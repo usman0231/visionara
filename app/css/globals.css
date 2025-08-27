@@ -1,0 +1,44 @@
+@import "tailwindcss";
+
+/* Fonts */
+@font-face {
+  font-family: 'LondrinaShadow-Regular';
+  src: url('/fonts/LondrinaShadow-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --background: #000000;
+  --foreground: #763cac;
+  --text1: #ffffff;
+}
+
+body {
+  background: var(--background);
+  font-family: Arial, Helvetica, sans-serif;
+  overflow-x: hidden  !important;
+}
+.bg_spread{
+  height: 100vh;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  /* background-color: rgba(118, 60, 172, 0.6); */
+  background-image: radial-gradient(circle at center, rgba(118, 60, 172, 1), transparent 70%);
+  filter: blur(150px);
+  position: fixed;
+  z-index: -10;
+  border-radius: 50%;
+}
+
+/* home  */
+.home_section1_heading{
+  font-family: 'LondrinaShadow-Regular';
+  color: var(--text1);
+  position: relative;
+}
+.home_section1_text{
+  color: var(--text1);
+}
