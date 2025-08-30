@@ -54,7 +54,7 @@ export default function Home() {
   return (
     <div>
       {/* Home Section 1 */}
-      <div className="home_section1 w-full h-screen grid grid-cols-1 md:grid-cols-2">
+      <div className="home_section1 w-full h-screen grid grid-cols-1 md:grid-cols-2 overflow-x-hidden">
         <div className="gradient-bg">
           <svg xmlns="http://www.w3.org/2000/svg">
             <defs>
@@ -91,7 +91,7 @@ export default function Home() {
       </div>
 
       {/* Home Section 2 */}
-      <div ref={services_container} className="home_section2 w-full mb-30 h-[100vh]">
+      <div ref={services_container} className="home_section2 w-full mb-30 h-[100vh] overflow-x-hidden">
         <h2 className="text-white text-5xl lg:text-6xl text-center mt-30">Our Services</h2>
 
         <div className="services_container pr-50 md:pr-0">
@@ -145,6 +145,15 @@ export default function Home() {
 
         </div>
 
+      </div>
+
+      <div className="home_section3 w-[80vh] h-fit">
+          <h2>Our Acheivements</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 ml-auto mr-auto">
+            <div>
+
+            </div>
+          </div>
       </div>
 
       <InteractiveBg />
