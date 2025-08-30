@@ -30,6 +30,9 @@ body {
 .home_section1_text{
   color: var(--text1);
 }
+.home_section2{
+  width: 100vw;
+}
 .services_container{
   display: flex;
   overflow: hidden;
@@ -41,9 +44,16 @@ body {
   align-items: center;
   width: 100vw;
   height: 60vh;
-  margin-top: 10rem;
+  margin-top: 5rem;
   color: var(--foreground);
 }
 .services_inner:nth-last-child(1){
-  margin-right: 3rem;
+  margin-right: 30rem;
+}
+.services_inner h2{
+  font-size: 2rem;
+}
+.services_inner p{
+  width: 30rem;
+  text-align: center;
 }

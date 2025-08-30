@@ -4,7 +4,6 @@ import Image from "next/image";
 import gsap from "gsap";
 import InteractiveBg from "./scripts/bg";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import Lordicon from "components/lordicon"; 
 export default function Home() {
 
 
@@ -38,7 +37,7 @@ export default function Home() {
   useEffect(() => {
     const panels = gsap.utils.toArray('.services_inner');
       gsap.to(panels, {
-        xPercent: -100 * (panels.length - 1),
+        xPercent: -110 * (panels.length - 1),
         ease: 'none',
         scrollTrigger: {
           trigger: services_container.current,
@@ -91,21 +90,52 @@ export default function Home() {
       </div>
 
       {/* Home Section 2 */}
-      <div ref={services_container} className="home_section2 w-full mb-30 h-full">
+      <div ref={services_container} className="home_section2 mb-30 h-full">
         <h2 className="text-white text-6xl text-center mt-20">Our Services</h2>
 
         <div className="services_container">
-          <div className="services_inner"> 
-            <Lordicon/>
+          <div className="services_inner">
+            <Image
+              src="/icons/computer.gif"
+              height={150}
+              width={150}
+              alt="coomputer_icon"
+            />
             <h2>Web Development</h2>
+            <p>Lorem ipsum dolor sit, amet consectetur adipisicing elit. Expedita, fuga. Ab nostrum dolore quod commodi sed aspernatur magni, quo unde sunt nulla est fuga voluptate perspiciatis iusto officia deleniti similique impedit eos quaerat nemo explicabo veritatis. Fugit corrupti deleniti similique aspernatur, repudiandae, eaque ut in vero ad repellendus, dolores quae.</p>
           </div>
 
           <div className="services_inner">
-            <h2>Mobile Apps</h2>
+            <Image
+              src="/icons/computer.gif"
+              height={150}
+              width={150}
+              alt="coomputer_icon"
+            />
+            <h2>Web Development</h2>
+            <p>Lorem ipsum dolor sit, amet consectetur adipisicing elit. Expedita, fuga. Ab nostrum dolore quod commodi sed aspernatur magni, quo unde sunt nulla est fuga voluptate perspiciatis iusto officia deleniti similique impedit eos quaerat nemo explicabo veritatis. Fugit corrupti deleniti similique aspernatur, repudiandae, eaque ut in vero ad repellendus, dolores quae.</p>
           </div>
 
           <div className="services_inner">
-            <h2>UI/UX Design</h2>
+            <Image
+              src="/icons/computer.gif"
+              height={150}
+              width={150}
+              alt="coomputer_icon"
+            />
+            <h2>Web Development</h2>
+            <p>Lorem ipsum dolor sit, amet consectetur adipisicing elit. Expedita, fuga. Ab nostrum dolore quod commodi sed aspernatur magni, quo unde sunt nulla est fuga voluptate perspiciatis iusto officia deleniti similique impedit eos quaerat nemo explicabo veritatis. Fugit corrupti deleniti similique aspernatur, repudiandae, eaque ut in vero ad repellendus, dolores quae.</p>
+          </div>
+
+          <div className="services_inner">
+            <Image
+              src="/icons/computer.gif"
+              height={150}
+              width={150}
+              alt="coomputer_icon"
+            />
+            <h2>Web Development</h2>
+            <p>Lorem ipsum dolor sit, amet consectetur adipisicing elit. Expedita, fuga. Ab nostrum dolore quod commodi sed aspernatur magni, quo unde sunt nulla est fuga voluptate perspiciatis iusto officia deleniti similique impedit eos quaerat nemo explicabo veritatis. Fugit corrupti deleniti similique aspernatur, repudiandae, eaque ut in vero ad repellendus, dolores quae.</p>
           </div>
 
         </div>

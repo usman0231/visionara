@@ -3,7 +3,6 @@ import "./css/globals.css";
 import "./css/navbar.css";
 import "./css/bg.css";
 import Nav from 'nav';
-import Script from "next/script";
 
 export const metadata: Metadata = {
   title: "VISIONARA",
@@ -18,9 +17,6 @@ export default function RootLayout({
 
   return (
     <html lang="en">
-      <head>
-        <Script src="https://cdn.lordicon.com/lordicon.js"></Script>
-      </head>
       <body>
         {children}
         <Nav/>
