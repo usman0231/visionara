@@ -95,7 +95,7 @@ export default function Home() {
         <h2 className="text-white text-6xl text-center mt-20">Our Services</h2>
 
         <div className="services_container">
-          <div className="services_inner">
+          <div className="services_inner"> 
             <Lordicon/>
             <h2>Web Development</h2>
           </div>
