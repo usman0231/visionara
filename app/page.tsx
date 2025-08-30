@@ -37,14 +37,15 @@ export default function Home() {
   useEffect(() => {
     const panels = gsap.utils.toArray('.services_inner');
       gsap.to(panels, {
-        xPercent: -110 * (panels.length - 1),
+        xPercent: -100 * (panels.length - 1),
         ease: 'none',
         scrollTrigger: {
           trigger: services_container.current,
           pin: true,
           scrub: 1,
           anticipatePin: 1,
-          end: () => services_container.current ? `+=${services_container.current.offsetWidth}` : "+=0",
+          snap: 1 / (panels.length - 1),
+          end: () => services_container.current ? `+=45000` : "+=9000",
           },
       });
   }, []);
@@ -91,7 +92,7 @@ export default function Home() {
 
       {/* Home Section 2 */}
       <div ref={services_container} className="home_section2 w-full mb-30 h-full">
-        <h2 className="text-white text-5xl lg:text-6xl text-center mt-20">Our Services</h2>
+        <h2 className="text-white text-5xl lg:text-6xl text-center mt-30">Our Services</h2>
 
         <div className="services_container pr-50 md:pr-0">
           <div className="services_inner">
@@ -103,6 +104,7 @@ export default function Home() {
             />
             <h2 className="text-3xl">Web Development</h2>
             <p className="text-md w-[90vw] md:w-[30rem]">Lorem ipsum dolor sit, amet consectetur adipisicing elit. Expedita, fuga. Ab nostrum dolore quod commodi sed aspernatur magni, quo unde sunt nulla est fuga voluptate perspiciatis iusto officia deleniti similique impedit eos quaerat nemo explicabo veritatis. Fugit corrupti deleniti similique aspernatur, repudiandae, eaque ut in vero ad repellendus, dolores quae.</p>
+            <div className="floor floor1"></div>
           </div>
 
           <div className="services_inner">
@@ -112,8 +114,9 @@ export default function Home() {
               width={150}
               alt="coomputer_icon"
             />
-            <h2 className="text-3xl">Web Development</h2>
+            <h2 className="text-3xl">Moobile App Development</h2>
             <p className="text-md w-[90vw] md:w-[30rem]">Lorem ipsum dolor sit, amet consectetur adipisicing elit. Expedita, fuga. Ab nostrum dolore quod commodi sed aspernatur magni, quo unde sunt nulla est fuga voluptate perspiciatis iusto officia deleniti similique impedit eos quaerat nemo explicabo veritatis. Fugit corrupti deleniti similique aspernatur, repudiandae, eaque ut in vero ad repellendus, dolores quae.</p>
+            <div className="floor floor2"></div>
           </div>
 
           <div className="services_inner">
@@ -123,8 +126,9 @@ export default function Home() {
               width={150}
               alt="coomputer_icon"
             />
-            <h2 className="text-3xl">Web Development</h2>
+            <h2 className="text-3xl">Graphic Designing</h2>
             <p className="text-md w-[90vw] md:w-[30rem]">Lorem ipsum dolor sit, amet consectetur adipisicing elit. Expedita, fuga. Ab nostrum dolore quod commodi sed aspernatur magni, quo unde sunt nulla est fuga voluptate perspiciatis iusto officia deleniti similique impedit eos quaerat nemo explicabo veritatis. Fugit corrupti deleniti similique aspernatur, repudiandae, eaque ut in vero ad repellendus, dolores quae.</p>
+            <div className="floor floor3"></div>
           </div>
 
           <div className="services_inner">
@@ -134,8 +138,9 @@ export default function Home() {
               width={150}
               alt="coomputer_icon"
             />
-            <h2 className="text-3xl">Web Development</h2>
+            <h2 className="text-3xl">Marketing</h2>
             <p className="text-md w-[90vw] md:w-[30rem]">Lorem ipsum dolor sit, amet consectetur adipisicing elit. Expedita, fuga. Ab nostrum dolore quod commodi sed aspernatur magni, quo unde sunt nulla est fuga voluptate perspiciatis iusto officia deleniti similique impedit eos quaerat nemo explicabo veritatis. Fugit corrupti deleniti similique aspernatur, repudiandae, eaque ut in vero ad repellendus, dolores quae.</p>
+            <div className="floor floor4"></div>
           </div>
 
         </div>
