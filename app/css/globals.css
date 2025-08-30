@@ -46,9 +46,9 @@ body {
   height: 35rem;
   margin-top: 5rem;
 }
-.services_inner:nth-last-child(1){
-  margin-right: 30rem;
-}
+/* .services_inner:nth-last-child(1){
+  padding-right: 80vw;
+} */
 .services_inner p{
   text-align: center;
 }

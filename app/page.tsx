@@ -45,7 +45,7 @@ export default function Home() {
           scrub: 1,
           anticipatePin: 1,
           snap: 1 / (panels.length - 1),
-          end: () => services_container.current ? `+=45000` : "+=9000",
+          end: () => services_container.current ? `+=${services_container.current.offsetWidth}` : "+=0",
           },
       });
   }, []);
@@ -91,7 +91,7 @@ export default function Home() {
       </div>
 
       {/* Home Section 2 */}
-      <div ref={services_container} className="home_section2 w-full mb-30 h-full">
+      <div ref={services_container} className="home_section2 w-full mb-30 h-[100vh]">
         <h2 className="text-white text-5xl lg:text-6xl text-center mt-30">Our Services</h2>
 
         <div className="services_container pr-50 md:pr-0">
