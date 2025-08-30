@@ -147,14 +147,78 @@ export default function Home() {
 
       </div>
 
-      <div className="home_section3 w-[80vw] h-fit">
-          <h2>Our Acheivements</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 ml-auto mr-auto">
+      {/* Home Section 3 */}
+      <div className="home_section3 w-[80vw] h-fit ms-auto mr-auto">
+          <h2 className="text-center text-white text-5xl mb-30">Our Acheivements</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 grid-rows-4 gap-4 ml-auto mr-auto">
             <div>
-
+              <Image
+                src="/gallery/s1.png"
+                height={400}
+                width={400}
+                alt="award_icon"
+                className="object-contain"
+              />
+            </div>
+            <div>
+              <Image
+                src="/gallery/s2.png"
+                height={400}
+                width={400}
+                alt="award_icon"
+                className="object-contain"
+              />
+            </div>
+            <div>
+              <Image
+                src="/gallery/s3.png"
+                height={400}
+                width={400}
+                alt="award_icon"
+                className="object-contain"
+              />
+            </div>
+            <div>
+              <Image
+                src="/gallery/s4.png"
+                height={400}
+                width={400}
+                alt="award_icon"
+                className="object-contain"
+              />
+            </div>
+            <div>
+              <Image
+                src="/gallery/s5.png"
+                height={400}
+                width={400}
+                alt="award_icon"
+                className="object-contain"
+              />
+            </div>
+            <div>
+              <Image
+                src="/gallery/s6.png"
+                height={400}
+                width={400}
+                alt="award_icon"
+                className="object-contain"
+              />
+            </div>
+            <div>
+              <Image
+                src="/gallery/s8.png"
+                height={400}
+                width={400}
+                alt="award_icon"
+                className="object-contain"
+              />
             </div>
           </div>
       </div>
+
+      {/* Home Section 4 */}
+
 
       <InteractiveBg />
     </div>
