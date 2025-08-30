@@ -93,7 +93,7 @@ export default function Home() {
       <div ref={services_container} className="home_section2 w-full mb-30 h-full">
         <h2 className="text-white text-5xl lg:text-6xl text-center mt-20">Our Services</h2>
 
-        <div className="services_container pr-20">
+        <div className="services_container pr-50 md:pr-0">
           <div className="services_inner">
             <Image
               src="/icons/computer.gif"
