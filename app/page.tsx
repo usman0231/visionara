@@ -114,7 +114,7 @@ export default function Home() {
               width={150}
               alt="coomputer_icon"
             />
-            <h2 className="text-3xl">Moobile App Development</h2>
+            <h2 className="text-3xl">Mobile App Development</h2>
             <p className="text-md w-[90vw] md:w-[30rem]">Lorem ipsum dolor sit, amet consectetur adipisicing elit. Expedita, fuga. Ab nostrum dolore quod commodi sed aspernatur magni, quo unde sunt nulla est fuga voluptate perspiciatis iusto officia deleniti similique impedit eos quaerat nemo explicabo veritatis. Fugit corrupti deleniti similique aspernatur, repudiandae, eaque ut in vero ad repellendus, dolores quae.</p>
             <div className="floor floor2"></div>
           </div>
@@ -147,7 +147,7 @@ export default function Home() {
 
       </div>
 
-      <div className="home_section3 w-[80vh] h-fit">
+      <div className="home_section3 w-[80vw] h-fit">
           <h2>Our Acheivements</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 ml-auto mr-auto">
             <div>
