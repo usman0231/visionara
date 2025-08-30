@@ -1,14 +1,14 @@
 "use client";
-import { useEffect, useRef } from "react";
+import {  useEffect, useRef } from "react";
 import Image from "next/image";
 import gsap from "gsap";
 import InteractiveBg from "./scripts/bg";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-
+import Lordicon from "components/lordicon"; 
 export default function Home() {
 
-  const wrapperRef = useRef<HTMLDivElement>(null); // pin hone wala section
-  const trackRef = useRef<HTMLDivElement>(null);   // horizontally move hone wala inner flex
+
+  const services_container = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     // Add GSAP Scroll Trigger
@@ -36,45 +36,25 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    gsap.registerPlugin(ScrollTrigger);
-
-    const ctx = gsap.context(() => {
-      const wrapper = wrapperRef.current!;
-      const track = trackRef.current!;
-
-      // Total horizontal distance we need to move (track width - viewport width)
-      const getDistance = () =>
-        Math.max(0, track.scrollWidth - wrapper.clientWidth);
-
-      // Horizontal scroll driven by vertical scroll
-      const tween = gsap.to(track, {
-        x: () => -getDistance(),          // move left
-        ease: "none",
+    const panels = gsap.utils.toArray('.services_inner');
+      gsap.to(panels, {
+        xPercent: -100 * (panels.length - 1),
+        ease: 'none',
         scrollTrigger: {
-          trigger: wrapper,
-          start: "top top",
-          end: () => "+=" + getDistance(),// vertical scroll amount equals horizontal distance
-          scrub: true,
-          pin: true,                      // section pinned
+          trigger: services_container.current,
+          pin: true,
+          scrub: 1,
           anticipatePin: 1,
-          invalidateOnRefresh: true,      // recompute on resize
-        },
+          end: () => services_container.current ? `+=${services_container.current.offsetWidth}` : "+=0",
+          },
       });
-
-      return () => {
-        tween.scrollTrigger?.kill();
-        tween.kill();
-      };
-    }, wrapperRef);
-
-    return () => ctx.revert();
   }, []);
+  
   
   return (
     <div>
       {/* Home Section 1 */}
       <div className="home_section1 w-full h-screen grid grid-cols-1 md:grid-cols-2">
-        {/* <div className="bg_spread w-2xl"></div> */}
         <div className="gradient-bg">
           <svg xmlns="http://www.w3.org/2000/svg">
             <defs>
@@ -111,22 +91,25 @@ export default function Home() {
       </div>
 
       {/* Home Section 2 */}
-      <div className="home_section2 w-full bg-amber-600 mb-30" ref={wrapperRef}>
-        <h2 className="text-white text-6xl text-center">Our Services</h2>
+      <div ref={services_container} className="home_section2 w-full mb-30 h-full">
+        <h2 className="text-white text-6xl text-center mt-20">Our Services</h2>
 
-        <div className="services_container mt-10 flex flex-nowrap overflow-x-auto gap-6 px-4 snap-x snap-mandatory" ref={trackRef}>
-          <div className="shrink-0 w-full h-[60vh] bg-amber-50 rounded-lg snap-start">
-            <h2 className="text-center text-4xl text-purple-600">Web Development</h2>
+        <div className="services_container">
+          <div className="services_inner">
+            <Lordicon/>
+            <h2>Web Development</h2>
           </div>
 
-          <div className="shrink-0 w-full h-[60vh] bg-orange-50 rounded-lg snap-start">
-            <h2 className="text-center text-4xl text-purple-600">Mobile Apps</h2>
+          <div className="services_inner">
+            <h2>Mobile Apps</h2>
           </div>
 
-          <div className="shrink-0 w-full h-[60vh] bg-blue-50 rounded-lg snap-start">
-            <h2 className="text-center text-4xl text-purple-600">UI/UX Design</h2>
+          <div className="services_inner">
+            <h2>UI/UX Design</h2>
           </div>
+
         </div>
+
       </div>
 
       <InteractiveBg />

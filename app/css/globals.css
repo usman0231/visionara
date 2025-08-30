@@ -20,18 +20,6 @@ body {
   font-family: Arial, Helvetica, sans-serif;
   overflow-x: hidden  !important;
 }
-.bg_spread{
-  height: 100vh;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  /* background-color: rgba(118, 60, 172, 0.6); */
-  background-image: radial-gradient(circle at center, rgba(118, 60, 172, 1), transparent 70%);
-  filter: blur(150px);
-  position: fixed;
-  z-index: -10;
-  border-radius: 50%;
-}
 
 /* home  */
 .home_section1_heading{
@@ -41,4 +29,21 @@ body {
 }
 .home_section1_text{
   color: var(--text1);
+}
+.services_container{
+  display: flex;
+  overflow: hidden;
+  width: fit-content !important;
+}
+.services_inner{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100vw;
+  height: 60vh;
+  margin-top: 10rem;
+  color: var(--foreground);
+}
+.services_inner:nth-last-child(1){
+  margin-right: 3rem;
 }
