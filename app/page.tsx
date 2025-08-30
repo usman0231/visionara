@@ -74,8 +74,8 @@ export default function Home() {
           </div>
         </div>  
         <div className=" flex flex-col justify-center items-center order-2 md:order-1 h-fit md:h-full">
-          <p className="home_section1_heading text-5xl sm:text-7xl md:text-6xl lg:text-9xl">VISIONARA</p>
-          <p className="home_section1_text text-2xl text-right w-120">Turn your visions into reality</p>
+          <p className="home_section1_heading text-7xl md:text-6xl lg:text-9xl">VISIONARA</p>
+          <p className="home_section1_text text-lg md:text-2xl text-center md:text-right w-120">Turn your visions into reality</p>
         </div>
         <div className="home_section1_right flex justify-center items-center order-1 md:order-2">
           <div className="relative w-[300px] h-[250px] md:w-[500px] md:h-[500px]">
@@ -90,8 +90,8 @@ export default function Home() {
       </div>
 
       {/* Home Section 2 */}
-      <div ref={services_container} className="home_section2 mb-30 h-full">
-        <h2 className="text-white text-6xl text-center mt-20">Our Services</h2>
+      <div ref={services_container} className="home_section2 w-full mb-30 h-full">
+        <h2 className="text-white text-5xl lg:text-6xl text-center mt-20">Our Services</h2>
 
         <div className="services_container">
           <div className="services_inner">
@@ -101,8 +101,8 @@ export default function Home() {
               width={150}
               alt="coomputer_icon"
             />
-            <h2>Web Development</h2>
-            <p>Lorem ipsum dolor sit, amet consectetur adipisicing elit. Expedita, fuga. Ab nostrum dolore quod commodi sed aspernatur magni, quo unde sunt nulla est fuga voluptate perspiciatis iusto officia deleniti similique impedit eos quaerat nemo explicabo veritatis. Fugit corrupti deleniti similique aspernatur, repudiandae, eaque ut in vero ad repellendus, dolores quae.</p>
+            <h2 className="text-3xl">Web Development</h2>
+            <p className="text-md w-[90vw] md:w-[30rem]">Lorem ipsum dolor sit, amet consectetur adipisicing elit. Expedita, fuga. Ab nostrum dolore quod commodi sed aspernatur magni, quo unde sunt nulla est fuga voluptate perspiciatis iusto officia deleniti similique impedit eos quaerat nemo explicabo veritatis. Fugit corrupti deleniti similique aspernatur, repudiandae, eaque ut in vero ad repellendus, dolores quae.</p>
           </div>
 
           <div className="services_inner">
@@ -112,8 +112,8 @@ export default function Home() {
               width={150}
               alt="coomputer_icon"
             />
-            <h2>Web Development</h2>
-            <p>Lorem ipsum dolor sit, amet consectetur adipisicing elit. Expedita, fuga. Ab nostrum dolore quod commodi sed aspernatur magni, quo unde sunt nulla est fuga voluptate perspiciatis iusto officia deleniti similique impedit eos quaerat nemo explicabo veritatis. Fugit corrupti deleniti similique aspernatur, repudiandae, eaque ut in vero ad repellendus, dolores quae.</p>
+            <h2 className="text-3xl">Web Development</h2>
+            <p className="text-md w-[90vw] md:w-[30rem]">Lorem ipsum dolor sit, amet consectetur adipisicing elit. Expedita, fuga. Ab nostrum dolore quod commodi sed aspernatur magni, quo unde sunt nulla est fuga voluptate perspiciatis iusto officia deleniti similique impedit eos quaerat nemo explicabo veritatis. Fugit corrupti deleniti similique aspernatur, repudiandae, eaque ut in vero ad repellendus, dolores quae.</p>
           </div>
 
           <div className="services_inner">
@@ -123,8 +123,8 @@ export default function Home() {
               width={150}
               alt="coomputer_icon"
             />
-            <h2>Web Development</h2>
-            <p>Lorem ipsum dolor sit, amet consectetur adipisicing elit. Expedita, fuga. Ab nostrum dolore quod commodi sed aspernatur magni, quo unde sunt nulla est fuga voluptate perspiciatis iusto officia deleniti similique impedit eos quaerat nemo explicabo veritatis. Fugit corrupti deleniti similique aspernatur, repudiandae, eaque ut in vero ad repellendus, dolores quae.</p>
+            <h2 className="text-3xl">Web Development</h2>
+            <p className="text-md w-[90vw] md:w-[30rem]">Lorem ipsum dolor sit, amet consectetur adipisicing elit. Expedita, fuga. Ab nostrum dolore quod commodi sed aspernatur magni, quo unde sunt nulla est fuga voluptate perspiciatis iusto officia deleniti similique impedit eos quaerat nemo explicabo veritatis. Fugit corrupti deleniti similique aspernatur, repudiandae, eaque ut in vero ad repellendus, dolores quae.</p>
           </div>
 
           <div className="services_inner">
@@ -134,8 +134,8 @@ export default function Home() {
               width={150}
               alt="coomputer_icon"
             />
-            <h2>Web Development</h2>
-            <p>Lorem ipsum dolor sit, amet consectetur adipisicing elit. Expedita, fuga. Ab nostrum dolore quod commodi sed aspernatur magni, quo unde sunt nulla est fuga voluptate perspiciatis iusto officia deleniti similique impedit eos quaerat nemo explicabo veritatis. Fugit corrupti deleniti similique aspernatur, repudiandae, eaque ut in vero ad repellendus, dolores quae.</p>
+            <h2 className="text-3xl">Web Development</h2>
+            <p className="text-md w-[90vw] md:w-[30rem]">Lorem ipsum dolor sit, amet consectetur adipisicing elit. Expedita, fuga. Ab nostrum dolore quod commodi sed aspernatur magni, quo unde sunt nulla est fuga voluptate perspiciatis iusto officia deleniti similique impedit eos quaerat nemo explicabo veritatis. Fugit corrupti deleniti similique aspernatur, repudiandae, eaque ut in vero ad repellendus, dolores quae.</p>
           </div>
 
         </div>
