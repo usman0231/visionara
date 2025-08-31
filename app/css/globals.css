@@ -107,3 +107,26 @@ body {
     rgba(0, 0, 0, 0) 80%         
   );
 }
+/* Home Section 4 */
+.home_section4{
+  background-color: var(--foreground);
+}
+.package_card{
+  background-color: var(--foreground);
+  text-align: center;
+  padding: 2rem;
+  height: fit-content;
+  border-radius: 10px;
+}
+.package_type{
+  height: 7rem;
+}
+.package_features{
+  height: 25rem;
+}
+.button_holder{
+  height: 5rem;
+}
+.package_button{
+  
+}

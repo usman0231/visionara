@@ -1,9 +1,10 @@
 "use client";
-import {  useEffect, useRef } from "react";
+import {  useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import gsap from "gsap";
 import InteractiveBg from "./scripts/bg";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import Package_detail from "./package";
 export default function Home() {
 
 
@@ -49,8 +50,7 @@ export default function Home() {
           },
       });
   }, []);
-  
-  
+
   return (
     <div>
       {/* Home Section 1 */}
@@ -219,6 +219,15 @@ export default function Home() {
 
       {/* Home Section 4 */}
 
+      <div className="home_section4 w-full h-[40vh] flex flex-col justify-center items-center">
+        <p className="text-2xl text-white text-center"><q>At <b>Visionara</b>, we don’t just build websites or apps <br/> we craft digital experiences that inspire growth and innovation.</q></p>
+      </div>
+
+      {/* Home Section 5 */}
+
+      <div className="home_section5 w-[70vw] h-fit mt-40 ml-auto mr-auto mb-30">
+        <Package_detail />
+      </div>
 
       <InteractiveBg />
     </div>
