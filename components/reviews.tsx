@@ -144,7 +144,9 @@ export default function ReviewsSection() {
       const rotX = gsap.quickTo(card, 'rotateX', { duration: 0.3, ease: 'power2.out' });
       const rotY = gsap.quickTo(card, 'rotateY', { duration: 0.3, ease: 'power2.out' });
       const lift = gsap.quickTo(card, 'y', { duration: 0.3, ease: 'power2.out' });
-      const shadow = gsap.quickTo(card, 'boxShadow', { duration: 0.3, ease: 'power2.out' });
+      const setBoxShadow = (value: string) => {
+        gsap.to(card, { boxShadow: value, duration: 0.3, ease: 'power2.out' });
+      };
 
       const onMove = (e: MouseEvent) => {
         const rect = card.getBoundingClientRect();
@@ -155,12 +157,12 @@ export default function ReviewsSection() {
         rotX(dy * -6);
         rotY(dx * 6);
         lift(-6);
-        shadow('0 12px 30px rgba(118, 60, 172, 0.35)');
+        setBoxShadow('0 12px 30px rgba(118, 60, 172, 0.35)');
       };
 
       const onLeave = () => {
         rotX(0); rotY(0); lift(0);
-        shadow('0 6px 20px rgba(118, 60, 172, 0.25)');
+        setBoxShadow('0 6px 20px rgba(118, 60, 172, 0.25)');
       };
 
       card.addEventListener('mousemove', onMove);

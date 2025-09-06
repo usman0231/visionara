@@ -219,7 +219,9 @@ export default function PackagesSection() {
       const rotX = gsap.quickTo(card, 'rotateX', { duration: 0.3, ease: 'power2.out' });
       const rotY = gsap.quickTo(card, 'rotateY', { duration: 0.3, ease: 'power2.out' });
       const lift = gsap.quickTo(card, 'y', { duration: 0.3, ease: 'power2.out' });
-      const shadow = gsap.quickTo(card, 'boxShadow', { duration: 0.3, ease: 'power2.out' });
+      const setBoxShadow = (value: string) => {
+        gsap.to(card, { boxShadow: value, duration: 0.3, ease: 'power2.out' });
+      };
 
       const onMove = (e: MouseEvent) => {
         const rect = card.getBoundingClientRect();
@@ -228,13 +230,13 @@ export default function PackagesSection() {
         rotX(dy * -6);
         rotY(dx * 6);
         lift(-6);
-        shadow('0 14px 32px rgba(118,60,172,.35)');
+        setBoxShadow('0 14px 32px rgba(118,60,172,.35)');
       };
       const onLeave = () => {
         rotX(0);
         rotY(0);
         lift(0);
-        shadow('0 8px 26px rgba(118,60,172,.25)');
+        setBoxShadow('0 8px 26px rgba(118,60,172,.25)');
       };
 
       card.addEventListener('mousemove', onMove);
