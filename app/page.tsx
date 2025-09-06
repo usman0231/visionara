@@ -1,55 +1,14 @@
 "use client";
-import {  useEffect, useRef, useState } from "react";
+
 import Image from "next/image";
-import gsap from "gsap";
 import InteractiveBg from "./scripts/bg";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import Package_detail from "./package";
+import Services from "@/components/services";
+import Package_detail from "@/components/package";
+import ReviewsSection from "@/components/reviews";
+import VisionQuoteBand from "@/components/quoate";
+import Gallery from "@/components/gallery";
+
 export default function Home() {
-
-
-  const services_container = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    // Add GSAP Scroll Trigger
-    if (typeof window !== "undefined") {
-      gsap.registerPlugin(ScrollTrigger);
-      gsap.defaults({ ease: "none", duration: 2 });
-    }
-
-    // Gsap Time Line 1
-    const tl = gsap.timeline({
-        scrollTrigger: {
-        trigger: ".home_section1",
-        start: "top top",
-        end: "+=500",
-        scrub: true,
-        pin: true,
-        pinSpacing: false,
-        anticipatePin: 1,
-      },
-    });
-
-    tl.to(".home_section1", { opacity: 0 }, 0);
-    tl.from(".home_section2", { yPercent: 0 }, 0);
-
-  }, []);
-
-  useEffect(() => {
-    const panels = gsap.utils.toArray('.services_inner');
-      gsap.to(panels, {
-        xPercent: -100 * (panels.length - 1),
-        ease: 'none',
-        scrollTrigger: {
-          trigger: services_container.current,
-          pin: true,
-          scrub: 1,
-          anticipatePin: 1,
-          snap: 1 / (panels.length - 1),
-          end: () => services_container.current ? `+=${services_container.current.offsetWidth}` : "+=0",
-          },
-      });
-  }, []);
 
   return (
     <div>
@@ -90,144 +49,26 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Home Section 2 */}
-      <div ref={services_container} className="home_section2 w-full mb-30 h-[100vh] overflow-x-hidden">
-        <h2 className="text-white text-5xl lg:text-6xl text-center mt-30">Our Services</h2>
+      {/* Services */}
+      
+      <Services/>
 
-        <div className="services_container pr-50 md:pr-0">
-          <div className="services_inner">
-            <Image
-              src="/icons/computer.gif"
-              height={150}
-              width={150}
-              alt="coomputer_icon"
-            />
-            <h2 className="text-3xl">Web Development</h2>
-            <p className="text-md w-[90vw] md:w-[30rem]">Lorem ipsum dolor sit, amet consectetur adipisicing elit. Expedita, fuga. Ab nostrum dolore quod commodi sed aspernatur magni, quo unde sunt nulla est fuga voluptate perspiciatis iusto officia deleniti similique impedit eos quaerat nemo explicabo veritatis. Fugit corrupti deleniti similique aspernatur, repudiandae, eaque ut in vero ad repellendus, dolores quae.</p>
-            <div className="floor floor1"></div>
-          </div>
+      {/* Gallery */}
+      
+      <Gallery />
 
-          <div className="services_inner">
-            <Image
-              src="/icons/computer.gif"
-              height={150}
-              width={150}
-              alt="coomputer_icon"
-            />
-            <h2 className="text-3xl">Mobile App Development</h2>
-            <p className="text-md w-[90vw] md:w-[30rem]">Lorem ipsum dolor sit, amet consectetur adipisicing elit. Expedita, fuga. Ab nostrum dolore quod commodi sed aspernatur magni, quo unde sunt nulla est fuga voluptate perspiciatis iusto officia deleniti similique impedit eos quaerat nemo explicabo veritatis. Fugit corrupti deleniti similique aspernatur, repudiandae, eaque ut in vero ad repellendus, dolores quae.</p>
-            <div className="floor floor2"></div>
-          </div>
+      {/* Quote */}
 
-          <div className="services_inner">
-            <Image
-              src="/icons/computer.gif"
-              height={150}
-              width={150}
-              alt="coomputer_icon"
-            />
-            <h2 className="text-3xl">Graphic Designing</h2>
-            <p className="text-md w-[90vw] md:w-[30rem]">Lorem ipsum dolor sit, amet consectetur adipisicing elit. Expedita, fuga. Ab nostrum dolore quod commodi sed aspernatur magni, quo unde sunt nulla est fuga voluptate perspiciatis iusto officia deleniti similique impedit eos quaerat nemo explicabo veritatis. Fugit corrupti deleniti similique aspernatur, repudiandae, eaque ut in vero ad repellendus, dolores quae.</p>
-            <div className="floor floor3"></div>
-          </div>
+      <VisionQuoteBand/>
 
-          <div className="services_inner">
-            <Image
-              src="/icons/computer.gif"
-              height={150}
-              width={150}
-              alt="coomputer_icon"
-            />
-            <h2 className="text-3xl">Marketing</h2>
-            <p className="text-md w-[90vw] md:w-[30rem]">Lorem ipsum dolor sit, amet consectetur adipisicing elit. Expedita, fuga. Ab nostrum dolore quod commodi sed aspernatur magni, quo unde sunt nulla est fuga voluptate perspiciatis iusto officia deleniti similique impedit eos quaerat nemo explicabo veritatis. Fugit corrupti deleniti similique aspernatur, repudiandae, eaque ut in vero ad repellendus, dolores quae.</p>
-            <div className="floor floor4"></div>
-          </div>
-
-        </div>
-
-      </div>
-
-      {/* Home Section 3 */}
-      <div className="home_section3 w-[80vw] h-fit ms-auto mr-auto">
-          <h2 className="text-center text-white text-5xl mb-30">Our Acheivements</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 grid-rows-4 gap-4 ml-auto mr-auto">
-            <div>
-              <Image
-                src="/gallery/s1.png"
-                height={400}
-                width={400}
-                alt="award_icon"
-                className="object-contain"
-              />
-            </div>
-            <div>
-              <Image
-                src="/gallery/s2.png"
-                height={400}
-                width={400}
-                alt="award_icon"
-                className="object-contain"
-              />
-            </div>
-            <div>
-              <Image
-                src="/gallery/s3.png"
-                height={400}
-                width={400}
-                alt="award_icon"
-                className="object-contain"
-              />
-            </div>
-            <div>
-              <Image
-                src="/gallery/s4.png"
-                height={400}
-                width={400}
-                alt="award_icon"
-                className="object-contain"
-              />
-            </div>
-            <div>
-              <Image
-                src="/gallery/s5.png"
-                height={400}
-                width={400}
-                alt="award_icon"
-                className="object-contain"
-              />
-            </div>
-            <div>
-              <Image
-                src="/gallery/s6.png"
-                height={400}
-                width={400}
-                alt="award_icon"
-                className="object-contain"
-              />
-            </div>
-            <div>
-              <Image
-                src="/gallery/s8.png"
-                height={400}
-                width={400}
-                alt="award_icon"
-                className="object-contain"
-              />
-            </div>
-          </div>
-      </div>
-
-      {/* Home Section 4 */}
-
-      <div className="home_section4 w-full h-[40vh] flex flex-col justify-center items-center">
-        <p className="text-2xl text-white text-center"><q>At <b>Visionara</b>, we don’t just build websites or apps <br/> we craft digital experiences that inspire growth and innovation.</q></p>
-      </div>
-
-      {/* Home Section 5 */}
+      {/* Package */}
 
       <div className="home_section5 w-[70vw] h-fit mt-40 ml-auto mr-auto mb-30">
         <Package_detail />
       </div>
+
+      {/* Review Section */}
+      <ReviewsSection />
 
       <InteractiveBg />
     </div>
