@@ -178,7 +178,6 @@ export default function PackagesSection() {
     const ctx = gsap.context(() => {
       if (prefersReduced) return;
 
-      // title + controls reveal
       gsap.from('.pkg__header .reveal', {
         opacity: 0,
         y: 22,
@@ -188,7 +187,6 @@ export default function PackagesSection() {
         scrollTrigger: { trigger: sectionRef.current, start: 'top 85%', once: true },
       });
 
-      // cards stagger
       gsap.from('.pkg-card', {
         opacity: 0,
         y: 36,
@@ -200,7 +198,6 @@ export default function PackagesSection() {
         scrollTrigger: { trigger: sectionRef.current, start: 'top 70%', once: true },
       });
 
-      // gentle glow orbit
       gsap.to('.pkg__glow', {
         x: 60,
         y: -30,
@@ -212,46 +209,7 @@ export default function PackagesSection() {
       });
     }, sectionRef);
 
-    // mouse tilt on hover
-    const cards = () =>
-      Array.from(sectionRef.current?.querySelectorAll<HTMLElement>('.pkg-card') ?? []);
-    const addTilt = (card: HTMLElement) => {
-      const rotX = gsap.quickTo(card, 'rotateX', { duration: 0.3, ease: 'power2.out' });
-      const rotY = gsap.quickTo(card, 'rotateY', { duration: 0.3, ease: 'power2.out' });
-      const lift = gsap.quickTo(card, 'y', { duration: 0.3, ease: 'power2.out' });
-      const setBoxShadow = (value: string) => {
-        gsap.to(card, { boxShadow: value, duration: 0.3, ease: 'power2.out' });
-      };
-
-      const onMove = (e: MouseEvent) => {
-        const rect = card.getBoundingClientRect();
-        const dx = (e.clientX - (rect.left + rect.width / 2)) / (rect.width / 2);
-        const dy = (e.clientY - (rect.top + rect.height / 2)) / (rect.height / 2);
-        rotX(dy * -6);
-        rotY(dx * 6);
-        lift(-6);
-        setBoxShadow('0 14px 32px rgba(118,60,172,.35)');
-      };
-      const onLeave = () => {
-        rotX(0);
-        rotY(0);
-        lift(0);
-        setBoxShadow('0 8px 26px rgba(118,60,172,.25)');
-      };
-
-      card.addEventListener('mousemove', onMove);
-      card.addEventListener('mouseleave', onLeave);
-      return () => {
-        card.removeEventListener('mousemove', onMove);
-        card.removeEventListener('mouseleave', onLeave);
-      };
-    };
-    const cleanups = cards().map(addTilt);
-
-    return () => {
-      ctx.revert();
-      cleanups.forEach((fn) => fn());
-    };
+    return () => ctx.revert();
   }, [category, billing]);
 
   return (
@@ -330,22 +288,18 @@ export default function PackagesSection() {
       </div>
 
       <style jsx>{`
-        :root {
-          --background: #000000;
-          --foreground: #763cac;
-          --text1: #ffffff;
-        }
         .pkg {
           position: relative;
           padding: 6rem 1.25rem 7rem;
-          max-width: 1200px;
+          max-width: 100vw;
+          overflow-x: hidden;
           margin: 0 auto;
           color: var(--text1);
           isolation: isolate;
         }
         .pkg__glow {
           position: absolute;
-          width: 700px;
+          width: 100%;
           height: 700px;
           border-radius: 999px;
           left: -180px;
@@ -486,58 +440,54 @@ export default function PackagesSection() {
           left: calc(4px + 2 * ((100% - 0.7rem) / 3 + 0.35rem));
         }
 
-        /* Grid */
+        /* ===== Uniform card sizes + aligned CTA ===== */
         .grid {
           display: grid;
           grid-template-columns: repeat(12, 1fr);
           gap: 1.25rem;
+          align-items: stretch;           /* ensure equal heights per row */
         }
         .pkg-card {
           grid-column: span 12;
-          perspective: 1000px;
           position: relative;
+          perspective: 1000px;
           transform-style: preserve-3d;
+          height: 100%;                   /* fill row height */
         }
         @media (min-width: 700px) {
-          .pkg-card {
-            grid-column: span 6;
-          }
+          .pkg-card { grid-column: span 6; }
         }
         @media (min-width: 1024px) {
-          .pkg-card {
-            grid-column: span 4;
-          }
+          .pkg-card { grid-column: span 4; }
         }
 
-        /* Card visuals */
         .pkg-card__border {
           position: absolute;
           inset: 0;
           border-radius: 18px;
           padding: 1px;
-          background: linear-gradient(
-            180deg,
-            rgba(118, 60, 172, 0.55),
-            rgba(118, 60, 172, 0.15)
-          );
+          background: linear-gradient(180deg, rgba(118, 60, 172, 0.55), rgba(118, 60, 172, 0.15));
           filter: drop-shadow(0 8px 26px rgba(118, 60, 172, 0.25));
           pointer-events: none;
         }
+
         .pkg-card__inner {
           position: relative;
           border-radius: 17px;
-          background: radial-gradient(
-              1200px 300px at 10% -20%,
-              rgba(118, 60, 172, 0.12),
-              transparent 40%
-            ),
+          background:
+            radial-gradient(1200px 300px at 10% -20%, rgba(118, 60, 172, 0.12), transparent 40%),
             rgba(255, 255, 255, 0.03);
           backdrop-filter: blur(8px);
           padding: 1.3rem;
-          min-height: 260px;
+          min-height: 320px;              /* base minimum */
+          height: 100%;                   /* fill available height */
           box-shadow: 0 8px 26px rgba(118, 60, 172, 0.25);
-          transform-style: preserve-3d;
           will-change: transform, box-shadow;
+
+          /* 👇 grid layout: header | flexible features | CTA at bottom */
+          display: grid;
+          grid-template-rows: auto 1fr auto;
+          gap: 0.8rem;
         }
 
         .ribbon {
@@ -557,7 +507,7 @@ export default function PackagesSection() {
           align-items: baseline;
           justify-content: space-between;
           gap: 1rem;
-          margin-bottom: 0.9rem;
+          margin: 0;                      /* remove extra bottom space; gap handles it */
         }
         .tier {
           font-size: 1.2rem;
@@ -577,9 +527,10 @@ export default function PackagesSection() {
         .features {
           display: grid;
           gap: 0.55rem;
-          margin: 0.8rem 0 1.1rem;
+          margin: 0;                      /* controlled by grid gap now */
           padding: 0;
           list-style: none;
+          /* occupies the flexible middle row */
         }
         .features li {
           display: grid;
@@ -595,22 +546,15 @@ export default function PackagesSection() {
           padding: 0.8rem 1rem;
           font-weight: 700;
           border: 1px solid rgba(118, 60, 172, 0.6);
-          background: linear-gradient(
-              120deg,
-              rgba(118, 60, 172, 0.25),
-              rgba(118, 60, 172, 0.12)
-            ),
+          background: linear-gradient(120deg, rgba(118, 60, 172, 0.25), rgba(118, 60, 172, 0.12)),
             rgba(255, 255, 255, 0.04);
           transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.3s ease;
+          align-self: end;                /* 🔒 stick to bottom row */
         }
         .cta:hover {
           transform: translateY(-2px);
           box-shadow: 0 14px 32px rgba(118, 60, 172, 0.35);
-          background: linear-gradient(
-              120deg,
-              rgba(118, 60, 172, 0.32),
-              rgba(118, 60, 172, 0.18)
-            ),
+          background: linear-gradient(120deg, rgba(118, 60, 172, 0.32), rgba(118, 60, 172, 0.18)),
             rgba(255, 255, 255, 0.06);
         }
       `}</style>

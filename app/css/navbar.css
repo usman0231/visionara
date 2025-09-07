@@ -1,16 +1,67 @@
+/* Premium iOS glass — subtle tint + saturated blur + hairline */
 .navbar {
   height: 5rem;
-  opacity: 0.7;
-  background-color: rgba(255, 255, 255, 0.1);
-  border: none;
-  box-shadow: inset 0px 4px 6px rgba(0, 0, 0, 0.25);
-  backdrop-filter: blur(200px);
-  -webkit-backdrop-filter: blur(10px);
-  color: white;
   padding: 1rem;
   border-radius: 50px;
   position: fixed;
   top: 90%;
   left: 50%;
   transform: translate(-50%, -50%);
+  color: var(--text1);
+  z-index: 100 !important;
+  /* base tint (slight purple from your theme) */
+  background:
+    linear-gradient(135deg, rgba(118, 60, 172, 0.18), rgba(255, 255, 255, 0.06)),
+    rgba(255, 255, 255, 0.04);
+
+  /* modern iOS look: more saturation + soft blur */
+  -webkit-backdrop-filter: saturate(160%) blur(22px) contrast(105%) brightness(115%);
+  backdrop-filter: saturate(160%) blur(22px) contrast(105%) brightness(115%);
+
+  /* hairline border + soft elevation */
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow:
+    0 8px 28px rgba(0, 0, 0, 0.35),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+
+  /* let the blur shine through — avoid global opacity on the container */
+  opacity: 1;
+}
+
+/* top glossy highlight (very subtle) */
+.navbar::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background:
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.35), rgba(255, 255, 255, 0.08));
+  /* fade out the gloss toward the bottom */
+  -webkit-mask: linear-gradient(#000, transparent 60%);
+          mask: linear-gradient(#000, transparent 60%);
+  mix-blend-mode: screen;
+  opacity: 0.6;
+}
+
+/* optional micro-sheen */
+.navbar::after {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  border-radius: inherit;
+  pointer-events: none;
+  background:
+    radial-gradient(65% 100% at 50% 0%, rgba(255,255,255,0.08), transparent 60%),
+    linear-gradient(120deg, rgba(118,60,172,0.10), transparent 55%);
+  mix-blend-mode: overlay;
+  opacity: 0.7;
+}
+
+/* Fallback if backdrop-filter isn’t supported */
+@supports not ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+  .navbar {
+    background: rgba(24, 24, 24, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+  }
 }

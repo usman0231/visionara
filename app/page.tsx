@@ -7,12 +7,13 @@ import Package_detail from "@/components/package";
 import ReviewsSection from "@/components/reviews";
 import VisionQuoteBand from "@/components/quoate";
 import Gallery from "@/components/gallery";
+import ProudlyCanadian from "@/components/proudly_candadian";
 
 export default function Home() {
 
   return (
     <div>
-      {/* Home Section 1 */}
+      {/* Banner */}
       <div className="home_section1 w-full h-screen grid grid-cols-1 md:grid-cols-2 overflow-x-hidden">
         <div className="gradient-bg">
           <svg xmlns="http://www.w3.org/2000/svg">
@@ -48,6 +49,7 @@ export default function Home() {
           </div>
         </div>
       </div>
+      <InteractiveBg />
 
       {/* Services */}
       
@@ -63,14 +65,16 @@ export default function Home() {
 
       {/* Package */}
 
-      <div className="home_section5 w-[70vw] h-fit mt-40 ml-auto mr-auto mb-30">
+      <div className="home_section5 md:w-[70vw] h-fit mt-40 ml-auto mr-auto mb-30">
         <Package_detail />
       </div>
 
       {/* Review Section */}
       <ReviewsSection />
 
-      <InteractiveBg />
+      {/* Proudly Canadian Section */}
+      <ProudlyCanadian /> 
+
     </div>
     
   );

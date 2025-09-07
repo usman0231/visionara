@@ -91,7 +91,7 @@ export default function ReviewsSection() {
         stagger: 0.08,
         scrollTrigger: {
           trigger: sectionRef.current,
-          start: 'top 0%',
+          start: 'top 80%',
           once: true,
         },
       });
@@ -108,7 +108,7 @@ export default function ReviewsSection() {
           delay: i * 0.06,
           scrollTrigger: {
             trigger: card,
-            start: 'top 85%',
+            start: 'top 90%',
             toggleActions: 'play none none reverse',
           },
         });
@@ -184,12 +184,12 @@ export default function ReviewsSection() {
     <section ref={sectionRef} className="reviews">
       <div className="glow-orb" aria-hidden />
       <header className="reviews__header">
-        <p className="eyebrow reveal">What people say</p>
+        <p className="eyebrow reveal text-white">What people say</p>
         <h2 className="headline reveal">
           <span className="headline-fill">Loved by teams</span>
           <span className="headline-sheen" aria-hidden />
         </h2>
-        <p className="sub reveal">
+        <p className="sub reveal text-white">
           Subtle motion, striking clarity—crafted for dark mode and performance.
         </p>
       </header>

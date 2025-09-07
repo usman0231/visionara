@@ -125,7 +125,6 @@ export default function AchievementsGallery() {
       )}
 
       <style jsx>{`
-        :root { --background:#000; --foreground:#763cac; --text1:#fff; }
 
         .ag {
           width: min(1200px, 95vw);
