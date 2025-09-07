@@ -222,6 +222,7 @@ export default function ReviewsSection() {
           max-width: 1100px;
           margin: 0 auto;
           isolation: isolate;
+          overflow-x: hidden;
         }
 
         .reviews__header {

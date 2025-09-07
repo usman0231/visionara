@@ -88,7 +88,7 @@ export default function InteractiveFooter() {
         {/* Brand */}
         <div className="ft__col ft__brand">
           <Link href="/" className="ft__logoLink">
-            <Image src="/images/just_logo.png" alt="Visionara logo" width={56} height={56} className="ft__logo" />
+            <Image src="/images/just_logo.png" alt="Visionara logo" width={56} height={56} className="ft__logo mx-auto sm:mx-0" />
             <span className="ft__brandName">VISIONARA</span>
           </Link>
           <p className="ft__tag">We craft digital experiences that inspire growth and innovation.</p>
@@ -181,6 +181,7 @@ export default function InteractiveFooter() {
             radial-gradient(900px 280px at 90% 110%, rgba(118,60,172,.12), transparent 45%),
             rgba(255,255,255,0.02);
           backdrop-filter: saturate(140%) blur(10px);
+          overflow: hidden !important;
         }
 
         /* spotlight layer */
@@ -309,6 +310,57 @@ export default function InteractiveFooter() {
           .ft { padding: 3rem 1rem 1.6rem; }
           .ft__bottom { flex-direction: column; align-items: flex-start; }
         }
+          /* Mobile: center-align all footer content */
+        @media (max-width: 560px) {
+            .ft { 
+                text-align: center;
+                padding-bottom: 10rem;
+            }
+
+            /* one-column grid, centered items */
+            .ft__grid { 
+                grid-template-columns: 1fr; 
+                justify-items: center;
+            }
+
+            /* brand block */
+            .ft__brand .ft__logoLink { 
+                justify-content: center; 
+            }
+            .ft__tag, .ft__email, .ft__note { 
+                margin-left: auto; 
+                margin-right: auto; 
+            }
+
+            /* socials */
+            .ft__social { 
+                justify-content: center; 
+            }
+
+            /* newsletter */
+            .ft__form { 
+                width: 100%; 
+                justify-items: center; 
+            }
+            .ft__field { 
+                width: min(100%, 360px); 
+            }
+            .ft__send { 
+                justify-self: center; 
+            }
+
+            /* bottom bar */
+            .ft__bottom { 
+                flex-direction: column; 
+                align-items: center; 
+                text-align: center; 
+            }
+            .ft__bottomLinks { 
+                justify-content: center; 
+            }
+
+        }
+
       `}</style>
     </footer>
   );
