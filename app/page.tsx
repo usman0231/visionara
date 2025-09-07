@@ -8,6 +8,7 @@ import ReviewsSection from "@/components/reviews";
 import VisionQuoteBand from "@/components/quoate";
 import Gallery from "@/components/gallery";
 import ProudlyCanadian from "@/components/proudly_candadian";
+import Footer from "@/components/footer";
 
 export default function Home() {
 
@@ -74,6 +75,9 @@ export default function Home() {
 
       {/* Proudly Canadian Section */}
       <ProudlyCanadian /> 
+
+      {/* Footer */}
+      <Footer />
 
     </div>
     
