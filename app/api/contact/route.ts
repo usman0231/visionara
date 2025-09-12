@@ -7,6 +7,17 @@ import { contactEmailText } from '@/lib/email/contactEmailText';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
+type ContactFormData = {
+  name?: string;
+  email?: string;
+  company?: string;
+  phone?: string;
+  projectType?: string | string[];
+  budget?: string;
+  timeline?: string;
+  message?: string;
+};
+
 function makeTransport() {
   const host = process.env.SMTP_HOST;
   const port = Number(process.env.SMTP_PORT || 587);
@@ -18,7 +29,6 @@ function makeTransport() {
   return nodemailer.createTransport({
     host,
     port,
-    // 587 => STARTTLS (secure false), 465 => implicit TLS (secure true)
     secure: port === 465,
     auth: { user, pass },
     pool: true,
@@ -31,11 +41,36 @@ function makeTransport() {
   });
 }
 
+// Small helper to extract useful fields without using `any`
+function extractErrorInfo(e: unknown) {
+  if (typeof e === 'string') return { message: e };
+  if (e instanceof Error) {
+    const extra = e as { code?: unknown; command?: unknown; response?: unknown };
+    return {
+      name: e.name,
+      message: e.message,
+      code: typeof extra.code === 'string' ? extra.code : undefined,
+      command: typeof extra.command === 'string' ? extra.command : undefined,
+      response: typeof extra.response === 'string' ? extra.response : undefined,
+    };
+  }
+  if (e && typeof e === 'object') {
+    const o = e as Record<string, unknown>;
+    return {
+      name: typeof o.name === 'string' ? o.name : undefined,
+      message: typeof o.message === 'string' ? o.message : undefined,
+      code: typeof o.code === 'string' ? o.code : undefined,
+      command: typeof o.command === 'string' ? o.command : undefined,
+      response: typeof o.response === 'string' ? o.response : undefined,
+    };
+  }
+  return { message: String(e) };
+}
+
 export async function POST(req: Request) {
   try {
-    const body = await req.json();
+    const body = (await req.json()) as ContactFormData;
 
-    // Normalize projectType from checkbox groups (can arrive as string or array)
     const projectType =
       Array.isArray(body.projectType)
         ? body.projectType
@@ -45,7 +80,6 @@ export async function POST(req: Request) {
 
     const transporter = makeTransport();
 
-    // Dev-friendly fallback when SMTP is not configured
     if (!transporter) {
       console.log('CONTACT (dev fallback, no SMTP configured):', { ...body, projectType });
       return NextResponse.json(
@@ -61,9 +95,7 @@ export async function POST(req: Request) {
       ...body,
       projectType,
       submittedAt: new Date().toISOString(),
-      logoUrl:
-        process.env.PUBLIC_LOGO_URL ||
-        'https://your-domain.com/visionara-logo.png',
+      logoUrl: process.env.PUBLIC_LOGO_URL || 'https://your-domain.com/visionara-logo.png',
     });
 
     await transporter.sendMail({
@@ -76,15 +108,8 @@ export async function POST(req: Request) {
     });
 
     return NextResponse.json({ message: 'Thanks! We’ll be in touch.' }, { status: 200 });
-  } catch (err: any) {
-    console.error('CONTACT_ERROR:', {
-      name: err?.name,
-      code: err?.code,
-      command: err?.command,
-      message: err?.message,
-      response: err?.response,
-    });
-
+  } catch (err: unknown) {
+    console.error('CONTACT_ERROR:', extractErrorInfo(err));
     return NextResponse.json(
       { message: 'Failed to send message. Please try again later.' },
       { status: 500 }
