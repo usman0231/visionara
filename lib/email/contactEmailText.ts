@@ -1,5 +1,15 @@
-// lib/email/contactEmailText.ts
-export function contactEmailText(data: Record<string, any>) {
+interface ContactFormData {
+  name?: string;
+  email?: string;
+  company?: string;
+  phone?: string;
+  projectType?: string | string[];
+  budget?: string;
+  timeline?: string;
+  message?: string;
+}
+
+export function contactEmailText(data: ContactFormData) {
   const types = Array.isArray(data.projectType)
     ? data.projectType.join(', ')
     : data.projectType || 'N/A';
@@ -16,6 +26,6 @@ export function contactEmailText(data: Record<string, any>) {
     `Timeline: ${data.timeline || 'N/A'}`,
     '',
     'Message:',
-    (data.message || '').toString(),
+    data.message || '',
   ].join('\n');
 }
