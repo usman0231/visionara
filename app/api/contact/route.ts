@@ -76,22 +76,14 @@ export async function POST(req: Request) {
     });
 
     return NextResponse.json({ message: 'Thanks! We’ll be in touch.' }, { status: 200 });
-  } catch (err: unknown) {
-    // Safely extract commonly-available properties from unknown errors
-    const toLog: Record<string, unknown> = {};
-
-    if (typeof err === 'object' && err !== null) {
-      const e = err as Record<string, unknown>;
-      toLog.name = e.name;
-      toLog.code = e.code;
-      toLog.command = e.command;
-      toLog.message = e.message;
-      toLog.response = e.response;
-    } else {
-      toLog.message = String(err);
-    }
-
-    console.error('CONTACT_ERROR:', toLog);
+  } catch (err: any) {
+    console.error('CONTACT_ERROR:', {
+      name: err?.name,
+      code: err?.code,
+      command: err?.command,
+      message: err?.message,
+      response: err?.response,
+    });
 
     return NextResponse.json(
       { message: 'Failed to send message. Please try again later.' },
