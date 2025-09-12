@@ -14,7 +14,7 @@ export default function Home() {
 
   return (
     <div>
-      {/* Banner */}
+      {/* Banner Section */}
       <div className="home_section1 w-full h-screen grid grid-cols-1 md:grid-cols-2 overflow-x-hidden">
         <div className="gradient-bg">
           <svg xmlns="http://www.w3.org/2000/svg">
