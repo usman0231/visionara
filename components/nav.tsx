@@ -1,7 +1,18 @@
+"use client";  // Ensure this is a client-side component
+
 import React from 'react'
 import Image from 'next/image';
 import Link from 'next/link';
-function nav() {
+import { usePathname } from 'next/navigation';
+
+function Nav() {
+  const pathname = usePathname();
+
+  // Check if the current URL contains '/dashboard'
+  if (pathname.includes('/dashboard')) {
+    return null;
+  }
+
   return (
     <div className='navbar liquid-glass w-[90vw] md:w-2xl flex'>
         <Link href={'/'} className='nav_logo_link'>
@@ -17,4 +28,4 @@ function nav() {
   )
 }
 
-export default nav
+export default Nav;

@@ -24,6 +24,6 @@
       "nav": ["components/nav"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "components/lordicon.jsx"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "components/lordicon.jsx", "app/api/database/page.tsx", "app/api/check-connection.js", "scripts/sync-db.ts"],
   "exclude": ["node_modules"]
 }

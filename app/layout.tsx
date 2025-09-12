@@ -16,11 +16,11 @@ export default function RootLayout({
 }>) {
 
   return (
-    <html lang="en">
-      <body className="overflow-x-hidden">
-        {children}
-        <Nav/>
-      </body>
-    </html>
+      <html lang="en">
+        <body className="overflow-x-hidden">
+          {children}
+          <Nav/>
+        </body>
+      </html>
   );
 }

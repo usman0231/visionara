@@ -10,11 +10,10 @@
   color: var(--text1);
   z-index: 100 !important;
   /* base tint (slight purple from your theme) */
-  background:
+  /* background:
     linear-gradient(135deg, rgba(118, 60, 172, 0.18), rgba(255, 255, 255, 0.06)),
-    rgba(255, 255, 255, 0.04);
-
-  /* modern iOS look: more saturation + soft blur */
+    rgba(255, 255, 255, 0.04); */
+    
   -webkit-backdrop-filter: saturate(160%) blur(22px) contrast(105%) brightness(115%);
   backdrop-filter: saturate(160%) blur(22px) contrast(105%) brightness(115%);
 
