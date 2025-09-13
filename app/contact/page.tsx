@@ -11,6 +11,7 @@ export default function ContactPage() {
   const rootRef = useRef<HTMLDivElement | null>(null);
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState<null | { ok: boolean; msg: string }>(null);
+  const [selectedService, setSelectedService] = useState<string>('');
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -153,50 +154,131 @@ export default function ContactPage() {
               </div>
             </div>
 
-            {/* Project Type */}
+            {/* Service Type */}
             <div className="mt-4">
-              <label className="mb-2 block text-sm">Project type</label>
-              <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
-                {['Web App', 'Mobile App', 'Graphic Design', 'Marketing'].map((t) => (
+              <label className="mb-2 block text-sm">Service type *</label>
+              <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                {[
+                  { name: 'Web Development', value: 'web' },
+                  { name: 'Mobile App Development', value: 'mobile' },
+                  { name: 'Graphic Design', value: 'graphic' },
+                  { name: 'Marketing', value: 'marketing' }
+                ].map((service) => (
                   <label
-                    key={t}
-                    className="flex cursor-pointer items-center gap-2 rounded-lg border border-white/15 bg-white/5 px-3 py-2 text-sm"
+                    key={service.value}
+                    className={`flex cursor-pointer items-center gap-3 rounded-lg border px-4 py-3 text-sm transition ${
+                      selectedService === service.value
+                        ? 'border-[var(--foreground)] bg-[var(--foreground)]/10'
+                        : 'border-white/15 bg-white/5 hover:border-white/25'
+                    }`}
                   >
-                    <input type="checkbox" name="projectType" value={t} />
-                    <span>{t}</span>
+                    <input 
+                      type="radio" 
+                      name="serviceType" 
+                      value={service.value}
+                      onChange={(e) => setSelectedService(e.target.value)}
+                      className="text-[var(--foreground)] focus:ring-[var(--foreground)]"
+                    />
+                    <span className="font-medium">{service.name}</span>
                   </label>
                 ))}
               </div>
             </div>
 
             {/* Budget */}
-            <div className="mt-4 grid gap-4 md:grid-cols-2">
+            <div className="mt-4">
               <div>
-                <label className="mb-1 block text-sm">Budget</label>
+                <label className="mb-1 block text-sm">Budget range (CAD)</label>
                 <select
                   name="budget"
                   className="w-full rounded-lg border border-white/15 bg-transparent px-3 py-2 outline-none focus:border-[var(--foreground)]"
                 >
-                  <option className="bg-black">Undecided</option>
-                  <option className="bg-black">$5k–$10k</option>
-                  <option className="bg-black">$10k–$25k</option>
-                  <option className="bg-black">$25k–$50k</option>
-                  <option className="bg-black">$50k+</option>
+                  <option className="bg-black">Select budget</option>
+                  {selectedService === 'web' && (
+                    <>
+                      <option className="bg-black">$1,499 - $2,499 (Basic - Standard)</option>
+                      <option className="bg-black">$4,000 - $5,500 (Enterprise)</option>
+                      <option className="bg-black">$99 - $299/month (Ongoing)</option>
+                    </>
+                  )}
+                  {selectedService === 'mobile' && (
+                    <>
+                      <option className="bg-black">$15,000 - $35,000 (Basic - Standard)</option>
+                      <option className="bg-black">$65,000 - $100,000 (Enterprise)</option>
+                      <option className="bg-black">$199 - $499/month (Ongoing)</option>
+                    </>
+                  )}
+                  {selectedService === 'graphic' && (
+                    <>
+                      <option className="bg-black">$899 - $2,299 (Basic - Standard)</option>
+                      <option className="bg-black">$3,799 (Enterprise)</option>
+                      <option className="bg-black">$599 - $1,499/month (Ongoing)</option>
+                    </>
+                  )}
+                  {selectedService === 'marketing' && (
+                    <>
+                      <option className="bg-black">$1,899 - $3,799/month (Basic - Standard)</option>
+                      <option className="bg-black">$6,999/month (Enterprise)</option>
+                      <option className="bg-black">Contact for custom quote</option>
+                    </>
+                  )}
+                  {!selectedService && (
+                    <>
+                      <option className="bg-black">$1,000 - $5,000</option>
+                      <option className="bg-black">$5,000 - $15,000</option>
+                      <option className="bg-black">$15,000 - $50,000</option>
+                      <option className="bg-black">$50,000+</option>
+                    </>
+                  )}
                 </select>
               </div>
+            </div>
 
-              <div>
-                <label className="mb-1 block text-sm">Timeline</label>
-                <select
-                  name="timeline"
-                  className="w-full rounded-lg border border-white/15 bg-transparent px-3 py-2 outline-none focus:border-[var(--foreground)]"
-                >
-                  <option className="bg-black">ASAP</option>
-                  <option className="bg-black">2–4 weeks</option>
-                  <option className="bg-black">1–3 months</option>
-                  <option className="bg-black">3+ months</option>
-                </select>
-              </div>
+            {/* Timeline */}
+            <div className="mt-4">
+              <label className="mb-1 block text-sm">Project timeline</label>
+              <select
+                name="timeline"
+                className="w-full rounded-lg border border-white/15 bg-transparent px-3 py-2 outline-none focus:border-[var(--foreground)]"
+              >
+                <option className="bg-black">Select timeline</option>
+                {selectedService === 'web' && (
+                  <>
+                    <option className="bg-black">1-2 weeks (Basic site)</option>
+                    <option className="bg-black">2-4 weeks (Standard site)</option>
+                    <option className="bg-black">4-8 weeks (Enterprise site)</option>
+                  </>
+                )}
+                {selectedService === 'mobile' && (
+                  <>
+                    <option className="bg-black">8-12 weeks (Basic app)</option>
+                    <option className="bg-black">12-16 weeks (Standard app)</option>
+                    <option className="bg-black">16-24 weeks (Enterprise app)</option>
+                  </>
+                )}
+                {selectedService === 'graphic' && (
+                  <>
+                    <option className="bg-black">1-2 weeks (Basic package)</option>
+                    <option className="bg-black">2-3 weeks (Standard package)</option>
+                    <option className="bg-black">3-4 weeks (Enterprise package)</option>
+                  </>
+                )}
+                {selectedService === 'marketing' && (
+                  <>
+                    <option className="bg-black">Ongoing - 6 month minimum</option>
+                    <option className="bg-black">Ongoing - 12 month contract</option>
+                    <option className="bg-black">Custom timeline</option>
+                  </>
+                )}
+                {!selectedService && (
+                  <>
+                    <option className="bg-black">ASAP</option>
+                    <option className="bg-black">2-4 weeks</option>
+                    <option className="bg-black">1-3 months</option>
+                    <option className="bg-black">3+ months</option>
+                  </>
+                )}
+              </select>
             </div>
 
             {/* Message */}

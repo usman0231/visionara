@@ -13,7 +13,7 @@ import Footer from "@/components/footer";
 export default function Home() {
 
   return (
-    <div>
+    <div className="page-background">
       {/* Banner Section */}
       <div className="home_section1 w-full h-screen grid grid-cols-1 md:grid-cols-2 overflow-x-hidden">
         <div className="gradient-bg">
@@ -66,7 +66,7 @@ export default function Home() {
 
       {/* Package */}
 
-      <div className="home_section5 md:w-[70vw] h-fit mt-40 ml-auto mr-auto mb-30">
+      <div className="home_section5 md:w-[70vw] h-fit mt-40 ml-auto mr-auto mb-30 package-section-bg">
         <Package_detail />
       </div>
 
@@ -78,6 +78,42 @@ export default function Home() {
 
       {/* Footer */}
       <Footer />
+
+      <style jsx>{`
+        .page-background {
+          background: 
+            radial-gradient(2000px 1200px at 30% 20%, 
+              rgba(118, 60, 172, 0.06) 0%,
+              rgba(118, 60, 172, 0.04) 30%,
+              rgba(118, 60, 172, 0.02) 60%,
+              rgba(118, 60, 172, 0.01) 80%,
+              transparent 100%),
+            radial-gradient(1800px 1000px at 70% 80%, 
+              rgba(118, 60, 172, 0.05) 0%,
+              rgba(118, 60, 172, 0.03) 40%,
+              rgba(118, 60, 172, 0.02) 70%,
+              rgba(118, 60, 172, 0.01) 85%,
+              transparent 100%),
+            radial-gradient(1600px 800px at 50% 50%, 
+              rgba(118, 60, 172, 0.04) 0%,
+              rgba(118, 60, 172, 0.02) 50%,
+              rgba(118, 60, 172, 0.01) 75%,
+              transparent 100%);
+          min-height: 100vh;
+        }
+        
+        .package-section-bg {
+          background: 
+            radial-gradient(1800px 900px at 50% 30%, 
+              rgba(118, 60, 172, 0.08) 0%,
+              rgba(118, 60, 172, 0.05) 40%,
+              rgba(118, 60, 172, 0.03) 70%,
+              rgba(118, 60, 172, 0.01) 85%,
+              transparent 100%);
+          border-radius: 24px;
+          padding: 2rem 0;
+        }
+      `}</style>
 
     </div>
     

@@ -147,19 +147,57 @@ export default function ProudlyCanadian() {
           margin: 0 0 .5rem;
         }
         .pc__titleFill {
-          background: linear-gradient(90deg, var(--text1), var(--foreground));
+          position: relative;
+          display: inline-block;
+          background: linear-gradient(
+            110deg,
+            var(--text1),
+            var(--foreground),
+            var(--text1)
+          );
+          background-size: 300% 100%;
           -webkit-background-clip: text;
           background-clip: text;
           color: transparent;
+          animation: textShine 6s ease-in-out infinite;
         }
-        .pc__titleSheen {
+        .pc__titleFill::after {
           content: '';
           position: absolute;
-          inset: 0;
-          background: linear-gradient(120deg, transparent 0%, rgba(255,255,255,.18) 30%, transparent 60%);
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: linear-gradient(
+            90deg,
+            transparent 0%,
+            rgba(255, 255, 255, 0.5) 50%,
+            transparent 100%
+          );
           background-size: 200% 100%;
+          animation: shine 5s linear infinite;
+          -webkit-background-clip: text;
+          background-clip: text;
           mix-blend-mode: overlay;
-          pointer-events: none;
+        }
+        .pc__titleSheen {
+          display: none;
+        }
+        @keyframes textShine {
+          0%, 100% {
+            background-position: 0% 50%;
+          }
+          50% {
+            background-position: 100% 50%;
+          }
+        }
+        @keyframes shine {
+          0% {
+            background-position: -200% 0;
+          }
+          100% {
+            background-position: 200% 0;
+          }
         }
         .pc__blurb {
           opacity: .85;

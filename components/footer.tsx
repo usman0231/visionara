@@ -119,10 +119,10 @@ export default function InteractiveFooter() {
         <nav className="ft__col">
           <p className="ft__h">Company</p>
           <ul className="ft__list">
-            <li><Link href="#about">About</Link></li>
-            <li><Link href="#features">Features</Link></li>
-            <li><Link href="#work">Work</Link></li>
-            <li><Link href="#contact">Contact</Link></li>
+            <li><Link href="/about">About</Link></li>
+            <li><Link href="/features">Features</Link></li>
+            <li><Link href="/">Home</Link></li>
+            <li><Link href="/contact">Contact</Link></li>
           </ul>
         </nav>
 

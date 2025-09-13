@@ -151,20 +151,59 @@ export default function VisionQuoteBand() {
           box-shadow: inset 0 0 0 1px rgba(255,255,255,.08);
         }
 
-        /* shimmering highlight on key words */
+        /* embedded shine highlight on key words */
         .vq__shine {
           position: relative;
-          background-image: linear-gradient(
-            120deg,
-            rgba(255,255,255,.0) 0%,
-            rgba(255,255,255,.22) 45%,
-            rgba(255,255,255,.0) 80%
+          display: inline-block;
+          background: linear-gradient(
+            110deg,
+            var(--text1),
+            var(--foreground),
+            var(--text1)
           );
-          background-size: 200% 100%;
-          background-repeat: no-repeat;
+          background-size: 300% 100%;
+          -webkit-background-clip: text;
+          background-clip: text;
+          color: transparent;
+          animation: textShine 5s ease-in-out infinite;
           border-bottom: 2px solid rgba(118,60,172,.55);
           padding: 0 .18em .04em;
           margin: 0 .06em;
+        }
+        .vq__shine::after {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: linear-gradient(
+            90deg,
+            transparent 0%,
+            rgba(255, 255, 255, 0.7) 50%,
+            transparent 100%
+          );
+          background-size: 200% 100%;
+          animation: shine 4s linear infinite;
+          -webkit-background-clip: text;
+          background-clip: text;
+          mix-blend-mode: overlay;
+        }
+        @keyframes textShine {
+          0%, 100% {
+            background-position: 0% 50%;
+          }
+          50% {
+            background-position: 100% 50%;
+          }
+        }
+        @keyframes shine {
+          0% {
+            background-position: -200% 0;
+          }
+          100% {
+            background-position: 200% 0;
+          }
         }
 
         .vq__signature {

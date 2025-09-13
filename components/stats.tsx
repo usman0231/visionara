@@ -7,7 +7,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 gsap.registerPlugin(ScrollTrigger);
 
 const statsData = [
-  { id: 1, value: 50, suffix: '+', label: 'projects shipped' },
+  { id: 1, value: 20, suffix: '+', label: 'projects shipped' },
   { id: 2, value: 97, suffix: '%', label: 'client satisfaction' },
   { id: 3, value: 6, prefix: '2–', suffix: ' wks', label: 'typical MVP timeline' },
 ];

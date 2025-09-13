@@ -243,24 +243,57 @@ export default function ReviewsSection() {
           margin: .35rem 0 .6rem;
         }
         .headline-fill {
-          background: linear-gradient(90deg, var(--text1), var(--foreground));
+          position: relative;
+          display: inline-block;
+          background: linear-gradient(
+            110deg,
+            var(--text1),
+            var(--foreground),
+            var(--text1)
+          );
+          background-size: 300% 100%;
           -webkit-background-clip: text;
           background-clip: text;
           color: transparent;
+          animation: textShine 4s ease-in-out infinite;
         }
-        .headline-sheen {
+        .headline-fill::after {
           content: '';
           position: absolute;
-          inset: 0;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
           background: linear-gradient(
-              120deg,
-              rgba(255,255,255,0) 0%,
-              rgba(255,255,255,.18) 30%,
-              rgba(255,255,255,0) 60%
+            90deg,
+            transparent 0%,
+            rgba(255, 255, 255, 0.6) 50%,
+            transparent 100%
           );
           background-size: 200% 100%;
+          animation: shine 3s linear infinite;
+          -webkit-background-clip: text;
+          background-clip: text;
           mix-blend-mode: overlay;
-          pointer-events: none;
+        }
+        .headline-sheen {
+          display: none;
+        }
+        @keyframes textShine {
+          0%, 100% {
+            background-position: 0% 50%;
+          }
+          50% {
+            background-position: 100% 50%;
+          }
+        }
+        @keyframes shine {
+          0% {
+            background-position: -200% 0;
+          }
+          100% {
+            background-position: 200% 0;
+          }
         }
         .sub {
           max-width: 620px;

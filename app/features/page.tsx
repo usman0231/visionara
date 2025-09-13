@@ -3,21 +3,36 @@
 import { useMemo, useState } from 'react';
 import Footer from '@/components/footer';
 
-type PlanKey = 'support' | 'suite' | 'pro' | 'enterprise';
-type ServiceKey = 'web' | 'mobile' | 'design' | 'marketing';
+type PlanKey = 'basic' | 'standard' | 'enterprise';
+type ServiceKey = 'web' | 'mobile' | 'graphic' | 'marketing';
 
 const plans: { key: PlanKey; name: string; tag?: string; cta: string }[] = [
-  { key: 'support', name: 'Support Team', cta: 'Buy now' },
-  { key: 'suite', name: 'Suite Team', cta: 'Buy now' },
-  { key: 'pro', name: 'Suite Professional', tag: 'Most popular', cta: 'Buy now' },
-  { key: 'enterprise', name: 'Suite Enterprise', cta: 'Talk to Sales' },
+  { key: 'basic', name: 'Basic', cta: 'Get Started' },
+  { key: 'standard', name: 'Standard', tag: 'Most Popular', cta: 'Get Started' },
+  { key: 'enterprise', name: 'Enterprise', cta: 'Contact Sales' },
 ];
 
-const pricing: Record<PlanKey, { annual: string; monthly: string }> = {
-  support: { annual: '$19', monthly: '$25' },
-  suite: { annual: '$55', monthly: '$69' },
-  pro: { annual: '$115', monthly: '$149' },
-  enterprise: { annual: '$169', monthly: '$219' },
+const pricing: Record<ServiceKey, Record<PlanKey, { onetime: string; monthly: string; yearly: string }>> = {
+  web: {
+    basic: { onetime: 'CAD $1,499', monthly: 'CAD $99/mo', yearly: 'CAD $1,188/yr' },
+    standard: { onetime: 'CAD $2,499', monthly: 'CAD $199/mo', yearly: 'CAD $2,388/yr' },
+    enterprise: { onetime: 'CAD $4,000-$5,500', monthly: 'CAD $299/mo', yearly: 'CAD $3,588/yr' },
+  },
+  mobile: {
+    basic: { onetime: 'CAD $15,000', monthly: 'CAD $199/mo', yearly: 'CAD $2,388/yr' },
+    standard: { onetime: 'CAD $35,000', monthly: 'CAD $299/mo', yearly: 'CAD $3,588/yr' },
+    enterprise: { onetime: 'CAD $65,000-$100,000', monthly: 'CAD $499/mo', yearly: 'CAD $5,988/yr' },
+  },
+  graphic: {
+    basic: { onetime: 'CAD $899', monthly: 'CAD $599/mo', yearly: 'CAD $7,188/yr' },
+    standard: { onetime: 'CAD $2,299', monthly: 'CAD $999/mo', yearly: 'CAD $11,988/yr' },
+    enterprise: { onetime: 'CAD $3,799', monthly: 'CAD $1,499/mo', yearly: 'CAD $17,988/yr' },
+  },
+  marketing: {
+    basic: { onetime: 'Contact for quote', monthly: 'CAD $1,899/mo', yearly: 'CAD $22,788/yr' },
+    standard: { onetime: 'Contact for quote', monthly: 'CAD $3,799/mo', yearly: 'CAD $45,588/yr' },
+    enterprise: { onetime: 'Contact for quote', monthly: 'CAD $6,999/mo', yearly: 'CAD $83,988/yr' },
+  },
 };
 
 type Cell = string | boolean;
@@ -30,62 +45,95 @@ type Section = {
 const dataByService: Record<ServiceKey, Section[]> = {
   web: [
     {
-      title: 'Web App — Core',
+      title: 'Web Development — Core Features',
       rows: [
-        { label: 'Next.js + React foundation', values: { support: true, suite: true, pro: true, enterprise: true } },
-        { label: 'API & database (Node/Prisma/Postgres)', values: { support: true, suite: true, pro: true, enterprise: true } },
-        { label: 'Auth & roles', values: { support: 'Basic', suite: 'Standard', pro: 'Advanced', enterprise: 'SSO/SAML' } },
-        { label: 'Accessibility & design system', values: { support: 'Starter', suite: 'Pro kit', pro: 'Enterprise kit', enterprise: 'Enterprise kit' } },
+        { label: 'Custom website pages', values: { basic: '5 pages', standard: '10 pages', enterprise: 'Unlimited pages' } },
+        { label: 'Domain & hosting', values: { basic: 'Free .ca domain + hosting', standard: 'Free .ca domain + hosting', enterprise: 'Premium hosting' } },
+        { label: 'Mobile-friendly design', values: { basic: true, standard: true, enterprise: true } },
+        { label: 'Contact forms', values: { basic: 'Basic integration', standard: 'Advanced forms', enterprise: 'Custom integrations' } },
+        { label: 'SEO optimization', values: { basic: 'Basic setup', standard: 'Standard optimization', enterprise: 'Marketing analytics' } },
+        { label: 'Support & updates', values: { basic: '1 hour/month', standard: '2 hours/month', enterprise: 'Weekly updates' } },
       ],
     },
     {
-      title: 'Delivery & Quality',
+      title: 'Advanced Features',
       rows: [
-        { label: 'CI/CD & preview environments', values: { support: true, suite: true, pro: true, enterprise: true } },
-        { label: 'Automated tests', values: { support: 'Smoke', suite: 'Unit', pro: 'Unit + E2E', enterprise: 'Unit + E2E' } },
-        { label: 'Performance budget', values: { support: false, suite: true, pro: true, enterprise: true } },
-        { label: 'Support SLA', values: { support: 'Community', suite: '48h', pro: '24h', enterprise: 'Same business day' } },
+        { label: 'Logo design', values: { basic: false, standard: 'Custom logo design', enterprise: 'Professional branding' } },
+        { label: 'Social media integration', values: { basic: false, standard: true, enterprise: true } },
+        { label: 'Google Business setup', values: { basic: false, standard: true, enterprise: true } },
+        { label: 'Blog functionality', values: { basic: false, standard: true, enterprise: true } },
+        { label: 'E-commerce/Reservations', values: { basic: false, standard: false, enterprise: 'E-commerce OR reservations' } },
+        { label: 'Content creation', values: { basic: false, standard: false, enterprise: 'Professional content creation' } },
+        { label: 'Priority support', values: { basic: false, standard: false, enterprise: true } },
       ],
     },
   ],
   mobile: [
     {
-      title: 'Mobile — Core',
+      title: 'Mobile Development — Core',
       rows: [
-        { label: 'React Native / Flutter', values: { support: true, suite: true, pro: true, enterprise: true } },
-        { label: 'Offline-first & sync', values: { support: false, suite: true, pro: true, enterprise: true } },
-        { label: 'Push notifications', values: { support: true, suite: true, pro: true, enterprise: true } },
-        { label: 'Native modules', values: { support: 'Common', suite: 'Extended', pro: 'Advanced', enterprise: 'Custom' } },
+        { label: 'Platform support', values: { basic: 'iOS OR Android', standard: 'Cross-platform (iOS + Android)', enterprise: 'Complex cross-platform' } },
+        { label: 'App screens', values: { basic: '5-8 core screens', standard: '12-15 screens', enterprise: 'Unlimited complexity' } },
+        { label: 'User authentication', values: { basic: true, standard: 'User accounts & profiles', enterprise: 'Advanced security features' } },
+        { label: 'Push notifications', values: { basic: true, standard: true, enterprise: true } },
+        { label: 'App store submission', values: { basic: true, standard: true, enterprise: true } },
+        { label: 'UI/UX design', values: { basic: 'Basic UI/UX design', standard: 'Professional design', enterprise: 'Custom design system' } },
       ],
     },
     {
-      title: 'Launch',
+      title: 'Backend & Integration',
       rows: [
-        { label: 'App Store / Play Store readiness', values: { support: true, suite: true, pro: true, enterprise: true } },
-        { label: 'Crash reporting & analytics', values: { support: true, suite: true, pro: true, enterprise: true } },
-        { label: 'Release train setup', values: { support: false, suite: true, pro: true, enterprise: true } },
+        { label: 'Payment integration', values: { basic: false, standard: true, enterprise: 'Advanced payment systems' } },
+        { label: 'Backend development', values: { basic: false, standard: 'Backend API development', enterprise: 'Custom backend development' } },
+        { label: 'Database setup', values: { basic: false, standard: 'Cloud database setup', enterprise: 'Enterprise database architecture' } },
+        { label: 'Third-party integrations', values: { basic: false, standard: 'Standard integrations', enterprise: 'Advanced integrations' } },
+        { label: 'Admin dashboard', values: { basic: false, standard: false, enterprise: true } },
+        { label: 'Support team', values: { basic: 'Basic support', standard: 'Standard support', enterprise: 'Dedicated support team' } },
       ],
     },
   ],
-  design: [
+  graphic: [
     {
-      title: 'Brand & UI',
+      title: 'Brand Design — Core',
       rows: [
-        { label: 'Logo & identity basics', values: { support: true, suite: true, pro: true, enterprise: true } },
-        { label: 'Design system (Figma)', values: { support: 'Light', suite: 'Core', pro: 'Core + tokens', enterprise: 'Enterprise tokens' } },
-        { label: 'Illustration / motion snippets', values: { support: false, suite: true, pro: true, enterprise: true } },
-        { label: 'Pitch deck / investor kit', values: { support: 'Template', suite: 'Custom', pro: 'Custom + motion', enterprise: 'Bespoke suite' } },
+        { label: 'Logo design', values: { basic: 'Custom logo (3 concepts)', standard: 'Logo + 3 variations', enterprise: 'Complete brand identity' } },
+        { label: 'Business materials', values: { basic: 'Business card + letterhead', standard: 'Business stationery suite', enterprise: 'Marketing materials' } },
+        { label: 'Brand guidelines', values: { basic: 'Brand color palette', standard: 'Brand guidelines document', enterprise: 'Comprehensive guidelines' } },
+        { label: 'Social media assets', values: { basic: false, standard: 'Social media templates (10)', enterprise: 'Unlimited templates' } },
+        { label: 'Delivery time', values: { basic: '1-2 weeks', standard: '2-3 weeks', enterprise: '3-4 weeks' } },
+        { label: 'Design support', values: { basic: 'Basic support', standard: '10 hours/month design work', enterprise: 'Unlimited design requests' } },
+      ],
+    },
+    {
+      title: 'Advanced Design Services',
+      rows: [
+        { label: 'Presentation templates', values: { basic: false, standard: false, enterprise: true } },
+        { label: 'Email signature designs', values: { basic: false, standard: false, enterprise: true } },
+        { label: 'Brand photography guidelines', values: { basic: false, standard: false, enterprise: true } },
+        { label: 'Marketing collateral', values: { basic: false, standard: 'Standard templates', enterprise: 'Marketing material templates' } },
+        { label: 'Brand extensions', values: { basic: false, standard: 'Limited variations', enterprise: 'Everything in Standard +' } },
       ],
     },
   ],
   marketing: [
     {
-      title: 'Growth',
+      title: 'Digital Marketing — Core',
       rows: [
-        { label: 'Positioning & messaging', values: { support: true, suite: true, pro: true, enterprise: true } },
-        { label: 'Landing pages & CRO', values: { support: 'Essentials', suite: 'A/B setup', pro: 'Experiment program', enterprise: 'Program + team enablement' } },
-        { label: 'SEO (tech + content plan)', values: { support: 'Checklist', suite: 'Foundation', pro: 'Foundation + content ops', enterprise: 'Enterprise plan' } },
-        { label: 'Paid media management', values: { support: false, suite: 'Starter', pro: 'Multi-channel', enterprise: 'Custom budget' } },
+        { label: 'Social media management', values: { basic: '3 platforms', standard: '5 platforms', enterprise: 'All platforms + LinkedIn/TikTok' } },
+        { label: 'Content posting', values: { basic: '12 posts/month/platform', standard: '20 posts/month/platform', enterprise: 'Content creation (blogs, videos)' } },
+        { label: 'SEO optimization', values: { basic: 'Basic SEO optimization', standard: 'Advanced SEO + content marketing', enterprise: 'Comprehensive digital strategy' } },
+        { label: 'Google Business', values: { basic: 'Google Business optimization', standard: 'Google Ads management', enterprise: 'Advanced PPC campaigns' } },
+        { label: 'Reporting', values: { basic: 'Monthly performance reports', standard: 'Bi-weekly reports', enterprise: 'Real-time analytics' } },
+        { label: 'Contract terms', values: { basic: '6-month minimum', standard: '6-month minimum', enterprise: 'Flexible terms' } },
+      ],
+    },
+    {
+      title: 'Advanced Marketing',
+      rows: [
+        { label: 'Email marketing', values: { basic: false, standard: 'Email marketing campaigns', enterprise: 'Marketing automation' } },
+        { label: 'Dedicated support', values: { basic: 'Shared account manager', standard: 'Account manager', enterprise: 'Dedicated marketing manager' } },
+        { label: 'Strategy development', values: { basic: 'Basic strategy', standard: 'Growth strategy', enterprise: 'Comprehensive digital strategy' } },
+        { label: 'Advanced campaigns', values: { basic: false, standard: 'Multi-channel campaigns', enterprise: 'Advanced PPC campaigns' } },
       ],
     },
   ],
@@ -104,37 +152,60 @@ const renderCell = (v: Cell) =>
 /* --------------------------------- Page -------------------------------- */
 export default function FeaturesPage() {
   const [service, setService] = useState<ServiceKey>('web');
+  const [billing, setBilling] = useState<'onetime' | 'monthly' | 'yearly'>('onetime');
   const sections = useMemo(() => dataByService[service], [service]);
 
   return (
-    <main className="bg-[var(--background)] text-[var(--text1)]">
+    <main className="bg-[var(--background)] text-[var(--text1)] min-h-screen">
       {/* HERO */}
-      <section className="mx-auto max-w-7xl px-4 pt-10">
-        <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
-          <p className="mb-1 text-xs uppercase tracking-[0.16em] text-white/70">Visionara</p>
-          <h1 className="text-3xl font-extrabold leading-tight md:text-5xl">Compare plans — side by side</h1>
-          <p className="mt-2 max-w-prose text-white/90">
-            Pick a service below to see exactly what’s included across plans.
+      <section className="mx-auto max-w-7xl px-4 pt-20 pb-8">
+        <div className="rounded-2xl border border-white/10 bg-white/5 p-8">
+          <p className="mb-2 text-xs uppercase tracking-[0.16em] text-white/70">🇨🇦 Visionara</p>
+          <h1 className="text-4xl font-extrabold leading-tight md:text-6xl">Compare Our Services</h1>
+          <p className="mt-4 max-w-prose text-lg text-white/90">
+            Detailed breakdown of what's included in each tier across all our service categories.
           </p>
 
           {/* SERVICE SELECTOR */}
-          <div className="mt-4 inline-flex rounded-full border border-white/15 bg-white/5 p-1">
+          <div className="mt-6 inline-flex rounded-full border border-white/15 bg-white/5 p-1">
             {([
-              { key: 'web', label: 'Web App' },
-              { key: 'mobile', label: 'Mobile App' },
-              { key: 'design', label: 'Graphic Designing' },
+              { key: 'web', label: 'Web Development' },
+              { key: 'mobile', label: 'Mobile Apps' },
+              { key: 'graphic', label: 'Graphic Design' },
               { key: 'marketing', label: 'Marketing' },
             ] as { key: ServiceKey; label: string }[]).map((opt) => (
               <button
                 key={opt.key}
                 onClick={() => setService(opt.key)}
-                className={`px-4 py-2 text-sm rounded-full transition ${
+                className={`px-5 py-3 text-sm rounded-full transition ${
                   service === opt.key
                     ? 'bg-[var(--foreground)] text-black font-semibold'
-                    : 'text-[var(--text1)]'
+                    : 'text-[var(--text1)] hover:text-white'
                 }`}
               >
                 {opt.label}
+              </button>
+            ))}
+          </div>
+
+          {/* BILLING TOGGLE */}
+          <div className="mt-4 inline-flex rounded-full border border-white/15 bg-white/5 p-1 ml-4">
+            {([
+              { key: 'onetime', label: 'One-time' },
+              { key: 'monthly', label: 'Monthly' },
+              { key: 'yearly', label: 'Yearly' },
+            ] as { key: 'onetime' | 'monthly' | 'yearly'; label: string }[]).map((opt) => (
+              <button
+                key={opt.key}
+                onClick={() => setBilling(opt.key)}
+                className={`px-4 py-2 text-sm rounded-full transition ${
+                  billing === opt.key
+                    ? 'bg-[var(--foreground)] text-black font-semibold'
+                    : 'text-[var(--text1)] hover:text-white'
+                }`}
+              >
+                {opt.label}
+                {opt.key === 'yearly' && <span className="ml-1 text-xs bg-orange-500 text-white px-1.5 py-0.5 rounded">20% OFF</span>}
               </button>
             ))}
           </div>
@@ -142,28 +213,32 @@ export default function FeaturesPage() {
       </section>
 
       {/* SIDE-BY-SIDE COLUMNS */}
-      <section className="mx-auto max-w-7xl px-4 pb-12 pt-8">
+      <section className="mx-auto max-w-7xl px-4 pb-12">
         {/* Header row */}
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
           {plans.map((p) => (
-            <div key={p.key} className="rounded-2xl border border-white/10 bg-white/5 p-5">
+            <div key={p.key} className="rounded-2xl border border-white/10 bg-white/5 p-6 relative">
               {p.tag && (
-                <div className="mb-2 w-fit rounded-full bg-[var(--foreground)] px-3 py-1 text-[10px] font-extrabold text-black">
+                <div className="absolute -top-3 left-6 w-fit rounded-full bg-[var(--foreground)] px-4 py-1 text-xs font-extrabold text-black">
                   {p.tag}
                 </div>
               )}
-              <h3 className="text-lg font-bold">{p.name}</h3>
-              <div className="mt-2 flex items-baseline gap-3">
-                <span className="text-2xl font-extrabold text-[var(--foreground)]">
-                  {pricing[p.key].annual}
+              <h3 className="text-xl font-bold mt-2">{p.name}</h3>
+              <div className="mt-3 flex items-baseline gap-2">
+                <span className="text-3xl font-extrabold text-[var(--foreground)]">
+                  {pricing[service][p.key][billing]}
                 </span>
-                <span className="text-xs text-white/70">annual / agent</span>
               </div>
-              <div className="text-xs text-white/70">or {pricing[p.key].monthly} monthly</div>
+              {service !== 'marketing' && (
+                <div className="text-sm text-white/70 mt-2">
+                  Monthly: {pricing[service][p.key].monthly}<br/>
+                  Yearly: {pricing[service][p.key].yearly} {billing === 'yearly' && <span className="text-orange-400">(20% off)</span>}
+                </div>
+              )}
               <a
-                href={p.key === 'enterprise' ? '/contact' : '#'}
-                className={`mt-4 inline-block w-full rounded-xl border border-white/20 px-4 py-2 text-center text-sm font-semibold ${
-                  p.tag ? 'bg-[var(--foreground)] text-black' : 'text-[var(--text1)]'
+                href={p.key === 'enterprise' ? '/contact' : '/contact'}
+                className={`mt-6 inline-block w-full rounded-xl border border-white/20 px-4 py-3 text-center text-sm font-semibold transition hover:bg-white/5 ${
+                  p.tag ? 'bg-[var(--foreground)] text-black hover:bg-[var(--foreground)]/90' : 'text-[var(--text1)]'
                 }`}
               >
                 {p.cta}
@@ -174,24 +249,24 @@ export default function FeaturesPage() {
 
         {/* Sections per plan (rows inside each column) */}
         {sections.map((section) => (
-          <div key={section.title} className="mt-6">
-            <div className="mb-2 text-sm font-semibold text-white/80">{section.title}</div>
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
+          <div key={section.title} className="mt-8">
+            <div className="mb-4 text-lg font-semibold text-white/90">{section.title}</div>
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
               {plans.map((p) => (
                 <div key={p.key} className="overflow-hidden rounded-2xl border border-white/10">
-                  <div className="bg-white/[0.06] px-4 py-2 text-sm font-semibold">
+                  <div className="bg-white/[0.08] px-5 py-3 text-sm font-semibold">
                     {p.name}
                   </div>
                   <ul>
                     {section.rows.map((r, i) => (
                       <li
                         key={r.label}
-                        className={`flex items-center justify-between gap-3 px-4 py-3 text-sm ${
+                        className={`flex items-center justify-between gap-3 px-5 py-4 text-sm ${
                           i % 2 ? 'bg-white/[0.03]' : ''
                         }`}
                       >
-                        <span className="text-white/90">{r.label}</span>
-                        <span>{renderCell(r.values[p.key])}</span>
+                        <span className="text-white/90 flex-1">{r.label}</span>
+                        <span className="flex-shrink-0">{renderCell(r.values[p.key])}</span>
                       </li>
                     ))}
                   </ul>
@@ -204,17 +279,25 @@ export default function FeaturesPage() {
 
       {/* CTA */}
       <section className="mx-auto max-w-7xl px-4 pb-16">
-        <div className="rounded-2xl border border-white/10 bg-white/5 p-6 text-center">
-          <h2 className="text-2xl font-extrabold">Ready to build with Visionara?</h2>
-          <p className="mx-auto mt-2 max-w-prose text-white/85">
-            Web & mobile apps, standout visuals, and marketing that moves the needle.
+        <div className="rounded-2xl border border-white/10 bg-white/5 p-8 text-center">
+          <h2 className="text-3xl font-extrabold">Ready to start your project?</h2>
+          <p className="mx-auto mt-4 max-w-prose text-lg text-white/85">
+            From web apps to mobile solutions, stunning visuals to growth marketing — we've got you covered.
           </p>
-          <a
-            href="/contact"
-            className="mt-4 inline-block rounded-full border border-white/20 bg-[var(--foreground)] px-5 py-3 font-semibold text-black"
-          >
-            Start a project
-          </a>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center mt-6">
+            <a
+              href="/contact"
+              className="inline-block rounded-full border border-white/20 bg-[var(--foreground)] px-8 py-4 font-semibold text-black hover:bg-[var(--foreground)]/90 transition"
+            >
+              Start a project
+            </a>
+            <a
+              href="/"
+              className="inline-block rounded-full border border-white/20 px-8 py-4 font-semibold text-[var(--text1)] hover:bg-white/5 transition"
+            >
+              Learn more
+            </a>
+          </div>
         </div>
       </section>
 

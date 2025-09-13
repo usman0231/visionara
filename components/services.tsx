@@ -317,32 +317,56 @@ export default function Services() {
           margin: 0.4rem 0 0.2rem;
         }
         .svc__titleFill {
-          background: linear-gradient(90deg, var(--text1), var(--foreground));
+          position: relative;
+          display: inline-block;
+          background: linear-gradient(
+            110deg,
+            var(--text1),
+            var(--foreground),
+            var(--text1)
+          );
+          background-size: 300% 100%;
           -webkit-background-clip: text;
           background-clip: text;
           color: transparent;
+          animation: textShine 4.5s ease-in-out infinite;
         }
-        .svc__titleSheen {
+        .svc__titleFill::after {
           content: '';
           position: absolute;
-          inset: 0;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
           background: linear-gradient(
-            120deg,
+            90deg,
             transparent 0%,
-            rgba(255, 255, 255, 0.18) 30%,
-            transparent 60%
+            rgba(255, 255, 255, 0.6) 50%,
+            transparent 100%
           );
           background-size: 200% 100%;
+          animation: shine 3.5s linear infinite;
+          -webkit-background-clip: text;
+          background-clip: text;
           mix-blend-mode: overlay;
-          animation: sheen 3.2s linear infinite;
-          pointer-events: none;
         }
-        @keyframes sheen {
-          from {
-            background-position-x: 0%;
+        .svc__titleSheen {
+          display: none;
+        }
+        @keyframes textShine {
+          0%, 100% {
+            background-position: 0% 50%;
           }
-          to {
-            background-position-x: 200%;
+          50% {
+            background-position: 100% 50%;
+          }
+        }
+        @keyframes shine {
+          0% {
+            background-position: -200% 0;
+          }
+          100% {
+            background-position: 200% 0;
           }
         }
 
