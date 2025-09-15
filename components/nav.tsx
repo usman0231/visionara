@@ -8,8 +8,8 @@ import { usePathname } from 'next/navigation';
 function Nav() {
   const pathname = usePathname();
 
-  // Check if the current URL contains '/dashboard'
-  if (pathname.includes('/dashboard')) {
+  // Check if the current URL contains '/backoffice'
+  if (pathname.includes('/backoffice')) {
     return null;
   }
 

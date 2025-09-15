@@ -2,7 +2,15 @@
   "permissions": {
     "allow": [
       "WebSearch",
-      "Read(//c/Users/Usman/Pictures/Screenshots/**)"
+      "Read(//c/Users/Usman/Pictures/Screenshots/**)",
+      "Bash(node:*)",
+      "Bash(npm install)",
+      "Bash(npm run dev:*)",
+      "Bash(npm run:*)",
+      "Bash(npx sequelize-cli:*)",
+      "Bash(psql:*)",
+      "Bash(curl:*)",
+      "Bash(npm install:*)"
     ],
     "deny": [],
     "ask": []

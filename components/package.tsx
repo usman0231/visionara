@@ -14,7 +14,20 @@ type Plan = {
   features: string[];
 };
 
-const DATA: Record<Category, Record<Tier, Plan>> = {
+interface Package {
+  id: string;
+  category: Category;
+  tier: Tier;
+  priceOnetime: string;
+  priceMonthly: string;
+  priceYearly: string;
+  features: string[];
+  active: boolean;
+  sortOrder: number;
+}
+
+// Fallback data for when database is unavailable
+const FALLBACK_DATA: Record<Category, Record<Tier, Plan>> = {
   Web: {
     Basic: {
       name: 'Basic',
@@ -189,9 +202,56 @@ export default function PackagesSection() {
   const sectionRef = useRef<HTMLDivElement | null>(null);
   const [category, setCategory] = useState<Category>('Web');
   const [billing, setBilling] = useState<Billing>('onetime');
+  const [packages, setPackages] = useState<Package[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchPackages();
+  }, []);
+
+  const fetchPackages = async () => {
+    try {
+      const response = await fetch('/api/admin/packages');
+      if (!response.ok) {
+        // Use fallback data if API fails
+        console.warn('API not available, using fallback data');
+        setPackages([]);
+        setLoading(false);
+        return;
+      }
+      const data = await response.json();
+      // Filter only active packages
+      const activePackages = data.filter((pkg: Package) => pkg.active);
+      setPackages(activePackages);
+    } catch (error) {
+      // Use fallback data on error
+      console.warn('Error fetching packages, using fallback data:', error);
+      setPackages([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const plans = useMemo(() => {
-    const group = DATA[category];
+    // If we have database packages, use them
+    if (packages.length > 0) {
+      const categoryPackages = packages
+        .filter(pkg => pkg.category === category)
+        .sort((a, b) => a.sortOrder - b.sortOrder);
+
+      return categoryPackages.map(pkg => ({
+        name: pkg.tier,
+        prices: {
+          onetime: pkg.priceOnetime,
+          monthly: pkg.priceMonthly,
+          yearly: pkg.priceYearly
+        },
+        features: pkg.features
+      }));
+    }
+
+    // Fall back to hardcoded data if database is empty
+    const group = FALLBACK_DATA[category];
     const applyDiscount = (price: string) => {
       if (billing !== 'yearly') return price;
       
@@ -212,7 +272,7 @@ export default function PackagesSection() {
         yearly: applyDiscount(plan.prices.yearly)
       }
     }));
-  }, [category, billing]);
+  }, [category, billing, packages]);
 
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
@@ -258,6 +318,47 @@ export default function PackagesSection() {
     return () => ctx.revert();
   }, [category, billing]);
 
+  // Get available categories from database packages
+  const availableCategories = useMemo(() => {
+    if (packages.length > 0) {
+      const categories = [...new Set(packages.map(pkg => pkg.category))].sort();
+      return categories;
+    }
+    return ['Web', 'Mobile', 'Graphic', 'Marketing'] as Category[];
+  }, [packages]);
+
+  // Show loading state
+  if (loading) {
+    return (
+      <section className="pkg">
+        <div className="pkg__glow" aria-hidden />
+        <header className="pkg__header">
+          <p className="eyebrow">Pricing</p>
+          <h2 className="headline">
+            <span className="headline-fill">Packages</span>
+          </h2>
+        </header>
+        <div className="grid">
+          {[...Array(3)].map((_, i) => (
+            <div key={i} className="pkg-card">
+              <div className="pkg-card__inner">
+                <div className="animate-pulse">
+                  <div className="h-6 bg-gray-200 rounded mb-4"></div>
+                  <div className="h-8 bg-gray-200 rounded mb-6"></div>
+                  <div className="space-y-3">
+                    {[...Array(4)].map((_, j) => (
+                      <div key={j} className="h-4 bg-gray-200 rounded"></div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section ref={sectionRef} className="pkg">
       <div className="pkg__glow" aria-hidden />
@@ -270,7 +371,7 @@ export default function PackagesSection() {
 
         {/* Category pills */}
         <div className="pills reveal" role="tablist" aria-label="Package categories">
-          {(['Web', 'Mobile', 'Graphic', 'Marketing'] as Category[]).map((c) => (
+          {availableCategories.map((c) => (
             <button
               key={c}
               role="tab"
