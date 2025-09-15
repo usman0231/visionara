@@ -87,12 +87,14 @@ export default function ContactPage() {
             <ul className="mt-3 space-y-2 text-sm text-[var(--text1)]/90">
               <li>
                 Email:{' '}
-                <a className="text-[var(--foreground)] underline" href="mailto:hello@visionara.studio">
-                  hello@visionara.studio
+                <a className="text-[var(--foreground)] underline" href="mailto:visionara0231@gmail.com">
+                  visionara0231@gmail.com
                 </a>
               </li>
-              <li>Phone: <span className="opacity-90">+1 (555) 123-4567</span></li>
-              <li>Hours: <span className="opacity-90">Mon–Fri, 9am–6pm</span></li>
+              <li>Phone: <span className="opacity-90">+1 437-430-3922</span></li>
+              <li>Contact Hours: <span className="opacity-90">24/7</span></li>
+              <li>Office Hours: <span className="opacity-90">Appointment Only</span></li>
+              <li>Adress: <span className="opacity-90">1454 Dundas St E, Mississauga, ON L4X 1L4</span></li>
             </ul>
           </div>
 

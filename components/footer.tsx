@@ -69,7 +69,7 @@ export default function InteractiveFooter() {
 
   const copyEmail = async () => {
     try {
-      await navigator.clipboard.writeText('hello@visionara.ca');
+      await navigator.clipboard.writeText('visionara0231@gmail.com');
       setCopied(true);
       setTimeout(() => setCopied(false), 1500);
     } catch {}
@@ -94,7 +94,7 @@ export default function InteractiveFooter() {
           <p className="ft__tag">We craft digital experiences that inspire growth and innovation.</p>
 
           <button className="ft__email" onClick={copyEmail} aria-label="Copy email">
-            hello@visionara.ca
+            visionara0231@gmail.com
             <span className={`ft__copied ${copied ? 'is-on' : ''}`}>Copied!</span>
           </button>
 

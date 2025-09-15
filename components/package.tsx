@@ -71,7 +71,7 @@ const FALLBACK_DATA: Record<Category, Record<Tier, Plan>> = {
   Mobile: {
     Basic: {
       name: 'Basic',
-      prices: { onetime: 'CAD $15,000', monthly: 'CAD $199/mo', yearly: 'CAD $2,388/yr' },
+      prices: { onetime: 'CAD $8-11k', monthly: 'CAD $199/mo', yearly: 'CAD $2,388/yr' },
       features: [
         'Native iOS OR Android app',
         '5-8 core screens',
@@ -83,7 +83,7 @@ const FALLBACK_DATA: Record<Category, Record<Tier, Plan>> = {
     },
     Standard: {
       name: 'Standard',
-      prices: { onetime: 'CAD $35,000', monthly: 'CAD $299/mo', yearly: 'CAD $3,588/yr' },
+      prices: { onetime: 'CAD $13-18k', monthly: 'CAD $299/mo', yearly: 'CAD $3,588/yr' },
       features: [
         'Cross-platform (iOS + Android)',
         '12-15 screens',
@@ -95,7 +95,7 @@ const FALLBACK_DATA: Record<Category, Record<Tier, Plan>> = {
     },
     Enterprise: {
       name: 'Enterprise',
-      prices: { onetime: 'CAD $65,000-$100,000', monthly: 'CAD $499/mo', yearly: 'CAD $5,988/yr' },
+      prices: { onetime: 'CAD $25-30k', monthly: 'CAD $499/mo', yearly: 'CAD $5,988/yr' },
       features: [
         'Complex cross-platform app',
         'Custom backend development',
