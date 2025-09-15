@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+import Link from 'next/link';
 import Footer from '@/components/footer';
 
 type PlanKey = 'basic' | 'standard' | 'enterprise';
@@ -285,18 +286,18 @@ export default function FeaturesPage() {
             From web apps to mobile solutions, stunning visuals to growth marketing — we've got you covered.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center mt-6">
-            <a
+            <Link
               href="/contact"
               className="inline-block rounded-full border border-white/20 bg-[var(--foreground)] px-8 py-4 font-semibold text-black hover:bg-[var(--foreground)]/90 transition"
             >
               Start a project
-            </a>
-            <a
+            </Link>
+            <Link
               href="/"
               className="inline-block rounded-full border border-white/20 px-8 py-4 font-semibold text-[var(--text1)] hover:bg-white/5 transition"
             >
               Learn more
-            </a>
+            </Link>
           </div>
         </div>
       </section>

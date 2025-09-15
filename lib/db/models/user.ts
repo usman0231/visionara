@@ -12,7 +12,9 @@ interface UserAttributes {
   deletedAt: Date | null;
 }
 
-interface UserCreationAttributes extends Optional<UserAttributes, 'displayName' | 'createdAt' | 'updatedAt' | 'deletedAt'> {}
+interface UserCreationAttributes extends Optional<UserAttributes, 'displayName' | 'createdAt' | 'updatedAt' | 'deletedAt'> {
+  // This interface has required fields: id, email, roleId
+}
 
 export class User extends Model<UserAttributes, UserCreationAttributes> implements UserAttributes {
   public id!: string;

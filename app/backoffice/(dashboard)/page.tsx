@@ -1,4 +1,15 @@
+'use client';
+
+import { useState, useEffect } from 'react';
 import StatsCard from '@/components/backoffice/StatsCard';
+import {
+  WrenchScrewdriverIcon,
+  CubeIcon,
+  StarIcon,
+  PhotoIcon,
+  EnvelopeIcon,
+  UsersIcon
+} from '@heroicons/react/24/outline';
 
 // Mock data fetcher — replace with real DB/API calls later
 async function getDashboardStats() {
@@ -12,8 +23,16 @@ async function getDashboardStats() {
   };
 }
 
-export default async function DashboardPage() {
-  const stats = await getDashboardStats();
+export default function DashboardPage() {
+  const [stats, setStats] = useState<any>(null);
+
+  useEffect(() => {
+    getDashboardStats().then(setStats);
+  }, []);
+
+  if (!stats) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div>
@@ -30,7 +49,7 @@ export default async function DashboardPage() {
           title="Services"
           value={stats.services.count}
           change={stats.services.change}
-          icon="wrench"
+          icon={WrenchScrewdriverIcon}
           href="/backoffice/services"
         />
 
@@ -38,7 +57,7 @@ export default async function DashboardPage() {
           title="Packages"
           value={stats.packages.count}
           change={stats.packages.change}
-          icon="cube"
+          icon={CubeIcon}
           href="/backoffice/packages"
         />
 
@@ -46,7 +65,7 @@ export default async function DashboardPage() {
           title="Reviews"
           value={stats.reviews.count}
           change={stats.reviews.change}
-          icon="star"
+          icon={StarIcon}
           href="/backoffice/reviews"
         />
 
@@ -54,7 +73,7 @@ export default async function DashboardPage() {
           title="Gallery Items"
           value={stats.gallery.count}
           change={stats.gallery.change}
-          icon="photo"
+          icon={PhotoIcon}
           href="/backoffice/gallery"
         />
 
@@ -62,7 +81,7 @@ export default async function DashboardPage() {
           title="Contact Submissions"
           value={stats.contacts.count}
           change={stats.contacts.change}
-          icon="envelope"
+          icon={EnvelopeIcon}
           href="/backoffice/contacts"
         />
 
@@ -70,7 +89,7 @@ export default async function DashboardPage() {
           title="Users"
           value={stats.users.count}
           change={stats.users.change}
-          icon="users"
+          icon={UsersIcon}
           href="/backoffice/settings"
         />
       </div>

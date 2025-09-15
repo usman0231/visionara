@@ -1,20 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { ContactSubmission, AuditLog } from '@/lib/db/models';
+import { ContactSubmission, AuditLog, AuditAction } from '@/lib/db/models';
 import { z } from 'zod';
 
 export const runtime = 'nodejs';
 
 const updateContactSchema = z.object({
-  status: z.enum(['new', 'in_progress', 'resolved']),
-  notes: z.string().optional(),
+  // Contact submissions are read-only, no fields can be updated
 });
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const contact = await ContactSubmission.findByPk(params.id);
+    const { id } = await params;
+    const contact = await ContactSubmission.findByPk(id);
 
     if (!contact) {
       return NextResponse.json(
@@ -35,15 +35,16 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const userId = request.headers.get('x-user-id');
     if (!userId) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
-    const contact = await ContactSubmission.findByPk(params.id);
+    const contact = await ContactSubmission.findByPk(id);
 
     if (!contact) {
       return NextResponse.json(
@@ -52,25 +53,11 @@ export async function PUT(
       );
     }
 
-    const body = await request.json();
-    const validatedData = updateContactSchema.parse(body);
-    const oldValues = contact.toJSON();
-
-    await contact.update({
-      ...validatedData,
-      updatedBy: userId,
-    });
-
-    await AuditLog.create({
-      userId,
-      action: 'UPDATE',
-      tableName: 'contact_submissions',
-      recordId: contact.id,
-      oldValues,
-      newValues: validatedData,
-    });
-
-    return NextResponse.json({ contact });
+    // Contact submissions are read-only
+    return NextResponse.json(
+      { error: 'Contact submissions cannot be updated' },
+      { status: 405 }
+    );
   } catch (error: any) {
     console.error('Update contact error:', error);
     
@@ -90,15 +77,16 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const userId = request.headers.get('x-user-id');
     if (!userId) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
-    const contact = await ContactSubmission.findByPk(params.id);
+    const contact = await ContactSubmission.findByPk(id);
 
     if (!contact) {
       return NextResponse.json(
@@ -112,11 +100,11 @@ export async function DELETE(
     await contact.destroy();
 
     await AuditLog.create({
-      userId,
-      action: 'DELETE',
-      tableName: 'contact_submissions',
-      recordId: contact.id,
-      oldValues,
+      actorUserId: userId,
+      action: AuditAction.DELETE,
+      entity: 'contact_submissions',
+      entityId: contact.id,
+      diff: { oldValues },
     });
 
     return NextResponse.json({ message: 'Contact deleted successfully' });

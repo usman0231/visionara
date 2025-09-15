@@ -157,7 +157,7 @@ export default function ContactModal({ isOpen, onClose, contact }: ContactModalP
                               </a>
                             </div>
                             <button
-                              onClick={() => copyToClipboard(contact.phone)}
+                              onClick={() => copyToClipboard(contact.phone || '')}
                               className="text-gray-400 hover:text-gray-600"
                             >
                               <ClipboardDocumentIcon className="h-4 w-4" />

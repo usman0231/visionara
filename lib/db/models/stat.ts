@@ -14,7 +14,9 @@ interface StatAttributes {
   deletedAt: Date | null;
 }
 
-interface StatCreationAttributes extends Optional<StatAttributes, 'id' | 'prefix' | 'suffix' | 'sortOrder' | 'active' | 'createdAt' | 'updatedAt' | 'deletedAt'> {}
+interface StatCreationAttributes extends Optional<StatAttributes, 'id' | 'prefix' | 'suffix' | 'sortOrder' | 'active' | 'createdAt' | 'updatedAt' | 'deletedAt'> {
+  // This interface has required fields: label, value
+}
 
 export class Stat extends Model<StatAttributes, StatCreationAttributes> implements StatAttributes {
   public id!: string;

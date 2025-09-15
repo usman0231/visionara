@@ -1,16 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { Setting, AuditLog } from '@/lib/db/models';
+import { Setting, AuditLog, AuditAction } from '@/lib/db/models';
 import { updateSettingSchema } from '@/lib/validations/setting';
 
 export const runtime = 'nodejs';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { key: string } }
+  { params }: { params: Promise<{ key: string }> }
 ) {
   try {
+    const { key } = await params;
     const setting = await Setting.findOne({
-      where: { key: params.key },
+      where: { key },
     });
 
     if (!setting) {
@@ -32,16 +33,17 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { key: string } }
+  { params }: { params: Promise<{ key: string }> }
 ) {
   try {
+    const { key } = await params;
     const userId = request.headers.get('x-user-id');
     if (!userId) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
     const setting = await Setting.findOne({
-      where: { key: params.key },
+      where: { key },
     });
 
     if (!setting) {
@@ -57,16 +59,14 @@ export async function PUT(
 
     await setting.update({
       ...validatedData,
-      updatedBy: userId,
     });
 
     await AuditLog.create({
-      userId,
-      action: 'UPDATE',
-      tableName: 'settings',
-      recordId: setting.id,
-      oldValues,
-      newValues: validatedData,
+      actorUserId: userId,
+      action: AuditAction.UPDATE,
+      entity: 'settings',
+      entityId: setting.id,
+      diff: { oldValues, newValues: validatedData },
     });
 
     return NextResponse.json({ setting });
@@ -89,16 +89,17 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { key: string } }
+  { params }: { params: Promise<{ key: string }> }
 ) {
   try {
+    const { key } = await params;
     const userId = request.headers.get('x-user-id');
     if (!userId) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
     const setting = await Setting.findOne({
-      where: { key: params.key },
+      where: { key },
     });
 
     if (!setting) {
@@ -113,11 +114,11 @@ export async function DELETE(
     await setting.destroy();
 
     await AuditLog.create({
-      userId,
-      action: 'DELETE',
-      tableName: 'settings',
-      recordId: setting.id,
-      oldValues,
+      actorUserId: userId,
+      action: AuditAction.DELETE,
+      entity: 'settings',
+      entityId: setting.id,
+      diff: { oldValues },
     });
 
     return NextResponse.json({ message: 'Setting deleted successfully' });

@@ -182,7 +182,7 @@ async function createSuperAdminIfNotExists() {
       await User.create({
         id: existingSuperAdmin.id,
         email: superAdminEmail,
-        name: 'Usman',
+        displayName: 'Usman',
         roleId: superAdminRole.id,
       });
       console.log('✅ SuperAdmin user added to database');
@@ -207,7 +207,7 @@ async function createSuperAdminIfNotExists() {
   await User.create({
     id: newUser.user.id,
     email: superAdminEmail,
-    name: 'Usman',
+    displayName: 'Usman',
     roleId: superAdminRole.id,
   });
   

@@ -1,17 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { Review, Service, AuditLog } from '@/lib/db/models';
+import { Review, Service, AuditLog, AuditAction } from '@/lib/db/models';
 import { updateReviewSchema } from '@/lib/validations/review';
 
 export const runtime = 'nodejs';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const review = await Review.findOne({
-      where: { 
-        id: params.id,
+      where: {
+        id,
         deletedAt: null 
       },
       include: [
@@ -43,17 +44,18 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const userId = request.headers.get('x-user-id');
     if (!userId) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
     const review = await Review.findOne({
-      where: { 
-        id: params.id,
+      where: {
+        id,
         deletedAt: null 
       },
     });
@@ -85,16 +87,14 @@ export async function PUT(
 
     await review.update({
       ...validatedData,
-      updatedBy: userId,
     });
 
     await AuditLog.create({
-      userId,
-      action: 'UPDATE',
-      tableName: 'reviews',
-      recordId: review.id,
-      oldValues,
-      newValues: validatedData,
+      actorUserId: userId,
+      action: AuditAction.UPDATE,
+      entity: 'reviews',
+      entityId: review.id,
+      diff: { oldValues, newValues: validatedData },
     });
 
     return NextResponse.json({ review });
@@ -117,17 +117,18 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const userId = request.headers.get('x-user-id');
     if (!userId) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
     const review = await Review.findOne({
-      where: { 
-        id: params.id,
+      where: {
+        id,
         deletedAt: null 
       },
     });
@@ -143,15 +144,14 @@ export async function DELETE(
 
     await review.update({
       deletedAt: new Date(),
-      updatedBy: userId,
     });
 
     await AuditLog.create({
-      userId,
-      action: 'DELETE',
-      tableName: 'reviews',
-      recordId: review.id,
-      oldValues,
+      actorUserId: userId,
+      action: AuditAction.DELETE,
+      entity: 'reviews',
+      entityId: review.id,
+      diff: { oldValues },
     });
 
     return NextResponse.json({ message: 'Review deleted successfully' });

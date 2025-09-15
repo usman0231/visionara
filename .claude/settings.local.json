@@ -10,7 +10,8 @@
       "Bash(npx sequelize-cli:*)",
       "Bash(psql:*)",
       "Bash(curl:*)",
-      "Bash(npm install:*)"
+      "Bash(npm install:*)",
+      "Bash(npx eslint:*)"
     ],
     "deny": [],
     "ask": []

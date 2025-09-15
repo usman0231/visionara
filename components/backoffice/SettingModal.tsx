@@ -156,7 +156,7 @@ export default function SettingModal({ isOpen, onClose, onSave, setting }: Setti
     }
   };
 
-  const useTemplate = (template: typeof settingTemplates[0]) => {
+  const applyTemplate = (template: typeof settingTemplates[0]) => {
     setFormData({
       key: template.key,
       value: JSON.stringify(template.value, null, 2),
@@ -225,7 +225,7 @@ export default function SettingModal({ isOpen, onClose, onSave, setting }: Setti
                         <button
                           key={template.key}
                           type="button"
-                          onClick={() => useTemplate(template)}
+                          onClick={() => applyTemplate(template)}
                           className="text-left p-3 border border-gray-200 rounded-lg hover:border-indigo-300 hover:bg-indigo-50 transition-colors"
                         >
                           <div className="text-sm font-medium text-gray-900">{template.name}</div>

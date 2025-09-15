@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { GalleryItem, Service, AuditLog } from '@/lib/db/models';
+import { GalleryItem, Service, AuditLog, AuditAction } from '@/lib/db/models';
 import { createGalleryItemSchema } from '@/lib/validations/gallery';
 
 export const runtime = 'nodejs';
@@ -67,15 +67,14 @@ export async function POST(request: NextRequest) {
 
     const galleryItem = await GalleryItem.create({
       ...validatedData,
-      createdBy: userId,
     });
 
     await AuditLog.create({
-      userId,
-      action: 'CREATE',
-      tableName: 'gallery_items',
-      recordId: galleryItem.id,
-      newValues: validatedData,
+      actorUserId: userId,
+      action: AuditAction.CREATE,
+      entity: 'gallery_items',
+      entityId: galleryItem.id,
+      diff: { newValues: validatedData },
     });
 
     return NextResponse.json({ galleryItem }, { status: 201 });

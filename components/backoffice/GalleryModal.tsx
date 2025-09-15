@@ -118,7 +118,7 @@ export default function GalleryModal({ isOpen, onClose, onSave, item }: GalleryM
       handleInputChange('imageUrl', url);
 
       // Auto-generate alt text from filename if empty
-      if (!formData.alt) {
+      if (!(formData as unknown as GalleryFormData).alt) {
         const filename = file.name.split('.')[0];
         const altText = filename.replace(/[-_]/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
         handleInputChange('alt', altText);

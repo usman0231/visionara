@@ -1,17 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { Service, AuditLog } from '@/lib/db/models';
+import { Service, AuditLog, AuditAction } from '@/lib/db/models';
 import { updateServiceSchema } from '@/lib/validations/service';
 
 export const runtime = 'nodejs';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const service = await Service.findOne({
-      where: { 
-        id: params.id,
+      where: {
+        id,
         deletedAt: null 
       },
     });
@@ -35,17 +36,18 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const userId = request.headers.get('x-user-id');
     if (!userId) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
     const service = await Service.findOne({
-      where: { 
-        id: params.id,
+      where: {
+        id,
         deletedAt: null 
       },
     });
@@ -66,12 +68,11 @@ export async function PUT(
     });
 
     await AuditLog.create({
-      userId,
-      action: 'UPDATE',
-      tableName: 'services',
-      recordId: service.id,
-      oldValues,
-      newValues: validatedData,
+      actorUserId: userId,
+      action: AuditAction.UPDATE,
+      entity: 'services',
+      entityId: service.id,
+      diff: { oldValues, newValues: validatedData },
     });
 
     return NextResponse.json({ service });
@@ -94,17 +95,18 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const userId = request.headers.get('x-user-id');
     if (!userId) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
     const service = await Service.findOne({
-      where: { 
-        id: params.id,
+      where: {
+        id,
         deletedAt: null 
       },
     });
@@ -123,11 +125,11 @@ export async function DELETE(
     });
 
     await AuditLog.create({
-      userId,
-      action: 'DELETE',
-      tableName: 'services',
-      recordId: service.id,
-      oldValues,
+      actorUserId: userId,
+      action: AuditAction.DELETE,
+      entity: 'services',
+      entityId: service.id,
+      diff: { oldValues },
     });
 
     return NextResponse.json({ message: 'Service deleted successfully' });
