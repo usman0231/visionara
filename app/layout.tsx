@@ -20,7 +20,7 @@ export const metadata: Metadata = {
     siteName: "VISIONARA",
     images: [
       {
-        url: "https://www.visionara.ca/images/medium_res_logo.png",
+        url: "https://www.visionara.ca/images/medium_res_logo.webp",
         width: 1200,
         height: 630,
         alt: "VISIONARA - Your Vision, Our Technology",
@@ -33,7 +33,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "VISIONARA",
     description: "Turn your visions into reality with our innovative solutions.",
-    images: ["https://www.visionara.ca/images/medium_res_logo.png"],
+    images: ["https://www.visionara.ca/images/medium_res_logo.webp"],
   },
 };
 

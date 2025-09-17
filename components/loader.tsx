@@ -26,7 +26,7 @@ export default function Loader() {
   return (
     <div className="loader">
       <img
-        src="/images/medium_res_logo.png"
+        src="/images/medium_res_logo.webp"
         alt="Visionara Logo"
         className="loader-logo"
       />

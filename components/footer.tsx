@@ -88,7 +88,7 @@ export default function InteractiveFooter() {
         {/* Brand */}
         <div className="ft__col ft__brand">
           <Link href="/" className="ft__logoLink">
-            <Image src="/images/just_logo.png" alt="Visionara logo" width={56} height={56} className="ft__logo mx-auto sm:mx-0" />
+            <Image src="/images/medium_res_logo.webp" alt="Visionara logo" width={56} height={56} className="ft__logo mx-auto sm:mx-0" />
             <span className="ft__brandName">VISIONARA</span>
           </Link>
           <p className="ft__tag">We craft digital experiences that inspire growth and innovation.</p>
