@@ -277,6 +277,7 @@ export default function Services() {
                     width={120}
                     height={120}
                     className="svc__icon"
+                    loading="lazy"
                   />
                   <span className="svc__orb" aria-hidden />
                 </div>

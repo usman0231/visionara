@@ -118,7 +118,7 @@ export default function AchievementsGallery() {
               alt={ITEMS[open].alt}
               sizes="100vw"
               className="ag__lightboxImg"
-              priority
+              loading="lazy"
             />
           </div>
         </div>
