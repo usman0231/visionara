@@ -160,8 +160,8 @@ export default function InteractiveFooter() {
       <div className="ft__bottom">
         <p>© {year} Visionara. All rights reserved.</p>
         <div className="ft__bottomLinks">
-          <Link href="/privacy">Privacy</Link>
-          <Link href="/terms">Terms</Link>
+          <Link href="#">Privacy</Link>
+          <Link href="#">Terms</Link>
           <button className="ft__top" onClick={scrollTop} aria-label="Back to top">↑ Top</button>
         </div>
       </div>
