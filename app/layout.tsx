@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   title: "VISIONARA",
   description: "Visionara, turn your visions into a reality.",
   icons: {
-    icon: "/public/images/fav.png",
+    icon: "/images/fav.png",
   },
 };
 
