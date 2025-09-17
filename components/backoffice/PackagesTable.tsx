@@ -223,10 +223,13 @@ export default function PackagesTable() {
     if (oldIndex !== -1 && newIndex !== -1) {
       const reorderedPackages = arrayMove(filteredPackages, oldIndex, newIndex);
 
-      // Update sort orders based on new positions
+      // Calculate new sort orders maintaining relative positions
+      const baseOrder = selectedCategory === 'all' ? 0 :
+        Math.min(...packages.filter(pkg => pkg.category === selectedCategory).map(pkg => pkg.sortOrder)) - 1;
+
       const updatedPackages = reorderedPackages.map((pkg, index) => ({
         ...pkg,
-        sortOrder: index + 1
+        sortOrder: baseOrder + index + 1
       }));
 
       // Update local state immediately for smooth UX
@@ -234,7 +237,10 @@ export default function PackagesTable() {
         const updated = updatedPackages.find(u => u.id === pkg.id);
         return updated || pkg;
       });
-      setPackages(allPackagesWithUpdates);
+
+      // Sort the updated packages to maintain proper order display
+      const sortedPackages = allPackagesWithUpdates.sort((a, b) => a.sortOrder - b.sortOrder);
+      setPackages(sortedPackages);
 
       // Send updates to the server
       try {
@@ -252,9 +258,12 @@ export default function PackagesTable() {
             })
           )
         );
+
+        // Refresh data to ensure consistency with server
+        await fetchPackages();
       } catch (error) {
         console.error('Failed to update sort orders:', error);
-        // Optionally revert the changes or show an error message
+        // Revert the changes and fetch fresh data
         await fetchPackages();
       }
     }

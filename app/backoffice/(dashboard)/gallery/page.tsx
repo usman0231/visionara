@@ -1,26 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { PhotoIcon, PlusIcon, PencilIcon, TrashIcon, Bars3Icon } from '@heroicons/react/24/outline';
-import Image from 'next/image';
+import { PhotoIcon, PlusIcon, PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
 import GalleryModal from '@/components/backoffice/GalleryModal';
-import {
-  DndContext,
-  closestCenter,
-  KeyboardSensor,
-  PointerSensor,
-  useSensor,
-  useSensors,
-} from '@dnd-kit/core';
-import {
-  SortableContext,
-  sortableKeyboardCoordinates,
-  rectSortingStrategy,
-  verticalListSortingStrategy,
-  useSortable,
-} from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
-import { useDragAndDrop } from '@/components/backoffice/useDragAndDrop';
 
 interface GalleryItem {
   id: string;
@@ -34,7 +16,6 @@ interface GalleryItem {
 export default function GalleryPage() {
   const [items, setItems] = useState<GalleryItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<GalleryItem | null>(null);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
@@ -47,7 +28,6 @@ export default function GalleryPage() {
     try {
       const response = await fetch('/api/admin/gallery');
       if (!response.ok) {
-        // If API fails, show empty state instead of error
         setItems([]);
         setLoading(false);
         return;
@@ -55,9 +35,7 @@ export default function GalleryPage() {
       const data = await response.json();
       setItems(data);
     } catch (error: any) {
-      // On any error, show empty state
       setItems([]);
-      setError(null);
     } finally {
       setLoading(false);
     }
@@ -65,17 +43,14 @@ export default function GalleryPage() {
 
   const handleDelete = async (id: string) => {
     if (!confirm('Are you sure you want to delete this gallery item?')) return;
-
     try {
       const response = await fetch(`/api/admin/gallery/${id}`, {
         method: 'DELETE',
       });
-
       if (!response.ok) throw new Error('Failed to delete gallery item');
-
       await fetchGalleryItems();
     } catch (error: any) {
-      alert('Failed to delete gallery item: ' + error.message);
+      console.error('Failed to delete gallery item:', error);
     }
   };
 
@@ -109,16 +84,12 @@ export default function GalleryPage() {
     );
   }
 
-  // Remove error display - we show empty state instead
-
   return (
     <div className="px-4 sm:px-6 lg:px-8">
       <div className="sm:flex sm:items-center">
         <div className="sm:flex-auto">
           <h1 className="text-xl font-semibold text-gray-900">Gallery</h1>
-          <p className="mt-2 text-sm text-gray-700">
-            Manage your portfolio images and media
-          </p>
+          <p className="mt-2 text-sm text-gray-700">Manage your portfolio images and media</p>
         </div>
         <div className="mt-4 sm:ml-16 sm:mt-0 sm:flex-none flex gap-2">
           <div className="flex rounded-md shadow-sm">
@@ -153,7 +124,6 @@ export default function GalleryPage() {
         </div>
       </div>
 
-      {/* Statistics */}
       <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-3">
         <div className="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6">
           <dt className="truncate text-sm font-medium text-gray-500">Total Images</dt>
@@ -183,20 +153,18 @@ export default function GalleryPage() {
             {items.map((item) => (
               <div key={item.id} className="group relative overflow-hidden rounded-lg bg-white shadow-sm ring-1 ring-gray-900/10">
                 <div className="aspect-square relative bg-gray-100">
-                  <Image
+                  <img
                     src={item.imageUrl}
                     alt={item.alt}
-                    fill
-                    className="object-cover"
-                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                    className="absolute inset-0 w-full h-full object-cover"
+                    loading="lazy"
                     onError={(e) => {
-                      console.error('Image failed to load:', item.imageUrl);
-                    }}
-                    onLoad={() => {
-                      console.log('Image loaded successfully:', item.imageUrl);
+                      const target = e.target as HTMLImageElement;
+                      target.src =
+                        'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDIwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjIwMCIgaGVpZ2h0PSIyMDAiIGZpbGw9IiNGM0Y0RjYiLz48cGF0aCBkPSJNNjAgODBIMTQwVjEyMEg2MFY4MFoiIGZpbGw9IiNENUQ3REEiLz48Y2lyY2xlIGN4PSI4NSIgY3k9Ijk1IiByPSI1IiBmaWxsPSIjOUI5QjlCIi8+PHBhdGggZD0iTTExMCAxMDVMMTI1IDkwTDE0MCAxMDVWMTIwSDExMFYxMDVaIiBmaWxsPSIjRDVEN0RBIi8+PC9zdmc+';
                     }}
                   />
-                  <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all duration-200">
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors duration-200">
                     <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                       <div className="flex gap-2">
                         <button
@@ -216,13 +184,13 @@ export default function GalleryPage() {
                   </div>
                   {!item.active && (
                     <div className="absolute top-2 left-2">
-                      <span className="inline-flex items-center rounded-md bg-gray-100 bg-opacity-90 px-2 py-1 text-xs font-medium text-gray-600">
+                      <span className="inline-flex items-center rounded-md bg-gray-100/90 px-2 py-1 text-xs font-medium text-gray-600">
                         Inactive
                       </span>
                     </div>
                   )}
                   <div className="absolute bottom-2 right-2">
-                    <span className="inline-flex items-center rounded-md bg-black bg-opacity-50 px-2 py-1 text-xs font-medium text-white">
+                    <span className="inline-flex items-center rounded-md bg-black/50 px-2 py-1 text-xs font-medium text-white">
                       #{item.sortOrder}
                     </span>
                   </div>
@@ -268,14 +236,14 @@ export default function GalleryPage() {
                   <tr key={item.id}>
                     <td className="whitespace-nowrap py-4 pl-4 pr-3 sm:pl-6">
                       <div className="h-16 w-16 relative rounded-lg overflow-hidden bg-gray-100">
-                        <Image
+                        <img
                           src={item.imageUrl}
                           alt={item.alt}
-                          fill
-                          className="object-cover"
-                          sizes="64px"
+                          className="absolute inset-0 w-full h-full object-cover"
                           onError={(e) => {
-                            console.error('Table image failed to load:', item.imageUrl);
+                            const target = e.target as HTMLImageElement;
+                            target.src =
+                              'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHZpZXdCb3g9IjAgMCA2NCA2NCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIGZpbGw9IiNGM0Y0RjYiLz48cGF0aCBkPSJNMjAgMjZINDRWMzhIMjBWMjZaIiBmaWxsPSIjRDVEN0RBIi8+PGNpcmNsZSBjeD0iMjgiIGN5PSIzMCIgcj0iMiIgZmlsbD0iIzlCOUI5QiIvPjxwYXRoIGQ9Ik0zNCAzNEwzOCAzMEw0NCAzNFYzOEgzNFYzNFoiIGZpbGw9IiNENUQ3REEiLz48L3N2Zz4=';
                           }}
                         />
                       </div>
@@ -286,11 +254,13 @@ export default function GalleryPage() {
                       </div>
                     </td>
                     <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                      <span className={`inline-flex rounded-full px-2 text-xs font-semibold leading-5 ${
-                        item.active
-                          ? 'bg-green-100 text-green-800'
-                          : 'bg-gray-100 text-gray-800'
-                      }`}>
+                      <span
+                        className={`inline-flex rounded-full px-2 text-xs font-semibold leading-5 ${
+                          item.active
+                            ? 'bg-green-100 text-green-800'
+                            : 'bg-gray-100 text-gray-800'
+                        }`}
+                      >
                         {item.active ? 'Active' : 'Inactive'}
                       </span>
                     </td>
@@ -343,12 +313,7 @@ export default function GalleryPage() {
         )}
       </div>
 
-      <GalleryModal
-        isOpen={isModalOpen}
-        onClose={closeModal}
-        onSave={handleSaveItem}
-        item={editingItem}
-      />
+      <GalleryModal isOpen={isModalOpen} onClose={closeModal} onSave={handleSaveItem} item={editingItem} />
     </div>
   );
 }

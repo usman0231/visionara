@@ -31,6 +31,8 @@ export default function GalleryModal({ isOpen, onClose, onSave, item }: GalleryM
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [uploadError, setUploadError] = useState<string | null>(null);
   const [formData, setFormData] = useState<GalleryFormData>({
     imageUrl: '',
     alt: '',
@@ -54,6 +56,9 @@ export default function GalleryModal({ isOpen, onClose, onSave, item }: GalleryM
         sortOrder: 0,
       });
     }
+    // Clear errors when modal opens
+    setError(null);
+    setUploadError(null);
   }, [item, isOpen]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -80,8 +85,8 @@ export default function GalleryModal({ isOpen, onClose, onSave, item }: GalleryM
 
       onSave();
     } catch (error: any) {
-      // Better error handling - log error instead of alert
       console.error('Error saving gallery item:', error);
+      setError(error.message || 'Failed to save gallery item');
     } finally {
       setLoading(false);
     }
@@ -96,36 +101,46 @@ export default function GalleryModal({ isOpen, onClose, onSave, item }: GalleryM
 
   const handleFileUpload = async (file: File) => {
     if (!file.type.startsWith('image/')) {
-      alert('Please select an image file');
+      setUploadError('Please select an image file');
+      return;
+    }
+
+    // Validate file size (max 10MB)
+    const maxSize = 10 * 1024 * 1024; // 10MB
+    if (file.size > maxSize) {
+      setUploadError('File size must be less than 10MB');
       return;
     }
 
     setUploading(true);
+    setUploadError(null);
+
     try {
-      const formData = new FormData();
-      formData.append('file', file);
+      const uploadFormData = new FormData();
+      uploadFormData.append('file', file);
 
       const response = await fetch('/api/admin/upload', {
         method: 'POST',
-        body: formData,
+        body: uploadFormData,
       });
 
       if (!response.ok) {
-        throw new Error('Failed to upload image');
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to upload image');
       }
 
       const { url } = await response.json();
       handleInputChange('imageUrl', url);
 
       // Auto-generate alt text from filename if empty
-      if (!(formData as unknown as GalleryFormData).alt) {
+      if (!formData.alt) {
         const filename = file.name.split('.')[0];
         const altText = filename.replace(/[-_]/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
         handleInputChange('alt', altText);
       }
     } catch (error: any) {
-      // Better error handling - log error instead of alert
       console.error('Upload failed:', error);
+      setUploadError(error.message || 'Failed to upload image');
     } finally {
       setUploading(false);
     }
@@ -198,6 +213,19 @@ export default function GalleryModal({ isOpen, onClose, onSave, item }: GalleryM
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
+                  {/* Error Messages */}
+                  {error && (
+                    <div className="rounded-md bg-red-50 p-4">
+                      <div className="text-sm text-red-700">{error}</div>
+                    </div>
+                  )}
+
+                  {uploadError && (
+                    <div className="rounded-md bg-red-50 p-4">
+                      <div className="text-sm text-red-700">{uploadError}</div>
+                    </div>
+                  )}
+
                   {/* Image Upload/Preview */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -270,7 +298,7 @@ export default function GalleryModal({ isOpen, onClose, onSave, item }: GalleryM
                     {/* Manual URL input */}
                     <div className="mt-2">
                       <input
-                        type="url"
+                        type="text"
                         value={formData.imageUrl}
                         onChange={(e) => handleInputChange('imageUrl', e.target.value)}
                         placeholder="Or enter image URL..."
