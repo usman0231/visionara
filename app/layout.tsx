@@ -8,6 +8,9 @@ import { Analytics } from "@vercel/analytics/next"
 export const metadata: Metadata = {
   title: "VISIONARA",
   description: "Visionara, turn your visions into a reality.",
+  icons: {
+    icon: "/public/images/fav.png",
+  },
 };
 
 export default function RootLayout({
