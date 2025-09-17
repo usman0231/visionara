@@ -42,8 +42,8 @@ export default function Home() {
         <div className="home_section1_right flex justify-center items-center order-1 md:order-2">
           <div className="relative w-[300px] h-[250px] md:w-[500px] md:h-[500px]">
             <Image
-              src="/images/just_logo.png"
-              alt="visionara_logo"
+              src="/images/medium_res_logo.png"
+              alt="Visionara Logo"
               fill
               className="object-contain"
             />
