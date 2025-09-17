@@ -2,23 +2,24 @@ import type { Metadata } from "next";
 import "./css/globals.css";
 import "./css/navbar.css";
 import "./css/bg.css";
-import Nav from 'nav';
-import { Analytics } from "@vercel/analytics/next"
+import Nav from "nav";
+import { Analytics } from "@vercel/analytics/next";
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://www.visionara.ca"), // <-- important
   title: "VISIONARA",
   description: "Visionara, turn your visions into a reality.",
   icons: {
-    icon: "/images/fav.png", // Your favicon
+    icon: "/images/fav.png",
   },
   openGraph: {
     title: "VISIONARA",
     description: "Turn your visions into reality with our innovative solutions.",
-    url: "https://www.visionara.ca", // Your site URL
+    url: "https://www.visionara.ca",
     siteName: "VISIONARA",
     images: [
       {
-        url: "/images/just_logo.png", // Public folder image
+        url: "https://www.visionara.ca/images/just_logo.png",
         width: 1200,
         height: 630,
         alt: "VISIONARA - Your Vision, Our Technology",
@@ -31,24 +32,18 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "VISIONARA",
     description: "Turn your visions into reality with our innovative solutions.",
-    images: ["/images/just_logo.png"], // Same image for Twitter preview
+    images: ["https://www.visionara.ca/images/just_logo.png"],
   },
 };
 
-
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
-
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-      <html lang="en">
-        <body className="overflow-x-hidden">
-          {children}
-          <Nav/>
-          <Analytics/>
-        </body>
-      </html>
+    <html lang="en">
+      <body className="overflow-x-hidden">
+        {children}
+        <Nav />
+        <Analytics />
+      </body>
+    </html>
   );
 }
