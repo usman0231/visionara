@@ -4,9 +4,10 @@ import "./css/navbar.css";
 import "./css/bg.css";
 import Nav from "nav";
 import { Analytics } from "@vercel/analytics/next";
+import Loader from "../components/loader";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://www.visionara.ca"), // <-- important
+  metadataBase: new URL("https://www.visionara.ca"),
   title: "VISIONARA",
   description: "Visionara, turn your visions into a reality.",
   icons: {
@@ -36,10 +37,15 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <html lang="en">
       <body className="overflow-x-hidden">
+        <Loader />
         {children}
         <Nav />
         <Analytics />
