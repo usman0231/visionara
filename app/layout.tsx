@@ -18,10 +18,10 @@ export default function RootLayout({
 
   return (
       <html lang="en">
-        <Analytics/>
         <body className="overflow-x-hidden">
           {children}
           <Nav/>
+          <Analytics/>
         </body>
       </html>
   );
