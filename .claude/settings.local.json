@@ -11,7 +11,10 @@
       "Bash(psql:*)",
       "Bash(curl:*)",
       "Bash(npm install:*)",
-      "Bash(npx eslint:*)"
+      "Bash(npx eslint:*)",
+      "Read(//c/Users/YOC/Documents/Shuja/**)",
+      "Bash(npx tsc:*)",
+      "Bash(ipconfig)"
     ],
     "deny": [],
     "ask": []

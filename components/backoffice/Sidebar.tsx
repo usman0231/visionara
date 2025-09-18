@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import {
   HomeIcon,
   WrenchScrewdriverIcon,
@@ -12,18 +12,26 @@ import {
   ListBulletIcon,
   Cog6ToothIcon,
   EnvelopeIcon,
-} from '@heroicons/react/24/outline';
+  DocumentTextIcon,
+  QuestionMarkCircleIcon,
+} from "@heroicons/react/24/outline";
 
 const navigation = [
-  { name: 'Dashboard', href: '/backoffice', icon: HomeIcon },
-  { name: 'Services', href: '/backoffice/services', icon: WrenchScrewdriverIcon },
-  { name: 'Packages', href: '/backoffice/packages', icon: CubeIcon },
-  { name: 'Reviews', href: '/backoffice/reviews', icon: StarIcon },
-  { name: 'Gallery', href: '/backoffice/gallery', icon: PhotoIcon },
-  { name: 'Stats', href: '/backoffice/stats', icon: ChartBarIcon },
-  { name: 'Features', href: '/backoffice/features', icon: ListBulletIcon },
-  { name: 'Settings', href: '/backoffice/settings', icon: Cog6ToothIcon },
-  { name: 'Contacts', href: '/backoffice/contacts', icon: EnvelopeIcon },
+  { name: "Dashboard", href: "/backoffice", icon: HomeIcon },
+  {
+    name: "Services",
+    href: "/backoffice/services",
+    icon: WrenchScrewdriverIcon,
+  },
+  { name: "Packages", href: "/backoffice/packages", icon: CubeIcon },
+  { name: "Reviews", href: "/backoffice/reviews", icon: StarIcon },
+  { name: "Gallery", href: "/backoffice/gallery", icon: PhotoIcon },
+  { name: "About Us", href: "/backoffice/about-us", icon: DocumentTextIcon },
+  { name: "FAQs", href: "/backoffice/faqs", icon: QuestionMarkCircleIcon },
+  { name: "Stats", href: "/backoffice/stats", icon: ChartBarIcon },
+  { name: "Features", href: "/backoffice/features", icon: ListBulletIcon },
+  { name: "Settings", href: "/backoffice/settings", icon: Cog6ToothIcon },
+  { name: "Contacts", href: "/backoffice/contacts", icon: EnvelopeIcon },
 ];
 
 export default function Sidebar() {
@@ -40,22 +48,25 @@ export default function Sidebar() {
       <nav className="flex-1 px-4 pb-4">
         <ul className="space-y-1">
           {navigation.map((item) => {
-            const isActive = pathname === item.href || 
-              (item.href !== '/backoffice' && pathname.startsWith(item.href));
-            
+            const isActive =
+              pathname === item.href ||
+              (item.href !== "/backoffice" && pathname.startsWith(item.href));
+
             return (
               <li key={item.name}>
                 <Link
                   href={item.href}
                   className={`group flex items-center rounded-md px-3 py-2 text-sm font-medium transition-colors ${
                     isActive
-                      ? 'bg-purple-600 text-white'
-                      : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+                      ? "bg-purple-600 text-white"
+                      : "text-gray-300 hover:bg-gray-800 hover:text-white"
                   }`}
                 >
                   <item.icon
                     className={`mr-3 h-5 w-5 flex-shrink-0 ${
-                      isActive ? 'text-white' : 'text-gray-400 group-hover:text-white'
+                      isActive
+                        ? "text-white"
+                        : "text-gray-400 group-hover:text-white"
                     }`}
                   />
                   {item.name}

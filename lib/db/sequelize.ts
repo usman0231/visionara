@@ -2,7 +2,7 @@ import { Sequelize } from 'sequelize';
 import { env } from '@/lib/env';
 
 // Import pg explicitly for Turbopack compatibility
-import pg from 'pg';
+import * as pg from 'pg';
 
 // Handle SSL certificate issues in development
 if (process.env.NODE_ENV === 'development') {
