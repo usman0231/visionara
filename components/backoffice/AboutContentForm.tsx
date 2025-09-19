@@ -35,6 +35,7 @@ const sections = [
   "tech",
   "testimonials",
   "cta",
+  "stats",
 ] as const;
 
 const sectionLabels = {
@@ -45,6 +46,7 @@ const sectionLabels = {
   tech: "Technology",
   testimonials: "Testimonials",
   cta: "Call to Action",
+  stats: "Statistics",
 };
 
 type SectionOption = (typeof sections)[number];
@@ -150,7 +152,6 @@ export default function AboutContentForm({
     subtitle: "",
     content: getDefaultContentForSection("hero"),
     active: true,
-    sortOrder: 0,
   });
 
   useEffect(() => {
@@ -163,7 +164,6 @@ export default function AboutContentForm({
           ? normalizeServicesContent(initialData.content)
           : initialData.content ?? getDefaultContentForSection(initialData.section),
         active: initialData.active,
-        sortOrder: initialData.sortOrder,
       });
     }
   }, [initialData]);
@@ -176,6 +176,7 @@ export default function AboutContentForm({
       ...formData,
       subtitle: formData.subtitle || null,
       content: formData.content,
+      sortOrder: initialData?.sortOrder, // Keep existing order for updates, let API handle new ones
     };
 
     if (formData.section === "services") {
@@ -1181,24 +1182,46 @@ export default function AboutContentForm({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="bg-white shadow-sm ring-1 ring-gray-900/5 sm:rounded-xl md:col-span-2">
-        <div className="px-4 py-6 sm:p-8">
-          <div className="grid max-w-2xl grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
-            {/* Section Selection */}
-            <div className="sm:col-span-3">
-              <label
-                htmlFor="section"
-                className="block text-sm font-medium leading-6 text-gray-900"
-              >
-                Section
-              </label>
-              <div className="mt-2">
+    <div className="max-w-5xl mx-auto">
+      <form onSubmit={handleSubmit} className="space-y-8">
+        {/* Header Section */}
+        <div className="bg-white shadow-sm ring-1 ring-gray-900/5 rounded-lg">
+          <div className="px-6 py-5">
+            <div className="flex items-center gap-3">
+              <div className="rounded-lg bg-indigo-100 p-2">
+                <svg className="h-6 w-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                </svg>
+              </div>
+              <div>
+                <h2 className="text-xl font-semibold text-gray-900">
+                  {initialData ? 'Edit Content Block' : 'Create Content Block'}
+                </h2>
+                <p className="text-sm text-gray-600">
+                  Configure the content for your About Us page section
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Basic Information Section */}
+        <div className="bg-white shadow-sm ring-1 ring-gray-900/5 rounded-lg">
+          <div className="px-6 py-5 border-b border-gray-200">
+            <h3 className="text-lg font-medium text-gray-900">Basic Information</h3>
+            <p className="text-sm text-gray-600 mt-1">Set the fundamental details for this content block</p>
+          </div>
+          <div className="px-6 py-6">
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+              <div>
+                <label htmlFor="section" className="block text-sm font-medium text-gray-900 mb-2">
+                  Section Type
+                </label>
                 <select
                   id="section"
                   value={formData.section}
                   onChange={(e) => handleInputChange("section", e.target.value)}
-                  className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                  className="block w-full rounded-lg border-0 py-2.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm"
                 >
                   {sections.map((section) => (
                     <option key={section} value={section}>
@@ -1206,118 +1229,136 @@ export default function AboutContentForm({
                     </option>
                   ))}
                 </select>
+                <p className="text-xs text-gray-500 mt-1">Choose the type of content section</p>
+              </div>
+
+              <div className="flex items-center justify-between">
+                {initialData && (
+                  <div className="flex-1 mr-4">
+                    <label className="block text-sm font-medium text-gray-900 mb-2">
+                      Display Order
+                    </label>
+                    <div className="block w-full rounded-lg border-0 py-2.5 px-3 text-gray-500 bg-gray-100 shadow-sm ring-1 ring-inset ring-gray-200 sm:text-sm">
+                      {initialData.sortOrder}
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">Order is automatically managed</p>
+                  </div>
+                )}
+                <div className={`${initialData ? 'mt-8' : ''}`}>
+                  <label className="block text-sm font-medium text-gray-900 mb-3">
+                    Status
+                  </label>
+                  <div className="flex items-center justify-between p-6 bg-gradient-to-br from-white/40 to-gray-50/60 backdrop-blur-sm rounded-xl border border-white/20 shadow-lg">
+                    <div>
+                      <span className="text-sm font-semibold text-gray-900">
+                        {formData.active ? 'Published' : 'Draft'}
+                      </span>
+                      <p className="text-xs text-gray-600 mt-1">
+                        {formData.active
+                          ? 'This content is visible on your website'
+                          : 'This content is hidden from your website'
+                        }
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => handleInputChange("active", !formData.active)}
+                      className={`relative inline-flex h-8 w-14 items-center rounded-full transition-all duration-300 ease-in-out focus:outline-none focus:ring-4 focus:ring-opacity-30 transform hover:scale-105 shadow-lg backdrop-blur-sm border border-white/30 ${
+                        formData.active
+                          ? 'bg-gradient-to-r from-emerald-400 to-cyan-500 focus:ring-emerald-300'
+                          : 'bg-gradient-to-r from-gray-300 to-gray-400 focus:ring-gray-300'
+                      }`}
+                    >
+                      <span
+                        className={`inline-block h-6 w-6 transform rounded-full bg-white shadow-lg transition-all duration-300 ease-in-out border-2 border-white/50 backdrop-blur-sm ${
+                          formData.active ? 'translate-x-7' : 'translate-x-1'
+                        }`}
+                      />
+                      <span className="sr-only">Toggle status</span>
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
 
-            {/* Basic Fields */}
-            <div className="sm:col-span-6">
-              <label
-                htmlFor="title"
-                className="block text-sm font-medium leading-6 text-gray-900"
-              >
-                Title
-              </label>
-              <div className="mt-2">
+            <div className="mt-6 space-y-6">
+              <div>
+                <label htmlFor="title" className="block text-sm font-medium text-gray-900 mb-2">
+                  Title <span className="text-red-500">*</span>
+                </label>
                 <input
                   type="text"
                   id="title"
                   value={formData.title}
                   onChange={(e) => handleInputChange("title", e.target.value)}
-                  className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                  className="block w-full rounded-lg border-0 py-2.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm"
+                  placeholder="Enter a descriptive title for this section"
                   required
                 />
               </div>
-            </div>
 
-            <div className="sm:col-span-6">
-              <label
-                htmlFor="subtitle"
-                className="block text-sm font-medium leading-6 text-gray-900"
-              >
-                Subtitle (Optional)
-              </label>
-              <div className="mt-2">
+              <div>
+                <label htmlFor="subtitle" className="block text-sm font-medium text-gray-900 mb-2">
+                  Subtitle
+                  <span className="text-gray-500 font-normal ml-1">(Optional)</span>
+                </label>
                 <input
                   type="text"
                   id="subtitle"
                   value={formData.subtitle}
-                  onChange={(e) =>
-                    handleInputChange("subtitle", e.target.value)
-                  }
-                  className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                  onChange={(e) => handleInputChange("subtitle", e.target.value)}
+                  className="block w-full rounded-lg border-0 py-2.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm"
+                  placeholder="Add a subtitle or supporting text"
                 />
-              </div>
-            </div>
-
-            {/* Dynamic Content Fields */}
-            {renderContentFields()}
-
-            {/* Settings */}
-            <div className="sm:col-span-3">
-              <label
-                htmlFor="sortOrder"
-                className="block text-sm font-medium leading-6 text-gray-900"
-              >
-                Sort Order
-              </label>
-              <div className="mt-2">
-                <input
-                  type="number"
-                  id="sortOrder"
-                  value={formData.sortOrder}
-                  onChange={(e) =>
-                    handleInputChange(
-                      "sortOrder",
-                      parseInt(e.target.value) || 0
-                    )
-                  }
-                  className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                />
-              </div>
-            </div>
-
-            <div className="sm:col-span-3">
-              <div className="mt-6">
-                <div className="flex items-center">
-                  <input
-                    id="active"
-                    type="checkbox"
-                    checked={formData.active}
-                    onChange={(e) =>
-                      handleInputChange("active", e.target.checked)
-                    }
-                    className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600"
-                  />
-                  <label
-                    htmlFor="active"
-                    className="ml-2 text-sm font-medium leading-6 text-gray-900"
-                  >
-                    Active
-                  </label>
-                </div>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="flex items-center justify-end gap-x-6 border-t border-gray-900/10 px-4 py-4 sm:px-8">
-          <button
-            type="button"
-            onClick={() => router.back()}
-            className="text-sm font-semibold leading-6 text-gray-900"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            disabled={loading}
-            className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50"
-          >
-            {loading ? "Saving..." : initialData ? "Update" : "Create"}
-          </button>
+        {/* Content Configuration Section */}
+        <div className="bg-white shadow-sm ring-1 ring-gray-900/5 rounded-lg">
+          <div className="px-6 py-5 border-b border-gray-200">
+            <h3 className="text-lg font-medium text-gray-900">
+              {sectionLabels[formData.section]} Configuration
+            </h3>
+            <p className="text-sm text-gray-600 mt-1">
+              Customize the specific content for this {sectionLabels[formData.section].toLowerCase()} section
+            </p>
+          </div>
+          <div className="px-6 py-6">
+            <div className="space-y-6">
+              {renderContentFields()}
+            </div>
+          </div>
         </div>
-      </div>
-    </form>
+
+        {/* Action Buttons */}
+        <div className="bg-white shadow-sm ring-1 ring-gray-900/5 rounded-lg">
+          <div className="flex items-center justify-between gap-x-6 px-6 py-4">
+            <button
+              type="button"
+              onClick={() => router.back()}
+              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={loading}
+              className="px-6 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            >
+              {loading && (
+                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+              )}
+              {loading ? "Saving..." : initialData ? "Update Content" : "Create Content"}
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
   );
 }
 

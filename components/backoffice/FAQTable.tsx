@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { PencilIcon, TrashIcon, Bars3Icon } from '@heroicons/react/24/outline';
+import Notification from './Notification';
 import {
   DndContext,
   closestCenter,
@@ -97,14 +98,66 @@ function SortableRow({ faq, onDelete }: SortableRowProps) {
           <div className="truncate">{faq.answer.substring(0, 150)}...</div>
         </div>
       </td>
-      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-        <span className={`inline-flex rounded-full px-2 text-xs font-semibold leading-5 ${
-          faq.active
-            ? 'bg-green-100 text-green-800'
-            : 'bg-gray-100 text-gray-800'
-        }`}>
-          {faq.active ? 'Active' : 'Inactive'}
-        </span>
+      <td className="whitespace-nowrap px-3 py-4 text-sm">
+        <div className="flex justify-center">
+          <button
+            type="button"
+            onClick={async () => {
+              try {
+                const response = await fetch(`/api/admin/faqs/${faq.id}`, {
+                  method: 'PUT',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ active: !faq.active }),
+                });
+                if (response.ok) {
+                  // Show notification
+                  const event = new CustomEvent('showFAQNotification', {
+                    detail: {
+                      message: `FAQ ${!faq.active ? 'activated' : 'deactivated'} successfully`,
+                      type: 'success'
+                    }
+                  });
+                  window.dispatchEvent(event);
+
+                  // Update UI immediately without reload
+                  faq.active = !faq.active;
+
+                  // Force component re-render
+                  const table = document.querySelector('table');
+                  if (table) {
+                    table.style.opacity = '0.95';
+                    setTimeout(() => {
+                      table.style.opacity = '1';
+                    }, 100);
+                  }
+                } else {
+                  throw new Error('Failed to update FAQ status');
+                }
+              } catch (error) {
+                console.error('Error updating FAQ status:', error);
+                const event = new CustomEvent('showFAQNotification', {
+                  detail: {
+                    message: 'Failed to update FAQ status',
+                    type: 'error'
+                  }
+                });
+                window.dispatchEvent(event);
+              }
+            }}
+            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-opacity-50 transform hover:scale-105 shadow-lg backdrop-blur-sm border border-white/30 ${
+              faq.active
+                ? 'bg-gradient-to-r from-emerald-400 to-cyan-500 focus:ring-emerald-300'
+                : 'bg-gradient-to-r from-gray-300 to-gray-400 focus:ring-gray-300'
+            }`}
+            title={faq.active ? 'Active - Click to deactivate' : 'Inactive - Click to activate'}
+          >
+            <span
+              className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-md transition-all duration-300 ease-in-out border border-white/60 backdrop-blur-sm ${
+                faq.active ? 'translate-x-6' : 'translate-x-1'
+              }`}
+            />
+          </button>
+        </div>
       </td>
       <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
         #{faq.sortOrder}
@@ -137,6 +190,11 @@ export default function FAQTable() {
   const [error, setError] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [isReordering, setIsReordering] = useState(false);
+  const [notification, setNotification] = useState<{ show: boolean; message: string; type: 'success' | 'error' }>({
+    show: false,
+    message: '',
+    type: 'success'
+  });
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -147,6 +205,19 @@ export default function FAQTable() {
 
   useEffect(() => {
     fetchFAQs();
+  }, []);
+
+  useEffect(() => {
+    const handleNotification = (event: any) => {
+      setNotification({
+        show: true,
+        message: event.detail.message,
+        type: event.detail.type
+      });
+    };
+
+    window.addEventListener('showFAQNotification', handleNotification);
+    return () => window.removeEventListener('showFAQNotification', handleNotification);
   }, []);
 
   const fetchFAQs = async () => {
@@ -322,7 +393,7 @@ export default function FAQTable() {
                       Answer Preview
                     </th>
                     <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                      Status
+                      Active
                     </th>
                     <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
                       Order
@@ -354,6 +425,13 @@ export default function FAQTable() {
           </div>
         </div>
       </DndContext>
+
+      <Notification
+        show={notification.show}
+        message={notification.message}
+        type={notification.type}
+        onClose={() => setNotification({ ...notification, show: false })}
+      />
     </div>
   );
 }

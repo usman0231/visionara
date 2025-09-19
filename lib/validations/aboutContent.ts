@@ -27,7 +27,7 @@ export const aboutContentBaseSchema = z.object({
     .number()
     .int()
     .min(0, "Sort order must be non-negative")
-    .default(0),
+    .optional(),
   active: z.boolean().default(true),
 });
 

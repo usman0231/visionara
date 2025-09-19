@@ -41,21 +41,36 @@ const requiredEnvVars = {
 function validateEnv() {
   const missing: string[] = [];
 
-  // Critical variables that must be present
-  const critical = [
-    'NEXT_PUBLIC_SUPABASE_URL',
-    'NEXT_PUBLIC_SUPABASE_ANON_KEY',
-    'SUPABASE_URL',
-    'SUPABASE_ANON_KEY',
-    'SUPABASE_SERVICE_ROLE_KEY',
-    'SUPABASE_JWT_SECRET',
-    'DATABASE_URL',
-    'JWT_SECRET'
-  ] as const;
+  // Only validate on server-side
+  if (typeof window !== 'undefined') {
+    // Client-side - only validate public env vars
+    const clientCritical = [
+      'NEXT_PUBLIC_SUPABASE_URL',
+      'NEXT_PUBLIC_SUPABASE_ANON_KEY'
+    ] as const;
 
-  for (const key of critical) {
-    if (!requiredEnvVars[key]) {
-      missing.push(key);
+    for (const key of clientCritical) {
+      if (!requiredEnvVars[key]) {
+        missing.push(key);
+      }
+    }
+  } else {
+    // Server-side - validate all critical variables
+    const critical = [
+      'NEXT_PUBLIC_SUPABASE_URL',
+      'NEXT_PUBLIC_SUPABASE_ANON_KEY',
+      'SUPABASE_URL',
+      'SUPABASE_ANON_KEY',
+      'SUPABASE_SERVICE_ROLE_KEY',
+      'SUPABASE_JWT_SECRET',
+      'DATABASE_URL',
+      'JWT_SECRET'
+    ] as const;
+
+    for (const key of critical) {
+      if (!requiredEnvVars[key]) {
+        missing.push(key);
+      }
     }
   }
 
@@ -72,32 +87,43 @@ function validateEnv() {
   return [];
 }
 
-// Validate environment variables
-try {
-  const missing = validateEnv();
-  if (missing.length === 0) {
-    console.log('✅ Environment variables validated successfully');
-  } else {
-    console.warn('⚠️ Missing environment variables:', missing.join(', '));
-    console.log('Available env vars:', {
-      SUPABASE_URL: !!process.env.SUPABASE_URL,
-      SUPABASE_ANON_KEY: !!process.env.SUPABASE_ANON_KEY,
-      SUPABASE_SERVICE_ROLE_KEY: !!process.env.SUPABASE_SERVICE_ROLE_KEY,
-      SUPABASE_JWT_SECRET: !!process.env.SUPABASE_JWT_SECRET,
-      DATABASE_URL: !!process.env.DATABASE_URL,
-      JWT_SECRET: !!process.env.JWT_SECRET,
-      NEXT_PUBLIC_SUPABASE_URL: !!process.env.NEXT_PUBLIC_SUPABASE_URL,
-      NEXT_PUBLIC_SUPABASE_ANON_KEY: !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-    });
-  }
-} catch (error) {
-  console.error('❌ Environment validation failed:', error);
+// Only validate environment variables on server-side
+if (typeof window === 'undefined') {
+  try {
+    const missing = validateEnv();
 
-  // In development, log more details but don't crash
-  if (process.env.NODE_ENV === 'development') {
-    console.warn('🔧 Development mode: Continuing despite missing environment variables');
-  } else {
-    throw error;
+    if (missing.length === 0) {
+      console.log('✅ Environment variables validated successfully');
+    } else {
+      console.warn('⚠️ Missing environment variables:', missing.join(', '));
+      console.log('Available env vars:', {
+        SUPABASE_URL: !!process.env.SUPABASE_URL,
+        SUPABASE_ANON_KEY: !!process.env.SUPABASE_ANON_KEY,
+        SUPABASE_SERVICE_ROLE_KEY: !!process.env.SUPABASE_SERVICE_ROLE_KEY,
+        SUPABASE_JWT_SECRET: !!process.env.SUPABASE_JWT_SECRET,
+        DATABASE_URL: !!process.env.DATABASE_URL,
+        JWT_SECRET: !!process.env.JWT_SECRET,
+        NEXT_PUBLIC_SUPABASE_URL: !!process.env.NEXT_PUBLIC_SUPABASE_URL,
+        NEXT_PUBLIC_SUPABASE_ANON_KEY: !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+      });
+
+      // Only throw in production when server-side validation fails
+      if (process.env.NODE_ENV === 'production') {
+        throw new Error(
+          `Missing required environment variables: ${missing.join(', ')}\n` +
+          'Please ensure these are set in your production environment.'
+        );
+      }
+    }
+  } catch (error) {
+    console.error('❌ Environment validation failed:', error);
+
+    // In development, log more details but don't crash
+    if (process.env.NODE_ENV === 'development') {
+      console.warn('🔧 Development mode: Continuing despite missing environment variables');
+    } else {
+      throw error;
+    }
   }
 }
 

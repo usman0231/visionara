@@ -75,9 +75,19 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Auto-assign sortOrder if not provided
+    let sortOrder = validatedData.sortOrder;
+    if (sortOrder === null || sortOrder === undefined) {
+      const maxSortOrder = await AboutContent.max('sortOrder', {
+        where: { deletedAt: null }
+      });
+      sortOrder = (maxSortOrder || 0) + 1;
+    }
+
     const newContent = await AboutContent.create({
       ...validatedData,
       section: validatedData.section as AboutSection,
+      sortOrder,
     });
 
     return NextResponse.json(newContent, { status: 201 });

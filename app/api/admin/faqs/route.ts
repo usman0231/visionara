@@ -85,7 +85,19 @@ export async function POST(request: NextRequest) {
     // Validate request body
     const validatedData = createFAQSchema.parse(body);
 
-    const newFAQ = await FAQ.create(validatedData);
+    // Auto-assign sortOrder if not provided
+    let sortOrder = validatedData.sortOrder;
+    if (sortOrder === null || sortOrder === undefined) {
+      const maxSortOrder = await FAQ.max('sortOrder', {
+        where: { deletedAt: null }
+      });
+      sortOrder = (maxSortOrder || 0) + 1;
+    }
+
+    const newFAQ = await FAQ.create({
+      ...validatedData,
+      sortOrder,
+    });
 
     return NextResponse.json(newFAQ, { status: 201 });
   } catch (error: any) {
