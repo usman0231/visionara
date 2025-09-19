@@ -13,7 +13,8 @@ interface AboutContent {
     | "services"
     | "tech"
     | "testimonials"
-    | "cta";
+    | "cta"
+    | "stats";
   title: string;
   subtitle: string | null;
   content: Record<string, any>;
@@ -70,6 +71,14 @@ interface ServicesContentState {
   background?: string;
   items: ServiceCardState[];
 }
+
+type FormState = {
+  section: SectionOption;
+  title: string;
+  subtitle: string;
+  content: Record<string, any>;
+  active: boolean;
+};
 
 const defaultServiceCard = (): ServiceCardState => ({
   title: "",
@@ -146,8 +155,8 @@ export default function AboutContentForm({
 }: AboutContentFormProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState({
-    section: "hero" as const,
+  const [formData, setFormData] = useState<FormState>({
+    section: "hero",
     title: "",
     subtitle: "",
     content: getDefaultContentForSection("hero"),
@@ -157,7 +166,7 @@ export default function AboutContentForm({
   useEffect(() => {
     if (initialData) {
       setFormData({
-        section: initialData.section as AboutSection,
+        section: initialData.section as SectionOption,
         title: initialData.title,
         subtitle: initialData.subtitle || "",
         content: initialData.section === "services"
