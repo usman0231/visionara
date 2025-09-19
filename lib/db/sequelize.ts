@@ -35,15 +35,25 @@ const resolveDialectOptions = (): DialectOptions | undefined => {
   const explicitSslMode = process.env.DATABASE_SSL_MODE?.toLowerCase();
   const mergedSslMode = explicitSslMode ?? sslModeFromUrl?.toLowerCase() ?? '';
 
-  const shouldForceSsl = isTruthy(process.env.DATABASE_SSL_REQUIRE, !isLocalHost);
+  if (['disable', 'off', 'false', 'no'].includes(mergedSslMode)) {
+    return undefined;
+  }
 
-  if (!shouldForceSsl || mergedSslMode === 'disable' || mergedSslMode === 'off' || mergedSslMode === 'false') {
+  const modeImpliesSelfSigned = mergedSslMode
+    ? ['require', 'prefer', 'allow'].includes(mergedSslMode)
+    : undefined;
+
+  const defaultRequireSsl = mergedSslMode ? mergedSslMode !== 'allow' : !isLocalHost;
+
+  const shouldForceSsl = isTruthy(process.env.DATABASE_SSL_REQUIRE, defaultRequireSsl);
+
+  if (!shouldForceSsl) {
     return undefined;
   }
 
   const allowSelfSigned = isTruthy(
     process.env.DATABASE_SSL_ALLOW_SELF_SIGNED,
-    isLocalHost || process.env.NODE_ENV !== 'production'
+    modeImpliesSelfSigned ?? (isLocalHost || process.env.NODE_ENV !== 'production')
   );
 
   if (allowSelfSigned && process.env.NODE_TLS_REJECT_UNAUTHORIZED !== '0') {
