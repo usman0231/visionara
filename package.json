@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "postinstall": "npm rebuild lightningcss",
+    "postinstall": "npm rebuild lightningcss || true; npm rebuild @tailwindcss/oxide || true; npm rebuild tailwindcss || true",
     "db:migrate": "npx sequelize-cli db:migrate",
     "db:migrate:undo": "npx sequelize-cli db:migrate:undo",
     "db:seed": "npx sequelize-cli db:seed:all",

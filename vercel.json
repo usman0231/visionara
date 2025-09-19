@@ -1,0 +1,14 @@
+{
+  "functions": {
+    "app/**/*.ts": {
+      "runtime": "nodejs20.x"
+    }
+  },
+  "buildCommand": "npm ci && npm run build",
+  "installCommand": "npm ci && npm rebuild lightningcss && npm rebuild @tailwindcss/oxide",
+  "build": {
+    "env": {
+      "NEXT_TELEMETRY_DISABLED": "1"
+    }
+  }
+}
