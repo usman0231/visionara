@@ -157,7 +157,7 @@ export default function AboutContentForm({
   useEffect(() => {
     if (initialData) {
       setFormData({
-        section: initialData.section,
+        section: initialData.section as AboutSection,
         title: initialData.title,
         subtitle: initialData.subtitle || "",
         content: initialData.section === "services"

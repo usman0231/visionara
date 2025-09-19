@@ -54,7 +54,7 @@ export async function GET(request: NextRequest) {
         total: totalCount,
         limit: validatedQuery.limit,
         offset: validatedQuery.offset,
-        hasMore: validatedQuery.offset + validatedQuery.limit < totalCount,
+        hasMore: (validatedQuery.offset || 0) + (validatedQuery.limit || 50) < totalCount,
       },
     });
   } catch (error: any) {
@@ -90,7 +90,7 @@ export async function POST(request: NextRequest) {
     if (sortOrder === null || sortOrder === undefined) {
       const maxSortOrder = await FAQ.max('sortOrder', {
         where: { deletedAt: null }
-      });
+      }) as number | null;
       sortOrder = (maxSortOrder || 0) + 1;
     }
 
