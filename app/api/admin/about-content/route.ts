@@ -80,7 +80,7 @@ export async function POST(request: NextRequest) {
     if (sortOrder === null || sortOrder === undefined) {
       const maxSortOrder = await AboutContent.max('sortOrder', {
         where: { deletedAt: null }
-      });
+      }) as number | null;
       sortOrder = (maxSortOrder || 0) + 1;
     }
 
