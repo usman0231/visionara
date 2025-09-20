@@ -1,34 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { GalleryItem, Service, AuditLog, AuditAction } from '@/lib/db/models';
+import { GalleryItem, AuditLog, AuditAction } from '@/lib/db/models';
 import { createGalleryItemSchema } from '@/lib/validations/gallery';
 
 export const runtime = 'nodejs';
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
-    const { searchParams } = new URL(request.url);
-    const published = searchParams.get('published');
-    const category = searchParams.get('category');
-
-    const whereCondition: any = { deletedAt: null };
-    if (published === 'true') {
-      whereCondition.isPublished = true;
-    }
-    if (category) {
-      whereCondition.category = category;
-    }
-
     const galleryItems = await GalleryItem.findAll({
-      where: whereCondition,
-      include: [
-        {
-          model: Service,
-          as: 'service',
-          attributes: ['id', 'name'],
-          required: false,
-        },
-      ],
-      order: [['displayOrder', 'ASC'], ['createdAt', 'DESC']],
+      where: { active: true },
+      order: [['sortOrder', 'ASC'], ['createdAt', 'DESC']],
     });
 
     return NextResponse.json({ galleryItems });
@@ -50,20 +30,6 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
     const validatedData = createGalleryItemSchema.parse(body);
-
-    // Verify service exists if serviceId provided
-    if (validatedData.serviceId) {
-      const service = await Service.findOne({
-        where: { id: validatedData.serviceId, deletedAt: null },
-      });
-
-      if (!service) {
-        return NextResponse.json(
-          { error: 'Service not found' },
-          { status: 404 }
-        );
-      }
-    }
 
     const galleryItem = await GalleryItem.create({
       ...validatedData,

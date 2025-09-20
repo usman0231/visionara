@@ -12,6 +12,7 @@ import {
   ListBulletIcon,
   Cog6ToothIcon,
   EnvelopeIcon,
+  UserGroupIcon,
 } from '@heroicons/react/24/outline';
 
 const navigation = [
@@ -22,6 +23,7 @@ const navigation = [
   { name: 'Gallery', href: '/backoffice/gallery', icon: PhotoIcon },
   { name: 'Stats', href: '/backoffice/stats', icon: ChartBarIcon },
   { name: 'Features', href: '/backoffice/features', icon: ListBulletIcon },
+  { name: 'Users', href: '/backoffice/users', icon: UserGroupIcon },
   { name: 'Settings', href: '/backoffice/settings', icon: Cog6ToothIcon },
   { name: 'Contacts', href: '/backoffice/contacts', icon: EnvelopeIcon },
 ];
