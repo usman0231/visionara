@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
+import { supabaseServer } from '@/lib/supabase/server';
 import { User, Role, AuditLog, AuditAction } from '@/lib/db/models';
 import { updateUserSchema } from '@/lib/validations/user';
 
@@ -13,6 +15,7 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    // Optional: enforce admin auth here if needed
     const { id } = await params;
     const user = await User.findByPk(id, {
       include: [
@@ -51,14 +54,17 @@ export async function PUT(
 ) {
   try {
     const { id } = await params;
-    const userId = request.headers.get('x-user-id');
-
-    if (!userId) {
-      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
-    }
+    const authHeader = request.headers.get('authorization');
+    const bearer = authHeader?.startsWith('Bearer ') ? authHeader.slice('Bearer '.length) : undefined;
+    const cookieStore = await cookies();
+    const token = bearer || cookieStore.get('sb-access-token')?.value;
+    if (!token) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+    const { data: { user: actor }, error } = await supabaseServer.auth.getUser(token);
+    if (error || !actor) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
 
     const body = await request.json();
     const validatedData = updateUserSchema.parse(body);
+    const { password, ...dbFields } = validatedData as any;
 
     // Check if user exists
     const existingUser = await User.findByPk(id);
@@ -105,7 +111,7 @@ export async function PUT(
     };
 
     // Update user
-    const [updatedRowsCount] = await User.update(validatedData, {
+    const [updatedRowsCount] = await User.update(dbFields, {
       where: { id }
     });
 
@@ -114,6 +120,14 @@ export async function PUT(
         { error: 'User not found' },
         { status: 404 }
       );
+    }
+
+    // If password provided, update in Supabase Auth
+    if (password && typeof password === 'string' && password.length >= 8) {
+      const { error: pwdErr } = await supabaseServer.auth.admin.updateUserById(id, { password });
+      if (pwdErr) {
+        console.warn('Failed to update user password in Supabase:', pwdErr.message);
+      }
     }
 
     // Fetch updated user with role
@@ -129,7 +143,7 @@ export async function PUT(
 
     // Create audit log
     await AuditLog.create({
-      actorUserId: userId,
+      actorUserId: actor.id,
       action: AuditAction.UPDATE,
       entity: 'users',
       entityId: id,
@@ -156,7 +170,7 @@ export async function PUT(
 
 /**
  * DELETE /api/admin/users/[id]
- * Delete a user (soft delete)
+ * Delete a user (hard delete)
  */
 export async function DELETE(
   request: NextRequest,
@@ -164,14 +178,16 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params;
-    const userId = request.headers.get('x-user-id');
-
-    if (!userId) {
-      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
-    }
+    const authHeader = request.headers.get('authorization');
+    const bearer = authHeader?.startsWith('Bearer ') ? authHeader.slice('Bearer '.length) : undefined;
+    const cookieStore = await cookies();
+    const token = bearer || cookieStore.get('sb-access-token')?.value;
+    if (!token) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+    const { data: { user: actor }, error } = await supabaseServer.auth.getUser(token);
+    if (error || !actor) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
 
     // Prevent self-deletion
-    if (id === userId) {
+    if (id === actor.id) {
       return NextResponse.json(
         { error: 'Cannot delete your own account' },
         { status: 400 }
@@ -187,9 +203,17 @@ export async function DELETE(
       );
     }
 
-    // Soft delete the user
+    // Store user data for audit log before deletion
+    const userDataForAudit = {
+      email: existingUser.email,
+      displayName: existingUser.displayName,
+      roleId: existingUser.roleId,
+    };
+
+    // Hard delete the user from database
     const deletedRowsCount = await User.destroy({
-      where: { id }
+      where: { id },
+      force: true // Force hard delete
     });
 
     if (deletedRowsCount === 0) {
@@ -199,13 +223,21 @@ export async function DELETE(
       );
     }
 
+    // Delete the user from Supabase Auth as well
+    try {
+      await supabaseServer.auth.admin.deleteUser(id);
+    } catch (authDeleteError) {
+      console.warn('Failed to delete user from Supabase Auth:', authDeleteError);
+      // Continue - database deletion succeeded, auth deletion failed but not critical
+    }
+
     // Create audit log
     await AuditLog.create({
-      actorUserId: userId,
+      actorUserId: actor.id,
       action: AuditAction.DELETE,
       entity: 'users',
       entityId: id,
-      diff: { oldValues: { email: existingUser.email, displayName: existingUser.displayName } },
+      diff: { oldValues: userDataForAudit },
     });
 
     return NextResponse.json({ message: 'User deleted successfully' });

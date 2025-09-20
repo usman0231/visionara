@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
+import { supabaseServer } from '@/lib/supabase/server';
 import { User, Role, AuditLog, AuditAction } from '@/lib/db/models';
 import { createUserSchema } from '@/lib/validations/user';
-import { v4 as uuidv4 } from 'uuid';
 
 export const runtime = 'nodejs';
 
@@ -30,11 +31,19 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
-    const userId = request.headers.get('x-user-id');
-    if (!userId) {
+    // Authenticate user
+    const cookieStore = await cookies();
+    const token = cookieStore.get('sb-access-token')?.value;
+    if (!token) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
+    const { data: { user: authUser }, error } = await supabaseServer.auth.getUser(token);
+    if (error || !authUser) {
+      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+    }
+
+    // Validate request data
     const body = await request.json();
     const validatedData = createUserSchema.parse(body);
 
@@ -59,15 +68,48 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Note: In a real implementation, you'd typically create the user in Supabase Auth first
-    // and use the returned user ID. For this demo, we'll generate a UUID.
-    const user = await User.create({
-      id: uuidv4(), // In practice, this would come from Supabase Auth
-      ...validatedData,
+    // Create user in Supabase Auth first
+    const { data: createdAuth, error: createAuthErr } = await supabaseServer.auth.admin.createUser({
+      email: validatedData.email,
+      password: validatedData.password,
+      email_confirm: true,
     });
 
-    // Include role information in response
-    const userWithRole = await User.findByPk(user.id, {
+    if (createAuthErr || !createdAuth?.user) {
+      return NextResponse.json(
+        { error: createAuthErr?.message || 'Failed to create auth user' },
+        { status: 400 }
+      );
+    }
+
+    // Create user in database
+    let createdUser;
+    try {
+      createdUser = await User.create({
+        id: createdAuth.user.id,
+        email: validatedData.email,
+        displayName: validatedData.displayName,
+        roleId: validatedData.roleId,
+      });
+    } catch (dbErr: any) {
+      // Rollback auth user if DB insert fails
+      try {
+        await supabaseServer.auth.admin.deleteUser(createdAuth.user.id);
+      } catch (rollbackErr) {
+        console.error('Failed to rollback auth user:', rollbackErr);
+      }
+
+      if (dbErr?.original?.code === '23505') {
+        return NextResponse.json(
+          { error: 'User with this email already exists' },
+          { status: 409 }
+        );
+      }
+      throw dbErr;
+    }
+
+    // Get user with role for response
+    const userWithRole = await User.findByPk(createdUser.id, {
       include: [
         {
           model: Role,
@@ -77,15 +119,23 @@ export async function POST(request: NextRequest) {
       ]
     });
 
+    // Log the action
     await AuditLog.create({
-      actorUserId: userId,
+      actorUserId: authUser.id,
       action: AuditAction.CREATE,
       entity: 'users',
-      entityId: user.id,
-      diff: { newValues: validatedData },
+      entityId: createdUser.id,
+      diff: {
+        newValues: {
+          email: validatedData.email,
+          displayName: validatedData.displayName,
+          roleId: validatedData.roleId
+        }
+      },
     });
 
     return NextResponse.json(userWithRole, { status: 201 });
+
   } catch (error: any) {
     console.error('Create user error:', error);
 

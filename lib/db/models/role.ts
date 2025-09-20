@@ -2,9 +2,9 @@ import { DataTypes, Model, Optional } from 'sequelize';
 import { sequelize } from '../sequelize';
 
 export enum RoleName {
+  SUPER_ADMIN = 'SuperAdmin',
   ADMIN = 'Admin',
-  EDITOR = 'Editor', 
-  VIEWER = 'Viewer'
+  MEMBER = 'Member'
 }
 
 interface RoleAttributes {
@@ -18,11 +18,11 @@ interface RoleAttributes {
 interface RoleCreationAttributes extends Optional<RoleAttributes, 'id' | 'createdAt' | 'updatedAt'> {}
 
 export class Role extends Model<RoleAttributes, RoleCreationAttributes> implements RoleAttributes {
-  public id!: string;
-  public name!: RoleName;
-  public permissions!: Record<string, any>;
-  public readonly createdAt!: Date;
-  public readonly updatedAt!: Date;
+  declare id: string;
+  declare name: RoleName;
+  declare permissions: Record<string, any>;
+  declare readonly createdAt: Date;
+  declare readonly updatedAt: Date;
 }
 
 Role.init(

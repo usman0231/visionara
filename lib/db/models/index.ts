@@ -16,6 +16,7 @@ export { default as Setting } from "./setting";
 export { default as ContactSubmission } from "./contactSubmission";
 export { default as AboutContent, AboutSection } from "./aboutContent";
 export { default as FAQ } from "./faq";
+export { default as PasswordResetCode } from "./passwordResetCode";
 
 // Re-export sequelize instance
 export { sequelize } from "../sequelize";

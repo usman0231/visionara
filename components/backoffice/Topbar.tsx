@@ -17,7 +17,6 @@ interface User {
   id: string;
   email: string;
   displayName: string | null;
-  role: string;
 }
 
 export default function Topbar() {
@@ -29,10 +28,15 @@ export default function Topbar() {
     // Get current user info
     const fetchUser = async () => {
       try {
-        const response = await fetch('/api/me');
+        const token = (typeof document !== 'undefined' && document.cookie.match(/(?:^|; )sb-access-token=([^;]+)/)?.[1]) || '';
+        const response = await fetch('/api/me', {
+          headers: token ? { Authorization: `Bearer ${decodeURIComponent(token)}` } : undefined,
+          credentials: 'same-origin',
+        });
         if (response.ok) {
-          const userData = await response.json();
-          setUser(userData.user);
+          const data = await response.json();
+          const u = data?.user ?? data;
+          setUser(u);
         }
       } catch (error) {
         console.error('Failed to fetch user:', error);
@@ -40,6 +44,15 @@ export default function Topbar() {
     };
 
     fetchUser();
+    const onProfileUpdated = () => fetchUser();
+    if (typeof window !== 'undefined') {
+      window.addEventListener('user:profile-updated', onProfileUpdated);
+    }
+    return () => {
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('user:profile-updated', onProfileUpdated);
+      }
+    };
   }, []);
 
   const handleLogout = async () => {
@@ -97,7 +110,6 @@ export default function Topbar() {
               <div className="text-sm font-medium text-gray-700">
                 {user?.displayName || user?.email || 'User'}
               </div>
-              <div className="text-xs text-gray-500">{user?.role}</div>
             </div>
           </button>
 

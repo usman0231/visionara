@@ -27,35 +27,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get or create user in our database
+    // Check if user exists in our database
     let dbUser = await User.findByPk(userId, {
       include: [{ model: Role, as: 'role' }]
     });
 
     if (!dbUser) {
-      // Get default Viewer role
-      const viewerRole = await Role.findOne({
-        where: { name: RoleName.VIEWER }
-      });
-
-      if (!viewerRole) {
-        throw new Error('Default Viewer role not found. Database may not be properly seeded.');
-      }
-
-      // Create new user with Viewer role
-      dbUser = await User.create({
-        id: userId,
-        email,
-        displayName: user.user_metadata?.display_name || null,
-        roleId: viewerRole.id,
-      }, {
-        include: [{ model: Role, as: 'role' }]
-      });
-
-      // Reload to get the role
-      dbUser = await User.findByPk(userId, {
-        include: [{ model: Role, as: 'role' }]
-      });
+      // User doesn't exist in our database - they need to be created by an admin
+      return NextResponse.json(
+        {
+          error: 'Account not found. Please contact an administrator to create your account.',
+          code: 'USER_NOT_FOUND'
+        },
+        { status: 403 }
+      );
     }
 
     // Log the login action

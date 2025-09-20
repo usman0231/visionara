@@ -1,13 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { PhotoIcon, PlusIcon, PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
-import GalleryModal from '@/components/backoffice/GalleryModal';
-import PageHeader from '@/components/backoffice/PageHeader';
-import ToggleSwitch from '@/components/backoffice/ToggleSwitch';
-import { useNotification } from '@/components/backoffice/NotificationProvider';
-=======
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { PhotoIcon, PlusIcon, PencilIcon, TrashIcon, Bars3Icon } from '@heroicons/react/24/outline';
 import {
   DndContext,
@@ -27,8 +20,10 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import GalleryModal from '@/components/backoffice/GalleryModal';
+import PageHeader from '@/components/backoffice/PageHeader';
+import ToggleSwitch from '@/components/backoffice/ToggleSwitch';
+import { useNotification } from '@/components/backoffice/NotificationProvider';
 import { useDragAndDrop } from '@/components/backoffice/useDragAndDrop';
->>>>>>> a5c9bca28f69da0d6c748757c9e451c6810d88e6
 
 interface GalleryItem {
   id: string;
@@ -242,14 +237,11 @@ export default function GalleryPage() {
 
   return (
     <div className="px-4 sm:px-6 lg:px-8">
-<<<<<<< HEAD
       <PageHeader
         title="Gallery"
         description="Manage your portfolio images and media content that showcases your work."
         icon={
-          <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-          </svg>
+          <PhotoIcon className="h-6 w-6" />
         }
         iconBgColor="bg-purple-100"
         iconColor="text-purple-600"
@@ -261,7 +253,7 @@ export default function GalleryPage() {
       />
 
       {/* Enhanced Instructions */}
-      <div className="mt-8 rounded-lg border border-blue-200 bg-blue-50 p-4">
+      <div className="mt-8 mb-6 rounded-lg border border-blue-200 bg-blue-50 p-4">
         <div className="flex items-start">
           <div className="flex-shrink-0">
             <svg className="h-5 w-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
@@ -271,51 +263,15 @@ export default function GalleryPage() {
           <div className="ml-3">
             <h3 className="text-sm font-medium text-blue-800">Gallery Management</h3>
             <div className="mt-1 text-sm text-blue-700">
-              Switch between grid and list view below. Use the toggle switches in list view to publish/hide images instantly.
+              Switch between grid and list view below. Use the toggle switches in list view to publish/hide images instantly. In grid view, drag images to reorder them.
             </div>
           </div>
         </div>
       </div>
 
       {/* View Mode Controls */}
-      <div className="mt-6 flex justify-end">
+      <div className="flex justify-between items-center">
         <div className="flex rounded-md shadow-sm">
-=======
-      <div className="sm:flex sm:items-center">
-        <div className="sm:flex-auto">
-          <h1 className="text-xl font-semibold text-gray-900">Gallery</h1>
-          <p className="mt-2 text-sm text-gray-700">Manage your portfolio images and media</p>
-        </div>
-        <div className="mt-4 sm:ml-16 sm:mt-0 sm:flex-none flex gap-2">
-          <div className="flex rounded-md shadow-sm">
-            <button
-              onClick={() => setViewMode('grid')}
-              className={`px-3 py-2 text-sm font-medium rounded-l-md border ${
-                viewMode === 'grid'
-                  ? 'bg-indigo-600 text-white border-indigo-600'
-                  : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
-              }`}
-            >
-              Grid {viewMode === 'grid' && '(Drag to reorder)'}
-            </button>
-            <button
-              onClick={() => setViewMode('list')}
-              className={`px-3 py-2 text-sm font-medium rounded-r-md border-t border-b border-r ${
-                viewMode === 'list'
-                  ? 'bg-indigo-600 text-white border-indigo-600'
-                  : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
-              }`}
-            >
-              List
-            </button>
-          </div>
-          {isReordering && (
-            <div className="flex items-center gap-2 text-sm text-gray-600">
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-indigo-600"></div>
-              Updating order...
-            </div>
-          )}
->>>>>>> a5c9bca28f69da0d6c748757c9e451c6810d88e6
           <button
             onClick={() => setViewMode('grid')}
             className={`px-3 py-2 text-sm font-medium rounded-l-md border transition-all duration-200 ${
@@ -324,7 +280,7 @@ export default function GalleryPage() {
                 : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
             }`}
           >
-            Grid
+            Grid {viewMode === 'grid' && '(Drag to reorder)'}
           </button>
           <button
             onClick={() => setViewMode('list')}
@@ -337,6 +293,12 @@ export default function GalleryPage() {
             List
           </button>
         </div>
+        {isReordering && (
+          <div className="flex items-center gap-2 text-sm text-gray-600">
+            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-indigo-600"></div>
+            Updating order...
+          </div>
+        )}
       </div>
 
       <Suspense fallback={

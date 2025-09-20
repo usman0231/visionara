@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -15,6 +16,7 @@ import {
   EnvelopeIcon,
   DocumentTextIcon,
   QuestionMarkCircleIcon,
+  UserIcon,
 } from "@heroicons/react/24/outline";
 
 const navigation = [
@@ -33,11 +35,42 @@ const navigation = [
   { name: "Stats", href: "/backoffice/stats", icon: ChartBarIcon },
   { name: "Features", href: "/backoffice/features", icon: ListBulletIcon },
   { name: "Settings", href: "/backoffice/settings", icon: Cog6ToothIcon },
+  { name: "Profile", href: "/backoffice/profile", icon: UserIcon },
   { name: "Contacts", href: "/backoffice/contacts", icon: EnvelopeIcon },
 ];
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const [user, setUser] = React.useState<{ displayName: string | null; email: string } | null>(null);
+
+  React.useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const token = (typeof document !== 'undefined' && document.cookie.match(/(?:^|; )sb-access-token=([^;]+)/)?.[1]) || '';
+        const res = await fetch('/api/me', {
+          headers: token ? { Authorization: `Bearer ${decodeURIComponent(token)}` } : undefined,
+          credentials: 'same-origin',
+        });
+        if (res.ok) {
+          const data = await res.json();
+          const u = data?.user ?? data;
+          setUser({ displayName: u.displayName ?? null, email: u.email });
+        }
+      } catch {
+        // ignore
+      }
+    };
+    fetchUser();
+    const onProfileUpdated = () => fetchUser();
+    if (typeof window !== 'undefined') {
+      window.addEventListener('user:profile-updated', onProfileUpdated);
+    }
+    return () => {
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('user:profile-updated', onProfileUpdated);
+      }
+    };
+  }, []);
 
   return (
     <div className="flex h-full flex-col">
@@ -79,11 +112,12 @@ export default function Sidebar() {
         </ul>
       </nav>
 
-      {/* Footer */}
+      {/* Footer with user */}
       <div className="p-4 border-t border-gray-800">
-        <p className="text-xs text-gray-400 text-center">
-          Visionara Backoffice
-        </p>
+        <div className="text-xs text-gray-300 text-center">
+          {user?.displayName || user?.email || '—'}
+        </div>
+        <p className="mt-1 text-[10px] text-gray-500 text-center">Visionara Backoffice</p>
       </div>
     </div>
   );

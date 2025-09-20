@@ -9,24 +9,22 @@ interface UserAttributes {
   roleId: string;
   createdAt: Date;
   updatedAt: Date;
-  deletedAt: Date | null;
 }
 
-interface UserCreationAttributes extends Optional<UserAttributes, 'displayName' | 'createdAt' | 'updatedAt' | 'deletedAt'> {
+interface UserCreationAttributes extends Optional<UserAttributes, 'displayName' | 'createdAt' | 'updatedAt'> {
   // This interface has required fields: id, email, roleId
 }
 
 export class User extends Model<UserAttributes, UserCreationAttributes> implements UserAttributes {
-  public id!: string;
-  public email!: string;
-  public displayName!: string | null;
-  public roleId!: string;
-  public readonly createdAt!: Date;
-  public readonly updatedAt!: Date;
-  public readonly deletedAt!: Date | null;
+  declare id: string;
+  declare email: string;
+  declare displayName: string | null;
+  declare roleId: string;
+  declare readonly createdAt: Date;
+  declare readonly updatedAt: Date;
 
   // Associations
-  public role?: Role;
+  declare role?: Role;
 }
 
 User.init(
@@ -64,17 +62,12 @@ User.init(
       type: DataTypes.DATE,
       allowNull: false,
     },
-    deletedAt: {
-      type: DataTypes.DATE,
-      allowNull: true,
-    },
   },
   {
     sequelize,
     modelName: 'User',
     tableName: 'users',
     timestamps: true,
-    paranoid: true,
   }
 );
 
