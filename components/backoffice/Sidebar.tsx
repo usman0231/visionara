@@ -6,6 +6,7 @@ import {
   HomeIcon,
   WrenchScrewdriverIcon,
   CubeIcon,
+  UsersIcon,
   StarIcon,
   PhotoIcon,
   ChartBarIcon,
@@ -18,6 +19,7 @@ import {
 
 const navigation = [
   { name: "Dashboard", href: "/backoffice", icon: HomeIcon },
+  { name: "Users", href: "/backoffice/users", icon: UsersIcon },
   {
     name: "Services",
     href: "/backoffice/services",

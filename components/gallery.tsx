@@ -5,23 +5,40 @@ import Image from 'next/image';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
-type Item = { src: string; alt: string };
-
-const ITEMS: Item[] = [
-  { src: '/gallery/s1.png', alt: 'Achievement 1' },
-  { src: '/gallery/s2.png', alt: 'Achievement 2' },
-  { src: '/gallery/s3.png', alt: 'Achievement 3' },
-  { src: '/gallery/s4.png', alt: 'Achievement 4' },
-  { src: '/gallery/s5.png', alt: 'Achievement 5' },
-  { src: '/gallery/s6.png', alt: 'Achievement 6' },
-  { src: '/gallery/s8.png', alt: 'Achievement 7' },
-];
+interface GalleryItem {
+  id: string;
+  imageUrl: string;
+  alt: string;
+  sortOrder: number;
+}
 
 export default function AchievementsGallery() {
   const ref = useRef<HTMLDivElement | null>(null);
   const [open, setOpen] = useState<number | null>(null);
+  const [galleryItems, setGalleryItems] = useState<GalleryItem[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const fetchGalleryItems = async () => {
+      try {
+        const response = await fetch('/api/gallery');
+        if (response.ok) {
+          const data = await response.json();
+          setGalleryItems(data.galleryItems.filter((item: GalleryItem) => item.imageUrl));
+        }
+      } catch (error) {
+        console.error('Failed to fetch gallery items:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchGalleryItems();
+  }, []);
+
+  useEffect(() => {
+    if (loading || galleryItems.length === 0) return;
+
     gsap.registerPlugin(ScrollTrigger);
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -49,7 +66,7 @@ export default function AchievementsGallery() {
     }, ref);
 
     return () => ctx.revert();
-  }, []);
+  }, [loading, galleryItems]);
 
   // Body lock while lightbox open
   useEffect(() => {
@@ -57,6 +74,28 @@ export default function AchievementsGallery() {
     if (open !== null) document.body.style.overflow = 'hidden';
     return () => { document.body.style.overflow = prev; };
   }, [open]);
+
+  if (loading) {
+    return (
+      <section className="ag mb-30">
+        <header className="ag__header">
+          <h2>
+            <span className="ag__headlineFill">Our Achievements</span>
+          </h2>
+          <p className="ag__sub">Loading our achievements...</p>
+        </header>
+        <div className="ag__grid">
+          {[1, 2, 3, 4, 5, 6].map((i) => (
+            <div key={i} className="ag__tile animate-pulse">
+              <div className="ag__imgWrap">
+                <div className="h-full bg-white/10 rounded"></div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section ref={ref} className="ag mb-30">
@@ -69,13 +108,13 @@ export default function AchievementsGallery() {
       </header>
 
       <div className="ag__grid">
-        {ITEMS.map((it, i) => (
+        {galleryItems.map((item, i) => (
           <figure
-            key={it.src}
+            key={item.id}
             className="ag__tile"
             role="button"
             tabIndex={0}
-            aria-label={`Open ${it.alt}`}
+            aria-label={`Open ${item.alt}`}
             onClick={() => setOpen(i)}
             onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && setOpen(i)}
           >
@@ -83,11 +122,14 @@ export default function AchievementsGallery() {
             <div className="ag__imgWrap">
               <Image
                 fill
-                src={it.src}
-                alt={it.alt}
+                src={item.imageUrl}
+                alt={item.alt}
                 sizes="(max-width: 640px) 92vw, (max-width: 1024px) 45vw, 30vw"
                 className="ag__img"
                 priority={i < 3}
+                loading={i < 3 ? 'eager' : 'lazy'}
+                placeholder="blur"
+                blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCdABmX/9k="
               />
               <span className="ag__shine" aria-hidden />
             </div>
@@ -96,29 +138,31 @@ export default function AchievementsGallery() {
       </div>
 
       {/* Lightbox (optional) */}
-      {open !== null && (
+      {open !== null && galleryItems[open] && (
         <div className="ag__lightbox" role="dialog" aria-modal="true" aria-label="Image viewer">
           <button className="ag__close" aria-label="Close" onClick={() => setOpen(null)}>✕</button>
           <button
             className="ag__nav ag__nav--prev"
             aria-label="Previous"
-            onClick={() => setOpen((i) => (i! - 1 + ITEMS.length) % ITEMS.length)}
+            onClick={() => setOpen((i) => (i! - 1 + galleryItems.length) % galleryItems.length)}
           >‹</button>
           <button
             className="ag__nav ag__nav--next"
             aria-label="Next"
-            onClick={() => setOpen((i) => (i! + 1) % ITEMS.length)}
+            onClick={() => setOpen((i) => (i! + 1) % galleryItems.length)}
           >›</button>
 
           <div className="ag__lightboxImgWrap">
             <Image
-              key={ITEMS[open].src}
+              key={galleryItems[open].id}
               fill
-              src={ITEMS[open].src}
-              alt={ITEMS[open].alt}
+              src={galleryItems[open].imageUrl}
+              alt={galleryItems[open].alt}
               sizes="100vw"
               className="ag__lightboxImg"
               loading="lazy"
+              placeholder="blur"
+              blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCdABmX/9k="
             />
           </div>
         </div>

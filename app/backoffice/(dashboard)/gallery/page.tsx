@@ -1,11 +1,34 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect } from 'react';
 import { PhotoIcon, PlusIcon, PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
 import GalleryModal from '@/components/backoffice/GalleryModal';
 import PageHeader from '@/components/backoffice/PageHeader';
 import ToggleSwitch from '@/components/backoffice/ToggleSwitch';
 import { useNotification } from '@/components/backoffice/NotificationProvider';
+=======
+import { useState, useEffect } from 'react';
+import { PhotoIcon, PlusIcon, PencilIcon, TrashIcon, Bars3Icon } from '@heroicons/react/24/outline';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core';
+import {
+  SortableContext,
+  sortableKeyboardCoordinates,
+  rectSortingStrategy,
+} from '@dnd-kit/sortable';
+import {
+  useSortable,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+import GalleryModal from '@/components/backoffice/GalleryModal';
+import { useDragAndDrop } from '@/components/backoffice/useDragAndDrop';
+>>>>>>> a5c9bca28f69da0d6c748757c9e451c6810d88e6
 
 interface GalleryItem {
   id: string;
@@ -16,6 +39,100 @@ interface GalleryItem {
   createdAt: string;
 }
 
+// Sortable Gallery Item Component
+function SortableGalleryItem({
+  item,
+  onEdit,
+  onDelete
+}: {
+  item: GalleryItem;
+  onEdit: (item: GalleryItem) => void;
+  onDelete: (id: string) => void;
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: item.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={`group relative overflow-hidden rounded-lg bg-white shadow-sm ring-1 ring-gray-900/10 ${
+        isDragging ? 'opacity-50 z-50' : ''
+      }`}
+    >
+      <div className="aspect-square relative bg-gray-100">
+        <img
+          src={item.imageUrl}
+          alt={item.alt}
+          className="absolute inset-0 w-full h-full object-cover"
+          loading="lazy"
+          onError={(e) => {
+            const target = e.target as HTMLImageElement;
+            target.src =
+              'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDIwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjIwMCIgaGVpZ2h0PSIyMDAiIGZpbGw9IiNGM0Y0RjYiLz48cGF0aCBkPSJNNjAgODBIMTQwVjEyMEg2MFY4MFoiIGZpbGw9IiNENUQ3REEiLz48Y2lyY2xlIGN4PSI4NSIgY3k9Ijk1IiByPSI1IiBmaWxsPSIjOUI5QjlCIi8+PHBhdGggZD0iTTExMCAxMDVMMTI1IDkwTDE0MCAxMDVWMTIwSDExMFYxMDVaIiBmaWxsPSIjRDVEN0RBIi8+PC9zdmc+';
+          }}
+        />
+        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors duration-200">
+          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+            <div className="flex gap-2">
+              <button
+                onClick={() => onEdit(item)}
+                className="p-2 bg-white rounded-full shadow-lg hover:bg-gray-50"
+              >
+                <PencilIcon className="h-4 w-4 text-gray-700" />
+              </button>
+              <button
+                onClick={() => onDelete(item.id)}
+                className="p-2 bg-white rounded-full shadow-lg hover:bg-gray-50"
+              >
+                <TrashIcon className="h-4 w-4 text-red-600" />
+              </button>
+            </div>
+          </div>
+        </div>
+        {!item.active && (
+          <div className="absolute top-2 left-2">
+            <span className="inline-flex items-center rounded-md bg-gray-100/90 px-2 py-1 text-xs font-medium text-gray-600">
+              Inactive
+            </span>
+          </div>
+        )}
+        <div className="absolute bottom-2 right-2">
+          <span className="inline-flex items-center rounded-md bg-black/50 px-2 py-1 text-xs font-medium text-white">
+            #{item.sortOrder}
+          </span>
+        </div>
+        <div
+          {...attributes}
+          {...listeners}
+          className="absolute top-2 right-2 p-1 bg-white/80 rounded cursor-grab active:cursor-grabbing hover:bg-white"
+        >
+          <Bars3Icon className="h-4 w-4 text-gray-600" />
+        </div>
+      </div>
+      <div className="p-4">
+        <h3 className="text-sm font-medium text-gray-900 truncate" title={item.alt}>
+          {item.alt}
+        </h3>
+        <p className="text-xs text-gray-500 mt-1">
+          {new Date(item.createdAt).toLocaleDateString()}
+        </p>
+      </div>
+    </div>
+  );
+}
+
 export default function GalleryPage() {
   const { showNotification } = useNotification();
   const [items, setItems] = useState<GalleryItem[]>([]);
@@ -23,6 +140,21 @@ export default function GalleryPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<GalleryItem | null>(null);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+
+  // Drag and drop sensors
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  // Initialize drag and drop hook
+  const { handleDragEnd, isReordering } = useDragAndDrop({
+    items,
+    setItems,
+    updateEndpoint: '/api/admin/gallery'
+  });
 
   useEffect(() => {
     fetchGalleryItems();
@@ -110,6 +242,7 @@ export default function GalleryPage() {
 
   return (
     <div className="px-4 sm:px-6 lg:px-8">
+<<<<<<< HEAD
       <PageHeader
         title="Gallery"
         description="Manage your portfolio images and media content that showcases your work."
@@ -147,6 +280,42 @@ export default function GalleryPage() {
       {/* View Mode Controls */}
       <div className="mt-6 flex justify-end">
         <div className="flex rounded-md shadow-sm">
+=======
+      <div className="sm:flex sm:items-center">
+        <div className="sm:flex-auto">
+          <h1 className="text-xl font-semibold text-gray-900">Gallery</h1>
+          <p className="mt-2 text-sm text-gray-700">Manage your portfolio images and media</p>
+        </div>
+        <div className="mt-4 sm:ml-16 sm:mt-0 sm:flex-none flex gap-2">
+          <div className="flex rounded-md shadow-sm">
+            <button
+              onClick={() => setViewMode('grid')}
+              className={`px-3 py-2 text-sm font-medium rounded-l-md border ${
+                viewMode === 'grid'
+                  ? 'bg-indigo-600 text-white border-indigo-600'
+                  : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+              }`}
+            >
+              Grid {viewMode === 'grid' && '(Drag to reorder)'}
+            </button>
+            <button
+              onClick={() => setViewMode('list')}
+              className={`px-3 py-2 text-sm font-medium rounded-r-md border-t border-b border-r ${
+                viewMode === 'list'
+                  ? 'bg-indigo-600 text-white border-indigo-600'
+                  : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+              }`}
+            >
+              List
+            </button>
+          </div>
+          {isReordering && (
+            <div className="flex items-center gap-2 text-sm text-gray-600">
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-indigo-600"></div>
+              Updating order...
+            </div>
+          )}
+>>>>>>> a5c9bca28f69da0d6c748757c9e451c6810d88e6
           <button
             onClick={() => setViewMode('grid')}
             className={`px-3 py-2 text-sm font-medium rounded-l-md border transition-all duration-200 ${
@@ -217,63 +386,26 @@ export default function GalleryPage() {
       }>
         <div className="mt-8">
         {viewMode === 'grid' ? (
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {items.map((item) => (
-              <div key={item.id} className="group relative overflow-hidden rounded-lg bg-white shadow-sm ring-1 ring-gray-900/10">
-                <div className="aspect-square relative bg-gray-100">
-                  <img
-                    src={item.imageUrl}
-                    alt={item.alt}
-                    className="absolute inset-0 w-full h-full object-cover"
-                    loading="lazy"
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      target.src =
-                        'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDIwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjIwMCIgaGVpZ2h0PSIyMDAiIGZpbGw9IiNGM0Y0RjYiLz48cGF0aCBkPSJNNjAgODBIMTQwVjEyMEg2MFY4MFoiIGZpbGw9IiNENUQ3REEiLz48Y2lyY2xlIGN4PSI4NSIgY3k9Ijk1IiByPSI1IiBmaWxsPSIjOUI5QjlCIi8+PHBhdGggZD0iTTExMCAxMDVMMTI1IDkwTDE0MCAxMDVWMTIwSDExMFYxMDVaIiBmaWxsPSIjRDVEN0RBIi8+PC9zdmc+';
-                    }}
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+          >
+            <SortableContext items={items.map(item => item.id)} strategy={rectSortingStrategy}>
+              <div className={`grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 ${
+                isReordering ? 'pointer-events-none' : ''
+              }`}>
+                {items.map((item) => (
+                  <SortableGalleryItem
+                    key={item.id}
+                    item={item}
+                    onEdit={openModal}
+                    onDelete={handleDelete}
                   />
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors duration-200">
-                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => openModal(item)}
-                          className="p-2 bg-white rounded-full shadow-lg hover:bg-gray-50"
-                        >
-                          <PencilIcon className="h-4 w-4 text-gray-700" />
-                        </button>
-                        <button
-                          onClick={() => handleDelete(item.id)}
-                          className="p-2 bg-white rounded-full shadow-lg hover:bg-gray-50"
-                        >
-                          <TrashIcon className="h-4 w-4 text-red-600" />
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                  {!item.active && (
-                    <div className="absolute top-2 left-2">
-                      <span className="inline-flex items-center rounded-md bg-gray-100/90 px-2 py-1 text-xs font-medium text-gray-600">
-                        Inactive
-                      </span>
-                    </div>
-                  )}
-                  <div className="absolute bottom-2 right-2">
-                    <span className="inline-flex items-center rounded-md bg-black/50 px-2 py-1 text-xs font-medium text-white">
-                      #{item.sortOrder}
-                    </span>
-                  </div>
-                </div>
-                <div className="p-4">
-                  <h3 className="text-sm font-medium text-gray-900 truncate" title={item.alt}>
-                    {item.alt}
-                  </h3>
-                  <p className="text-xs text-gray-500 mt-1">
-                    {new Date(item.createdAt).toLocaleDateString()}
-                  </p>
-                </div>
+                ))}
               </div>
-            ))}
-          </div>
+            </SortableContext>
+          </DndContext>
         ) : (
           <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
             <table className="min-w-full divide-y divide-gray-300">
