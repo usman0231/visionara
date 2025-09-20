@@ -1,9 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { CogIcon, PlusIcon, PencilIcon, TrashIcon, CheckIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { ChevronDownIcon, ChevronRightIcon } from '@heroicons/react/20/solid';
 import SettingModal from '@/components/backoffice/SettingModal';
+import PageHeader from '@/components/backoffice/PageHeader';
+import { useNotification } from '@/components/backoffice/NotificationProvider';
 
 interface Setting {
   id: string;
@@ -14,6 +16,7 @@ interface Setting {
 }
 
 export default function SettingsPage() {
+  const { showNotification } = useNotification();
   const [settings, setSettings] = useState<Setting[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -57,8 +60,9 @@ export default function SettingsPage() {
       if (!response.ok) throw new Error('Failed to delete setting');
 
       await fetchSettings();
+      showNotification('Setting deleted successfully', 'success');
     } catch (error: any) {
-      alert('Failed to delete setting: ' + error.message);
+      showNotification('Failed to delete setting: ' + error.message, 'error');
     }
   };
 
@@ -156,39 +160,65 @@ export default function SettingsPage() {
 
   return (
     <div className="px-4 sm:px-6 lg:px-8">
-      <div className="sm:flex sm:items-center">
-        <div className="sm:flex-auto">
-          <h1 className="text-xl font-semibold text-gray-900">Settings</h1>
-          <p className="mt-2 text-sm text-gray-700">
-            Manage application settings and configuration values
-          </p>
-        </div>
-        <div className="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
-          <button
-            onClick={() => openModal()}
-            className="inline-flex items-center gap-x-1.5 rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-          >
-            <PlusIcon className="-ml-0.5 h-5 w-5" aria-hidden="true" />
-            Add Setting
-          </button>
-        </div>
-      </div>
+      <PageHeader
+        title="Settings"
+        description="Manage application settings and configuration values for your system."
+        icon={
+          <CogIcon className="h-6 w-6" />
+        }
+        iconBgColor="bg-gray-100"
+        iconColor="text-gray-600"
+        action={{
+          label: "Add Setting",
+          onClick: () => openModal(),
+          icon: <PlusIcon className="h-4 w-4" />
+        }}
+      />
 
-      {/* Search */}
-      <div className="mt-8">
-        <div className="max-w-md">
-          <input
-            type="text"
-            placeholder="Search settings..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-          />
+      <Suspense fallback={
+        <div className="mt-8">
+          <div className="max-w-md">
+            <div className="animate-pulse h-10 bg-gray-200 rounded"></div>
+          </div>
+          <div className="mt-6 space-y-4">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="h-32 bg-gray-200 rounded-lg animate-pulse"></div>
+            ))}
+          </div>
         </div>
-      </div>
+      }>
+        {/* Enhanced Instructions */}
+        <div className="mt-8 mb-6 rounded-lg border border-blue-200 bg-blue-50 p-4">
+          <div className="flex items-start">
+            <div className="flex-shrink-0">
+              <svg className="h-5 w-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <div className="ml-3">
+              <h3 className="text-sm font-medium text-blue-800">Settings Management</h3>
+              <div className="mt-1 text-sm text-blue-700">
+                Store application configuration as key-value pairs with JSON values. Click the arrow next to each setting to expand and view the full configuration structure.
+              </div>
+            </div>
+          </div>
+        </div>
 
-      {/* Settings Cards */}
-      <div className="mt-6 space-y-4">
+        {/* Search */}
+        <div className="mb-6">
+          <div className="max-w-md">
+            <input
+              type="text"
+              placeholder="Search settings..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+            />
+          </div>
+        </div>
+
+        {/* Settings Cards */}
+        <div className="mt-6 space-y-4">
         {filteredSettings.map((setting) => (
           <div key={setting.id} className="bg-white shadow-sm ring-1 ring-gray-900/5 sm:rounded-lg">
             <div className="px-4 py-5 sm:p-6">
@@ -324,7 +354,8 @@ export default function SettingsPage() {
             </div>
           </div>
         </div>
-      )}
+        )}
+      </Suspense>
 
       <SettingModal
         isOpen={isModalOpen}

@@ -1,10 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { PlusIcon, StarIcon } from '@heroicons/react/24/outline';
 import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
 import { PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
 import ReviewModal from '@/components/backoffice/ReviewModal';
+import PageHeader from '@/components/backoffice/PageHeader';
+import ToggleSwitch from '@/components/backoffice/ToggleSwitch';
+import { useNotification } from '@/components/backoffice/NotificationProvider';
 
 interface Review {
   id: string;
@@ -18,6 +21,7 @@ interface Review {
 }
 
 export default function ReviewsPage() {
+  const { showNotification } = useNotification();
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -59,8 +63,9 @@ export default function ReviewsPage() {
       if (!response.ok) throw new Error('Failed to delete review');
 
       await fetchReviews();
+      showNotification('Review deleted successfully', 'success');
     } catch (error: any) {
-      alert('Failed to delete review: ' + error.message);
+      showNotification('Failed to delete review: ' + error.message, 'error');
     }
   };
 
@@ -77,6 +82,25 @@ export default function ReviewsPage() {
   const handleSaveReview = async () => {
     await fetchReviews();
     closeModal();
+  };
+
+  const handleToggleActive = async (id: string, currentActive: boolean) => {
+    const response = await fetch(`/api/admin/reviews/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ active: !currentActive }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to update review status');
+    }
+
+    // Update local state immediately for better UX
+    setReviews(prevReviews =>
+      prevReviews.map(review =>
+        review.id === id ? { ...review, active: !currentActive } : review
+      )
+    );
   };
 
   const renderStars = (rating: number) => {
@@ -118,50 +142,69 @@ export default function ReviewsPage() {
 
   return (
     <div className="px-4 sm:px-6 lg:px-8">
-      <div className="sm:flex sm:items-center">
-        <div className="sm:flex-auto">
-          <h1 className="text-xl font-semibold text-gray-900">Reviews</h1>
-          <p className="mt-2 text-sm text-gray-700">
-            Manage customer reviews and testimonials
-          </p>
-        </div>
-        <div className="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
-          <button
-            onClick={() => openModal()}
-            className="inline-flex items-center gap-x-1.5 rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-          >
-            <PlusIcon className="-ml-0.5 h-5 w-5" aria-hidden="true" />
-            Add Review
-          </button>
-        </div>
-      </div>
+      <PageHeader
+        title="Reviews"
+        description="Manage customer reviews and testimonials that showcase your work quality."
+        icon={
+          <StarIcon className="h-6 w-6" />
+        }
+        iconBgColor="bg-yellow-100"
+        iconColor="text-yellow-600"
+        action={{
+          label: "Add Review",
+          onClick: () => openModal(),
+          icon: <PlusIcon className="h-4 w-4" />
+        }}
+      />
 
-      {/* Statistics */}
-      {reviews.length > 0 && (
+      <Suspense fallback={
         <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-3">
-          <div className="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6">
-            <dt className="truncate text-sm font-medium text-gray-500">Total Reviews</dt>
-            <dd className="mt-1 text-3xl font-semibold tracking-tight text-gray-900">{reviews.length}</dd>
+          {[...Array(3)].map((_, i) => (
+            <div key={i} className="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6">
+              <div className="animate-pulse">
+                <div className="h-4 bg-gray-200 rounded w-1/2 mb-2"></div>
+                <div className="h-8 bg-gray-200 rounded w-3/4"></div>
+              </div>
+            </div>
+          ))}
+        </div>
+      }>
+        {/* Statistics */}
+        {reviews.length > 0 && (
+          <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-3">
+            <div className="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6">
+              <dt className="truncate text-sm font-medium text-gray-500">Total Reviews</dt>
+              <dd className="mt-1 text-3xl font-semibold tracking-tight text-gray-900">{reviews.length}</dd>
+            </div>
+            <div className="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6">
+              <dt className="truncate text-sm font-medium text-gray-500">Average Rating</dt>
+              <dd className="mt-1 flex items-center gap-2">
+                <span className="text-3xl font-semibold tracking-tight text-gray-900">
+                  {averageRating.toFixed(1)}
+                </span>
+                {renderStars(Math.round(averageRating))}
+              </dd>
+            </div>
+            <div className="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6">
+              <dt className="truncate text-sm font-medium text-gray-500">Active Reviews</dt>
+              <dd className="mt-1 text-3xl font-semibold tracking-tight text-gray-900">
+                {reviews.filter(r => r.active).length}
+              </dd>
+            </div>
           </div>
-          <div className="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6">
-            <dt className="truncate text-sm font-medium text-gray-500">Average Rating</dt>
-            <dd className="mt-1 flex items-center gap-2">
-              <span className="text-3xl font-semibold tracking-tight text-gray-900">
-                {averageRating.toFixed(1)}
-              </span>
-              {renderStars(Math.round(averageRating))}
-            </dd>
-          </div>
-          <div className="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6">
-            <dt className="truncate text-sm font-medium text-gray-500">Active Reviews</dt>
-            <dd className="mt-1 text-3xl font-semibold tracking-tight text-gray-900">
-              {reviews.filter(r => r.active).length}
-            </dd>
+        )}
+      </Suspense>
+
+      <Suspense fallback={
+        <div className="mt-8">
+          <div className="animate-pulse grid gap-6 sm:grid-cols-1 lg:grid-cols-2">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="h-48 bg-gray-200 rounded-lg"></div>
+            ))}
           </div>
         </div>
-      )}
-
-      <div className="mt-8">
+      }>
+        <div className="mt-8">
         <div className="grid gap-6 sm:grid-cols-1 lg:grid-cols-2">
           {reviews.map((review) => (
             <div key={review.id} className="overflow-hidden bg-white shadow sm:rounded-lg">
@@ -170,11 +213,6 @@ export default function ReviewsPage() {
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
                       <h3 className="text-lg font-medium text-gray-900">{review.name}</h3>
-                      {!review.active && (
-                        <span className="inline-flex items-center rounded-md bg-gray-100 px-2 py-1 text-xs font-medium text-gray-600">
-                          Inactive
-                        </span>
-                      )}
                     </div>
                     {review.role && (
                       <p className="text-sm text-gray-500 mb-2">{review.role}</p>
@@ -189,21 +227,35 @@ export default function ReviewsPage() {
                       Order: {review.sortOrder} • Created: {new Date(review.createdAt).toLocaleDateString()}
                     </div>
                   </div>
-                  <div className="ml-4 flex flex-col gap-2">
-                    <button
-                      onClick={() => openModal(review)}
-                      className="text-indigo-600 hover:text-indigo-900"
-                    >
-                      <PencilIcon className="h-5 w-5" />
-                      <span className="sr-only">Edit {review.name}</span>
-                    </button>
-                    <button
-                      onClick={() => handleDelete(review.id)}
-                      className="text-red-600 hover:text-red-900"
-                    >
-                      <TrashIcon className="h-5 w-5" />
-                      <span className="sr-only">Delete {review.name}</span>
-                    </button>
+                  <div className="ml-4 flex flex-col gap-3">
+                    <div className="flex items-center gap-1">
+                      <span className="text-xs text-gray-500">Visible:</span>
+                      <ToggleSwitch
+                        enabled={review.active}
+                        onChange={() => {}} // Handled by onToggle
+                        onToggle={(newValue) => handleToggleActive(review.id, review.active)}
+                        showNotification={showNotification}
+                        successMessage={review.active ? 'Review hidden from website' : 'Review published to website'}
+                        size="sm"
+                        title={review.active ? 'Published - Click to hide' : 'Hidden - Click to publish'}
+                      />
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <button
+                        onClick={() => openModal(review)}
+                        className="text-indigo-600 hover:text-indigo-900"
+                      >
+                        <PencilIcon className="h-4 w-4" />
+                        <span className="sr-only">Edit {review.name}</span>
+                      </button>
+                      <button
+                        onClick={() => handleDelete(review.id)}
+                        className="text-red-600 hover:text-red-900"
+                      >
+                        <TrashIcon className="h-4 w-4" />
+                        <span className="sr-only">Delete {review.name}</span>
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -227,7 +279,8 @@ export default function ReviewsPage() {
             </div>
           </div>
         )}
-      </div>
+        </div>
+      </Suspense>
 
       <ReviewModal
         isOpen={isModalOpen}

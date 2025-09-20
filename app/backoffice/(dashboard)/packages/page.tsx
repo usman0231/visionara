@@ -1,28 +1,31 @@
+'use client';
+
 import { Suspense } from 'react';
 import Link from 'next/link';
 import { PlusIcon } from '@heroicons/react/24/outline';
 import PackagesTable from '@/components/backoffice/PackagesTable';
+import PageHeader from '@/components/backoffice/PageHeader';
+import { useNotification } from '@/components/backoffice/NotificationProvider';
 
 export default function PackagesPage() {
   return (
     <div className="px-4 sm:px-6 lg:px-8">
-      <div className="sm:flex sm:items-center">
-        <div className="sm:flex-auto">
-          <h1 className="text-xl font-semibold text-gray-900">Packages</h1>
-          <p className="mt-2 text-sm text-gray-700">
-            Manage your service packages and pricing tiers
-          </p>
-        </div>
-        <div className="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
-          <Link
-            href="/backoffice/packages/new"
-            className="inline-flex items-center gap-x-1.5 rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-          >
-            <PlusIcon className="-ml-0.5 h-5 w-5" aria-hidden="true" />
-            Add Package
-          </Link>
-        </div>
-      </div>
+      <PageHeader
+        title="Packages"
+        description="Manage your service packages and pricing tiers that define your offerings."
+        icon={
+          <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+          </svg>
+        }
+        iconBgColor="bg-emerald-100"
+        iconColor="text-emerald-600"
+        action={{
+          label: "Add Package",
+          href: "/backoffice/packages/new",
+          icon: <PlusIcon className="h-4 w-4" />
+        }}
+      />
 
       <div className="mt-8">
         <Suspense fallback={

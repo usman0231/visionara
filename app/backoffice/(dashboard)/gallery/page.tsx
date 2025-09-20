@@ -1,8 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { PhotoIcon, PlusIcon, PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
 import GalleryModal from '@/components/backoffice/GalleryModal';
+import PageHeader from '@/components/backoffice/PageHeader';
+import ToggleSwitch from '@/components/backoffice/ToggleSwitch';
+import { useNotification } from '@/components/backoffice/NotificationProvider';
 
 interface GalleryItem {
   id: string;
@@ -14,6 +17,7 @@ interface GalleryItem {
 }
 
 export default function GalleryPage() {
+  const { showNotification } = useNotification();
   const [items, setItems] = useState<GalleryItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -49,8 +53,9 @@ export default function GalleryPage() {
       });
       if (!response.ok) throw new Error('Failed to delete gallery item');
       await fetchGalleryItems();
+      showNotification('Gallery item deleted successfully', 'success');
     } catch (error: any) {
-      console.error('Failed to delete gallery item:', error);
+      showNotification('Failed to delete gallery item: ' + error.message, 'error');
     }
   };
 
@@ -67,6 +72,25 @@ export default function GalleryPage() {
   const handleSaveItem = async () => {
     await fetchGalleryItems();
     closeModal();
+  };
+
+  const handleToggleActive = async (id: string, currentActive: boolean) => {
+    const response = await fetch(`/api/admin/gallery/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ active: !currentActive }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to update status');
+    }
+
+    // Update local state immediately for better UX
+    setItems(prevItems =>
+      prevItems.map(item =>
+        item.id === id ? { ...item, active: !currentActive } : item
+      )
+    );
   };
 
   if (loading) {
@@ -86,68 +110,112 @@ export default function GalleryPage() {
 
   return (
     <div className="px-4 sm:px-6 lg:px-8">
-      <div className="sm:flex sm:items-center">
-        <div className="sm:flex-auto">
-          <h1 className="text-xl font-semibold text-gray-900">Gallery</h1>
-          <p className="mt-2 text-sm text-gray-700">Manage your portfolio images and media</p>
-        </div>
-        <div className="mt-4 sm:ml-16 sm:mt-0 sm:flex-none flex gap-2">
-          <div className="flex rounded-md shadow-sm">
-            <button
-              onClick={() => setViewMode('grid')}
-              className={`px-3 py-2 text-sm font-medium rounded-l-md border ${
-                viewMode === 'grid'
-                  ? 'bg-indigo-600 text-white border-indigo-600'
-                  : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
-              }`}
-            >
-              Grid
-            </button>
-            <button
-              onClick={() => setViewMode('list')}
-              className={`px-3 py-2 text-sm font-medium rounded-r-md border-t border-b border-r ${
-                viewMode === 'list'
-                  ? 'bg-indigo-600 text-white border-indigo-600'
-                  : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
-              }`}
-            >
-              List
-            </button>
+      <PageHeader
+        title="Gallery"
+        description="Manage your portfolio images and media content that showcases your work."
+        icon={
+          <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
+        }
+        iconBgColor="bg-purple-100"
+        iconColor="text-purple-600"
+        action={{
+          label: "Add Image",
+          onClick: () => openModal(),
+          icon: <PlusIcon className="h-4 w-4" />
+        }}
+      />
+
+      {/* Enhanced Instructions */}
+      <div className="mt-8 rounded-lg border border-blue-200 bg-blue-50 p-4">
+        <div className="flex items-start">
+          <div className="flex-shrink-0">
+            <svg className="h-5 w-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+            </svg>
           </div>
+          <div className="ml-3">
+            <h3 className="text-sm font-medium text-blue-800">Gallery Management</h3>
+            <div className="mt-1 text-sm text-blue-700">
+              Switch between grid and list view below. Use the toggle switches in list view to publish/hide images instantly.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* View Mode Controls */}
+      <div className="mt-6 flex justify-end">
+        <div className="flex rounded-md shadow-sm">
           <button
-            onClick={() => openModal()}
-            className="inline-flex items-center gap-x-1.5 rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+            onClick={() => setViewMode('grid')}
+            className={`px-3 py-2 text-sm font-medium rounded-l-md border transition-all duration-200 ${
+              viewMode === 'grid'
+                ? 'bg-indigo-600 text-white border-indigo-600'
+                : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+            }`}
           >
-            <PlusIcon className="-ml-0.5 h-5 w-5" aria-hidden="true" />
-            Add Image
+            Grid
+          </button>
+          <button
+            onClick={() => setViewMode('list')}
+            className={`px-3 py-2 text-sm font-medium rounded-r-md border-t border-b border-r transition-all duration-200 ${
+              viewMode === 'list'
+                ? 'bg-indigo-600 text-white border-indigo-600'
+                : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+            }`}
+          >
+            List
           </button>
         </div>
       </div>
 
-      <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-3">
-        <div className="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6">
-          <dt className="truncate text-sm font-medium text-gray-500">Total Images</dt>
-          <dd className="mt-1 text-3xl font-semibold tracking-tight text-gray-900">{items.length}</dd>
+      <Suspense fallback={
+        <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-3">
+          {[...Array(3)].map((_, i) => (
+            <div key={i} className="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6">
+              <div className="animate-pulse">
+                <div className="h-4 bg-gray-200 rounded w-1/2 mb-2"></div>
+                <div className="h-8 bg-gray-200 rounded w-3/4"></div>
+              </div>
+            </div>
+          ))}
         </div>
-        <div className="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6">
-          <dt className="truncate text-sm font-medium text-gray-500">Active Images</dt>
-          <dd className="mt-1 text-3xl font-semibold tracking-tight text-gray-900">
-            {items.filter(item => item.active).length}
-          </dd>
+      }>
+        <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-3">
+          <div className="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6">
+            <dt className="truncate text-sm font-medium text-gray-500">Total Images</dt>
+            <dd className="mt-1 text-3xl font-semibold tracking-tight text-gray-900">{items.length}</dd>
+          </div>
+          <div className="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6">
+            <dt className="truncate text-sm font-medium text-gray-500">Active Images</dt>
+            <dd className="mt-1 text-3xl font-semibold tracking-tight text-gray-900">
+              {items.filter(item => item.active).length}
+            </dd>
+          </div>
+          <div className="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6">
+            <dt className="truncate text-sm font-medium text-gray-500">Recent Uploads</dt>
+            <dd className="mt-1 text-3xl font-semibold tracking-tight text-gray-900">
+              {items.filter(item => {
+                const weekAgo = new Date();
+                weekAgo.setDate(weekAgo.getDate() - 7);
+                return new Date(item.createdAt) > weekAgo;
+              }).length}
+            </dd>
+          </div>
         </div>
-        <div className="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6">
-          <dt className="truncate text-sm font-medium text-gray-500">Recent Uploads</dt>
-          <dd className="mt-1 text-3xl font-semibold tracking-tight text-gray-900">
-            {items.filter(item => {
-              const weekAgo = new Date();
-              weekAgo.setDate(weekAgo.getDate() - 7);
-              return new Date(item.createdAt) > weekAgo;
-            }).length}
-          </dd>
-        </div>
-      </div>
+      </Suspense>
 
-      <div className="mt-8">
+      <Suspense fallback={
+        <div className="mt-8">
+          <div className="animate-pulse grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {[...Array(8)].map((_, i) => (
+              <div key={i} className="aspect-square bg-gray-200 rounded-lg"></div>
+            ))}
+          </div>
+        </div>
+      }>
+        <div className="mt-8">
         {viewMode === 'grid' ? (
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {items.map((item) => (
@@ -217,8 +285,13 @@ export default function GalleryPage() {
                   <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
                     Alt Text
                   </th>
-                  <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                    Status
+                  <th scope="col" className="px-3 py-3.5 text-center text-sm font-semibold text-gray-900">
+                    <div className="flex items-center justify-center gap-1">
+                      <svg className="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      Active
+                    </div>
                   </th>
                   <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
                     Order
@@ -254,15 +327,15 @@ export default function GalleryPage() {
                       </div>
                     </td>
                     <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                      <span
-                        className={`inline-flex rounded-full px-2 text-xs font-semibold leading-5 ${
-                          item.active
-                            ? 'bg-green-100 text-green-800'
-                            : 'bg-gray-100 text-gray-800'
-                        }`}
-                      >
-                        {item.active ? 'Active' : 'Inactive'}
-                      </span>
+                      <ToggleSwitch
+                        enabled={item.active}
+                        onChange={() => {}} // Handled by onToggle
+                        onToggle={(newValue) => handleToggleActive(item.id, item.active)}
+                        showNotification={showNotification}
+                        successMessage={item.active ? 'Image hidden from gallery' : 'Image published to gallery'}
+                        size="sm"
+                        title={item.active ? 'Published - Click to hide' : 'Hidden - Click to publish'}
+                      />
                     </td>
                     <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                       {item.sortOrder}
@@ -311,7 +384,8 @@ export default function GalleryPage() {
             </div>
           </div>
         )}
-      </div>
+        </div>
+      </Suspense>
 
       <GalleryModal isOpen={isModalOpen} onClose={closeModal} onSave={handleSaveItem} item={editingItem} />
     </div>

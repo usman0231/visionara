@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import {
   EnvelopeIcon,
   PhoneIcon,
@@ -11,6 +11,8 @@ import {
   ArrowDownTrayIcon
 } from '@heroicons/react/24/outline';
 import ContactModal from '@/components/backoffice/ContactModal';
+import PageHeader from '@/components/backoffice/PageHeader';
+import { useNotification } from '@/components/backoffice/NotificationProvider';
 
 interface ContactSubmission {
   id: string;
@@ -34,6 +36,7 @@ const budgetRanges = ['Under $1,000', '$1,000 - $5,000', '$5,000 - $15,000', '$1
 const timelineOptions = ['ASAP', '1-2 weeks', '1-2 months', '3-6 months', '6+ months'];
 
 export default function ContactsPage() {
+  const { showNotification } = useNotification();
   const [contacts, setContacts] = useState<ContactSubmission[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -85,8 +88,9 @@ export default function ContactsPage() {
       if (!response.ok) throw new Error('Failed to delete contact');
 
       await fetchContacts();
+      showNotification('Contact deleted successfully', 'success');
     } catch (error: any) {
-      alert('Failed to delete contact: ' + error.message);
+      showNotification('Failed to delete contact: ' + error.message, 'error');
     }
   };
 
@@ -199,14 +203,25 @@ export default function ContactsPage() {
   if (loading) {
     return (
       <div className="px-4 sm:px-6 lg:px-8">
-        <div className="animate-pulse">
-          <div className="h-8 bg-gray-200 rounded mb-4"></div>
-          <div className="space-y-4">
-            {[...Array(5)].map((_, i) => (
-              <div key={i} className="h-24 bg-gray-200 rounded-lg"></div>
-            ))}
+        <Suspense fallback={
+          <div className="animate-pulse">
+            <div className="h-8 bg-gray-200 rounded mb-4"></div>
+            <div className="space-y-4">
+              {[...Array(5)].map((_, i) => (
+                <div key={i} className="h-24 bg-gray-200 rounded-lg"></div>
+              ))}
+            </div>
           </div>
-        </div>
+        }>
+          <div className="animate-pulse">
+            <div className="h-8 bg-gray-200 rounded mb-4"></div>
+            <div className="space-y-4">
+              {[...Array(5)].map((_, i) => (
+                <div key={i} className="h-24 bg-gray-200 rounded-lg"></div>
+              ))}
+            </div>
+          </div>
+        </Suspense>
       </div>
     );
   }
@@ -215,23 +230,22 @@ export default function ContactsPage() {
 
   return (
     <div className="px-4 sm:px-6 lg:px-8">
-      <div className="sm:flex sm:items-center">
-        <div className="sm:flex-auto">
-          <h1 className="text-xl font-semibold text-gray-900">Contact Submissions</h1>
-          <p className="mt-2 text-sm text-gray-700">
-            Manage and respond to customer inquiries and lead submissions
-          </p>
-        </div>
-        <div className="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
-          <button
-            onClick={exportContacts}
-            className="inline-flex items-center gap-x-1.5 rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-          >
-            <ArrowDownTrayIcon className="-ml-0.5 h-5 w-5" aria-hidden="true" />
-            Export CSV
-          </button>
-        </div>
-      </div>
+      <PageHeader
+        title="Contact Submissions"
+        description="Manage and respond to customer inquiries and lead submissions from your website."
+        icon={
+          <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+          </svg>
+        }
+        iconBgColor="bg-blue-100"
+        iconColor="text-blue-600"
+        action={{
+          label: "Export CSV",
+          onClick: exportContacts,
+          icon: <ArrowDownTrayIcon className="h-4 w-4" />
+        }}
+      />
 
       {/* Statistics */}
       <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-4">
@@ -263,11 +277,16 @@ export default function ContactsPage() {
         </div>
       </div>
 
-      {/* Filters */}
-      <div className="mt-8 bg-white p-4 rounded-lg shadow-sm border">
-        <div className="flex items-center gap-4 mb-4">
-          <FunnelIcon className="h-5 w-5 text-gray-400" />
-          <span className="text-sm font-medium text-gray-700">Filters</span>
+      {/* Enhanced Filter Section matching About Us pattern */}
+      <div className="mt-8 rounded-lg border border-gray-200 bg-white p-4">
+        <div className="mb-3 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <FunnelIcon className="h-5 w-5 text-blue-400" />
+            <h3 className="text-sm font-medium text-gray-900">Filter Contacts</h3>
+          </div>
+          <span className="text-xs text-gray-500">
+            {filteredAndSortedContacts.length} of {contacts.length} contacts
+          </span>
         </div>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
@@ -277,7 +296,7 @@ export default function ContactsPage() {
               placeholder="Search contacts..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+              className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm transition-all duration-200"
             />
           </div>
 
@@ -285,7 +304,7 @@ export default function ContactsPage() {
             <select
               value={serviceFilter}
               onChange={(e) => setServiceFilter(e.target.value)}
-              className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+              className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm transition-all duration-200"
             >
               <option value="">All Services</option>
               {serviceTypes.map(service => (
@@ -298,7 +317,7 @@ export default function ContactsPage() {
             <select
               value={budgetFilter}
               onChange={(e) => setBudgetFilter(e.target.value)}
-              className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+              className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm transition-all duration-200"
             >
               <option value="">All Budgets</option>
               {budgetRanges.map(budget => (
@@ -311,7 +330,7 @@ export default function ContactsPage() {
             <select
               value={dateFilter}
               onChange={(e) => setDateFilter(e.target.value)}
-              className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+              className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm transition-all duration-200"
             >
               <option value="">All Time</option>
               <option value="today">Today</option>
@@ -328,7 +347,7 @@ export default function ContactsPage() {
                 setBudgetFilter('');
                 setDateFilter('');
               }}
-              className="w-full px-3 py-2 text-sm text-gray-600 bg-gray-100 rounded-md hover:bg-gray-200"
+              className="w-full px-3 py-2 text-sm font-medium text-gray-600 bg-gray-100 rounded-md hover:bg-gray-200 transition-all duration-200"
             >
               Clear Filters
             </button>
@@ -336,9 +355,37 @@ export default function ContactsPage() {
         </div>
       </div>
 
-      {/* Contacts Table */}
-      <div className="mt-6 overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
-        <table className="min-w-full divide-y divide-gray-300">
+      {/* Enhanced Instructions */}
+      <div className="mt-6 rounded-lg border border-blue-200 bg-blue-50 p-4">
+        <div className="flex items-start">
+          <div className="flex-shrink-0">
+            <svg className="h-5 w-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+            </svg>
+          </div>
+          <div className="ml-3">
+            <h3 className="text-sm font-medium text-blue-800">Contact Management</h3>
+            <div className="mt-1 text-sm text-blue-700">
+              Click on the eye icon to view full contact details and messages. Use filters to find specific contacts quickly.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-8">
+        <Suspense fallback={
+          <div className="animate-pulse">
+            <div className="h-8 bg-gray-200 rounded mb-4"></div>
+            <div className="space-y-4">
+              {[...Array(5)].map((_, i) => (
+                <div key={i} className="h-16 bg-gray-200 rounded"></div>
+              ))}
+            </div>
+          </div>
+        }>
+          {/* Contacts Table */}
+          <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
+            <table className="min-w-full divide-y divide-gray-300">
           <thead className="bg-gray-50">
             <tr>
               <th
@@ -452,22 +499,24 @@ export default function ContactsPage() {
               </tr>
             ))}
           </tbody>
-        </table>
+            </table>
 
-        {filteredAndSortedContacts.length === 0 && (
-          <div className="py-12 text-center">
-            <EnvelopeIcon className="mx-auto h-12 w-12 text-gray-400" />
-            <h3 className="mt-2 text-sm font-semibold text-gray-900">
-              {contacts.length === 0 ? 'No contacts yet' : 'No matches found'}
-            </h3>
-            <p className="mt-1 text-sm text-gray-500">
-              {contacts.length === 0
-                ? 'Customer inquiries will appear here when they submit the contact form.'
-                : 'Try adjusting your filters to find what you\'re looking for.'
-              }
-            </p>
+            {filteredAndSortedContacts.length === 0 && (
+              <div className="py-12 text-center">
+                <EnvelopeIcon className="mx-auto h-12 w-12 text-gray-400" />
+                <h3 className="mt-2 text-sm font-semibold text-gray-900">
+                  {contacts.length === 0 ? 'No contacts yet' : 'No matches found'}
+                </h3>
+                <p className="mt-1 text-sm text-gray-500">
+                  {contacts.length === 0
+                    ? 'Customer inquiries will appear here when they submit the contact form.'
+                    : 'Try adjusting your filters to find what you\'re looking for.'
+                  }
+                </p>
+              </div>
+            )}
           </div>
-        )}
+        </Suspense>
       </div>
 
       <ContactModal

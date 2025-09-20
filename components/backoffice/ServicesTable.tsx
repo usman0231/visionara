@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
+import { useNotification } from './NotificationProvider';
+import ToggleSwitch from './ToggleSwitch';
 
 interface Service {
   id: string;
@@ -15,6 +17,7 @@ interface Service {
 }
 
 export default function ServicesTable() {
+  const { showNotification } = useNotification();
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -50,13 +53,33 @@ export default function ServicesTable() {
       const response = await fetch(`/api/services/${id}`, {
         method: 'DELETE',
       });
-      
+
       if (!response.ok) throw new Error('Failed to delete service');
-      
+
       await fetchServices();
+      showNotification('Service deleted successfully', 'success');
     } catch (error: any) {
-      alert('Failed to delete service: ' + error.message);
+      showNotification('Failed to delete service: ' + error.message, 'error');
     }
+  };
+
+  const handleToggleActive = async (id: string, currentActive: boolean) => {
+    const response = await fetch(`/api/services/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ active: !currentActive }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to update service status');
+    }
+
+    // Update local state immediately for better UX
+    setServices(prevServices =>
+      prevServices.map(service =>
+        service.id === id ? { ...service, active: !currentActive } : service
+      )
+    );
   };
 
   if (loading) {
@@ -76,6 +99,23 @@ export default function ServicesTable() {
 
   return (
     <div className="mt-8 flow-root">
+      {/* Enhanced Instructions */}
+      <div className="mb-6 rounded-lg border border-blue-200 bg-blue-50 p-4">
+        <div className="flex items-start">
+          <div className="flex-shrink-0">
+            <svg className="h-5 w-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+            </svg>
+          </div>
+          <div className="ml-3">
+            <h3 className="text-sm font-medium text-blue-800">Service Management</h3>
+            <div className="mt-1 text-sm text-blue-700">
+              Use the toggle switches to publish or hide services on your website instantly. Active services will be visible to clients.
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div className="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
         <div className="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
           <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
@@ -88,8 +128,13 @@ export default function ServicesTable() {
                   <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
                     Text
                   </th>
-                  <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                    Status
+                  <th scope="col" className="px-3 py-3.5 text-center text-sm font-semibold text-gray-900">
+                    <div className="flex items-center justify-center gap-1">
+                      <svg className="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      Active
+                    </div>
                   </th>
                   <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
                     Order
@@ -111,13 +156,15 @@ export default function ServicesTable() {
                       </div>
                     </td>
                     <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                      <span className={`inline-flex rounded-full px-2 text-xs font-semibold leading-5 ${
-                        service.active
-                          ? 'bg-green-100 text-green-800'
-                          : 'bg-gray-100 text-gray-800'
-                      }`}>
-                        {service.active ? 'Active' : 'Inactive'}
-                      </span>
+                      <ToggleSwitch
+                        enabled={service.active}
+                        onChange={() => {}} // Handled by onToggle
+                        onToggle={(newValue) => handleToggleActive(service.id, service.active)}
+                        showNotification={showNotification}
+                        successMessage={service.active ? 'Service hidden from website' : 'Service published to website'}
+                        size="sm"
+                        title={service.active ? 'Published - Click to hide' : 'Hidden - Click to publish'}
+                      />
                     </td>
                     <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                       {service.sortOrder}

@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { PencilIcon, TrashIcon, Bars3Icon } from '@heroicons/react/24/outline';
+import { useNotification } from './NotificationProvider';
+import ToggleSwitch from './ToggleSwitch';
 import {
   DndContext,
   closestCenter,
@@ -52,9 +54,11 @@ const tierColors = {
 interface SortableRowProps {
   pkg: Package;
   onDelete: (id: string) => void;
+  onToggleActive: (id: string, currentActive: boolean) => Promise<void>;
 }
 
-function SortableRow({ pkg, onDelete }: SortableRowProps) {
+function SortableRow({ pkg, onDelete, onToggleActive }: SortableRowProps) {
+  const { showNotification } = useNotification();
   const {
     attributes,
     listeners,
@@ -119,13 +123,15 @@ function SortableRow({ pkg, onDelete }: SortableRowProps) {
         </div>
       </td>
       <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-        <span className={`inline-flex rounded-full px-2 text-xs font-semibold leading-5 ${
-          pkg.active
-            ? 'bg-green-100 text-green-800'
-            : 'bg-gray-100 text-gray-800'
-        }`}>
-          {pkg.active ? 'Active' : 'Inactive'}
-        </span>
+        <ToggleSwitch
+          enabled={pkg.active}
+          onChange={() => {}} // Handled by onToggle
+          onToggle={(newValue) => onToggleActive(pkg.id, pkg.active)}
+          showNotification={showNotification}
+          successMessage={pkg.active ? 'Package hidden from clients' : 'Package available to clients'}
+          size="sm"
+          title={pkg.active ? 'Available - Click to hide' : 'Hidden - Click to make available'}
+        />
       </td>
       <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
         #{pkg.sortOrder}
@@ -153,6 +159,7 @@ function SortableRow({ pkg, onDelete }: SortableRowProps) {
 }
 
 export default function PackagesTable() {
+  const { showNotification } = useNotification();
   const [packages, setPackages] = useState<Package[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -199,9 +206,29 @@ export default function PackagesTable() {
       if (!response.ok) throw new Error('Failed to delete package');
 
       await fetchPackages();
+      showNotification('Package deleted successfully', 'success');
     } catch (error: any) {
-      console.error('Failed to delete package:', error);
+      showNotification('Failed to delete package: ' + error.message, 'error');
     }
+  };
+
+  const handleToggleActive = async (id: string, currentActive: boolean) => {
+    const response = await fetch(`/api/admin/packages/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ active: !currentActive }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to update package status');
+    }
+
+    // Update local state immediately for better UX
+    setPackages(prevPackages =>
+      prevPackages.map(pkg =>
+        pkg.id === id ? { ...pkg, active: !currentActive } : pkg
+      )
+    );
   };
 
   const handleDragEnd = async (event: DragEndEvent) => {
@@ -261,8 +288,9 @@ export default function PackagesTable() {
 
         // Refresh data to ensure consistency with server
         await fetchPackages();
+        showNotification('Package order updated successfully', 'success');
       } catch (error) {
-        console.error('Failed to update sort orders:', error);
+        showNotification('Failed to update package order', 'error');
         // Revert the changes and fetch fresh data
         await fetchPackages();
       }
@@ -290,15 +318,21 @@ export default function PackagesTable() {
 
   return (
     <div className="mt-8 flow-root">
-      {/* Category Filter */}
-      <div className="mb-4">
-        <div className="flex flex-wrap gap-2 items-center">
+      {/* Enhanced Category Filter matching About Us pattern */}
+      <div className="mb-6 rounded-lg border border-gray-200 bg-white p-4">
+        <div className="mb-3 flex items-center justify-between">
+          <h3 className="text-sm font-medium text-gray-900">Filter by Category</h3>
+          <span className="text-xs text-gray-500">
+            {filteredPackages.length} of {packages.length} packages
+          </span>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
           <button
             onClick={() => setSelectedCategory('all')}
-            className={`px-3 py-1 text-sm rounded-full transition-colors ${
+            className={`px-3 py-2 text-sm rounded-lg font-medium transition-all duration-200 ${
               selectedCategory === 'all'
-                ? 'bg-indigo-100 text-indigo-800'
-                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                ? 'bg-indigo-100 text-indigo-800 ring-2 ring-indigo-200'
+                : 'bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-800'
             }`}
           >
             All Categories
@@ -307,21 +341,39 @@ export default function PackagesTable() {
             <button
               key={category}
               onClick={() => setSelectedCategory(category)}
-              className={`px-3 py-1 text-sm rounded-full transition-colors ${
+              className={`px-3 py-2 text-sm rounded-lg font-medium transition-all duration-200 ${
                 selectedCategory === category
-                  ? categoryColors[category as keyof typeof categoryColors]
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  ? `${categoryColors[category as keyof typeof categoryColors]} ring-2 ring-opacity-50`
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-800'
               }`}
+              title={`View ${category} packages`}
             >
               {category}
             </button>
           ))}
-          {isReordering && (
-            <div className="flex items-center gap-2 text-sm text-indigo-600">
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-indigo-600"></div>
-              Updating order...
+        </div>
+        {isReordering && (
+          <div className="mt-3 flex items-center gap-2 rounded-md bg-blue-50 px-3 py-2 text-sm text-blue-700">
+            <div className="h-4 w-4 animate-spin rounded-full border-b-2 border-blue-600" />
+            Updating package order...
+          </div>
+        )}
+      </div>
+
+      {/* Enhanced Instructions */}
+      <div className="mb-6 rounded-lg border border-blue-200 bg-blue-50 p-4">
+        <div className="flex items-start">
+          <div className="flex-shrink-0">
+            <svg className="h-5 w-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+            </svg>
+          </div>
+          <div className="ml-3">
+            <h3 className="text-sm font-medium text-blue-800">Package Management</h3>
+            <div className="mt-1 text-sm text-blue-700">
+              Drag packages using the <Bars3Icon className="inline h-4 w-4" /> handle to reorder. Use toggle switches to make packages available to clients instantly.
             </div>
-          )}
+          </div>
         </div>
       </div>
 
@@ -348,8 +400,13 @@ export default function PackagesTable() {
                     <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
                       Features
                     </th>
-                    <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                      Status
+                    <th scope="col" className="px-3 py-3.5 text-center text-sm font-semibold text-gray-900">
+                      <div className="flex items-center justify-center gap-1">
+                        <svg className="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Available
+                      </div>
                     </th>
                     <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
                       Order
@@ -365,7 +422,7 @@ export default function PackagesTable() {
                 >
                   <tbody className="divide-y divide-gray-200 bg-white">
                     {filteredPackages.map((pkg) => (
-                      <SortableRow key={pkg.id} pkg={pkg} onDelete={handleDelete} />
+                      <SortableRow key={pkg.id} pkg={pkg} onDelete={handleDelete} onToggleActive={handleToggleActive} />
                     ))}
                   </tbody>
                 </SortableContext>
