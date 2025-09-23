@@ -7,11 +7,44 @@ import Footer from '@/components/footer';
 
 gsap.registerPlugin(ScrollTrigger);
 
+interface Package {
+  id: string;
+  category: 'Web' | 'Mobile' | 'Graphic' | 'Marketing';
+  tier: 'Basic' | 'Standard' | 'Enterprise';
+  priceOnetime: string;
+  priceMonthly: string;
+  priceYearly: string;
+  features: string[];
+  sortOrder: number;
+  active: boolean;
+}
+
 export default function ContactPage() {
   const rootRef = useRef<HTMLDivElement | null>(null);
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState<null | { ok: boolean; msg: string }>(null);
   const [selectedService, setSelectedService] = useState<string>('');
+  const [packages, setPackages] = useState<Package[]>([]);
+  const [packagesLoading, setPackagesLoading] = useState(true);
+
+  // Fetch packages for pricing
+  useEffect(() => {
+    const fetchPackages = async () => {
+      try {
+        const response = await fetch('/api/packages');
+        if (response.ok) {
+          const data = await response.json();
+          setPackages(data);
+        }
+      } catch (err) {
+        console.warn('Error fetching packages:', err);
+      } finally {
+        setPackagesLoading(false);
+      }
+    };
+
+    fetchPackages();
+  }, []);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -196,41 +229,46 @@ export default function ContactPage() {
                   className="w-full rounded-lg border border-white/15 bg-transparent px-3 py-2 outline-none focus:border-[var(--foreground)]"
                 >
                   <option className="bg-black">Select budget</option>
-                  {selectedService === 'web' && (
-                    <>
-                      <option className="bg-black">$1,499 - $2,499 (Basic - Standard)</option>
-                      <option className="bg-black">$4,000 - $5,500 (Enterprise)</option>
-                      <option className="bg-black">$99 - $299/month (Ongoing)</option>
-                    </>
-                  )}
-                  {selectedService === 'mobile' && (
-                    <>
-                      <option className="bg-black">$15,000 - $35,000 (Basic - Standard)</option>
-                      <option className="bg-black">$65,000 - $100,000 (Enterprise)</option>
-                      <option className="bg-black">$199 - $499/month (Ongoing)</option>
-                    </>
-                  )}
-                  {selectedService === 'graphic' && (
-                    <>
-                      <option className="bg-black">$899 - $2,299 (Basic - Standard)</option>
-                      <option className="bg-black">$3,799 (Enterprise)</option>
-                      <option className="bg-black">$599 - $1,499/month (Ongoing)</option>
-                    </>
-                  )}
-                  {selectedService === 'marketing' && (
-                    <>
-                      <option className="bg-black">$1,899 - $3,799/month (Basic - Standard)</option>
-                      <option className="bg-black">$6,999/month (Enterprise)</option>
-                      <option className="bg-black">Contact for custom quote</option>
-                    </>
-                  )}
-                  {!selectedService && (
+                  {selectedService && packages.length > 0 ? (
+                    packages
+                      .filter(pkg => pkg.category.toLowerCase() === selectedService)
+                      .sort((a, b) => a.sortOrder - b.sortOrder)
+                      .map((pkg) => {
+                        const tierName = pkg.tier;
+                        const onetime = pkg.priceOnetime !== 'Contact us' ? `$${pkg.priceOnetime}` : 'Contact us';
+                        const monthly = pkg.priceMonthly !== 'Contact us' ? `$${pkg.priceMonthly}/mo` : 'Contact us';
+
+                        return (
+                          <optgroup key={pkg.tier} label={`${tierName} Package`} className="bg-black">
+                            {pkg.priceOnetime !== 'Contact us' && (
+                              <option className="bg-black" value={`${tierName}-onetime`}>
+                                {onetime} (One-time - {tierName})
+                              </option>
+                            )}
+                            {pkg.priceMonthly !== 'Contact us' && (
+                              <option className="bg-black" value={`${tierName}-monthly`}>
+                                {monthly} (Monthly - {tierName})
+                              </option>
+                            )}
+                            {(pkg.priceOnetime === 'Contact us' && pkg.priceMonthly === 'Contact us') && (
+                              <option className="bg-black" value={`${tierName}-contact`}>
+                                Contact for quote ({tierName})
+                              </option>
+                            )}
+                          </optgroup>
+                        );
+                      })
+                  ) : !selectedService ? (
                     <>
                       <option className="bg-black">$1,000 - $5,000</option>
                       <option className="bg-black">$5,000 - $15,000</option>
                       <option className="bg-black">$15,000 - $50,000</option>
                       <option className="bg-black">$50,000+</option>
                     </>
+                  ) : packagesLoading ? (
+                    <option className="bg-black">Loading pricing...</option>
+                  ) : (
+                    <option className="bg-black">Contact for custom quote</option>
                   )}
                 </select>
               </div>

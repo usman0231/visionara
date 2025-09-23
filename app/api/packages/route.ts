@@ -7,19 +7,15 @@ export const runtime = 'nodejs';
 export async function GET() {
   try {
     const packages = await Package.findAll({
-      where: { deletedAt: null },
-      include: [
-        {
-          model: Service,
-          as: 'service',
-          attributes: ['id', 'name'],
-          where: { deletedAt: null },
-        },
-      ],
-      order: [['displayOrder', 'ASC'], ['createdAt', 'DESC']],
+      where: {
+        deletedAt: null,
+        active: true
+      },
+      order: [['sortOrder', 'ASC'], ['category', 'ASC'], ['tier', 'ASC']],
+      attributes: ['id', 'category', 'tier', 'priceOnetime', 'priceMonthly', 'priceYearly', 'features', 'sortOrder']
     });
 
-    return NextResponse.json({ packages });
+    return NextResponse.json(packages);
   } catch (error: any) {
     console.error('Get packages error:', error);
     return NextResponse.json(

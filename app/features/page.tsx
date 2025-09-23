@@ -160,15 +160,15 @@ export default function FeaturesPage() {
     <main className="bg-[var(--background)] text-[var(--text1)] min-h-screen">
       {/* HERO */}
       <section className="mx-auto max-w-7xl px-4 pt-20 pb-8">
-        <div className="rounded-2xl border border-white/10 bg-white/5 p-8">
+        <div className="rounded-2xl border border-white/10 bg-white/5 p-4 sm:p-6 md:p-8">
           <p className="mb-2 text-xs uppercase tracking-[0.16em] text-white/70">🇨🇦 Visionara</p>
-          <h1 className="text-4xl font-extrabold leading-tight md:text-6xl">Compare Our Services</h1>
-          <p className="mt-4 max-w-prose text-lg text-white/90">
+          <h1 className="text-2xl font-extrabold leading-tight sm:text-4xl md:text-6xl">Compare Our Services</h1>
+          <p className="mt-4 max-w-prose text-base sm:text-lg text-white/90">
             Detailed breakdown of what's included in each tier across all our service categories.
           </p>
 
           {/* SERVICE SELECTOR */}
-          <div className="mt-6 inline-flex rounded-full border border-white/15 bg-white/5 p-1">
+          <div className="mt-6 flex flex-col sm:inline-flex sm:flex-row rounded-xl sm:rounded-full border border-white/15 bg-white/5 p-1 gap-1 sm:gap-0">
             {([
               { key: 'web', label: 'Web Development' },
               { key: 'mobile', label: 'Mobile Apps' },
@@ -178,10 +178,10 @@ export default function FeaturesPage() {
               <button
                 key={opt.key}
                 onClick={() => setService(opt.key)}
-                className={`px-5 py-3 text-sm rounded-full transition ${
+                className={`px-4 py-3 text-sm rounded-xl sm:rounded-full transition min-h-[44px] flex items-center justify-center ${
                   service === opt.key
                     ? 'bg-[var(--foreground)] text-black font-semibold'
-                    : 'text-[var(--text1)] hover:text-white'
+                    : 'text-[var(--text1)] hover:text-white active:bg-white/10'
                 }`}
               >
                 {opt.label}
@@ -190,7 +190,7 @@ export default function FeaturesPage() {
           </div>
 
           {/* BILLING TOGGLE */}
-          <div className="mt-4 inline-flex rounded-full border border-white/15 bg-white/5 p-1 ml-4">
+          <div className="mt-4 flex flex-col sm:inline-flex sm:flex-row rounded-xl sm:rounded-full border border-white/15 bg-white/5 p-1 gap-1 sm:gap-0 sm:ml-4">
             {([
               { key: 'onetime', label: 'One-time' },
               { key: 'monthly', label: 'Monthly' },
@@ -199,10 +199,10 @@ export default function FeaturesPage() {
               <button
                 key={opt.key}
                 onClick={() => setBilling(opt.key)}
-                className={`px-4 py-2 text-sm rounded-full transition ${
+                className={`px-4 py-2 text-sm rounded-xl sm:rounded-full transition min-h-[44px] flex items-center justify-center ${
                   billing === opt.key
                     ? 'bg-[var(--foreground)] text-black font-semibold'
-                    : 'text-[var(--text1)] hover:text-white'
+                    : 'text-[var(--text1)] hover:text-white active:bg-white/10'
                 }`}
               >
                 {opt.label}
@@ -216,17 +216,17 @@ export default function FeaturesPage() {
       {/* SIDE-BY-SIDE COLUMNS */}
       <section className="mx-auto max-w-7xl px-4 pb-12">
         {/* Header row */}
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-3">
           {plans.map((p) => (
-            <div key={p.key} className="rounded-2xl border border-white/10 bg-white/5 p-6 relative">
+            <div key={p.key} className="rounded-2xl border border-white/10 bg-white/5 p-4 sm:p-6 relative">
               {p.tag && (
                 <div className="absolute -top-3 left-6 w-fit rounded-full bg-[var(--foreground)] px-4 py-1 text-xs font-extrabold text-black">
                   {p.tag}
                 </div>
               )}
-              <h3 className="text-xl font-bold mt-2">{p.name}</h3>
+              <h3 className="text-lg sm:text-xl font-bold mt-2">{p.name}</h3>
               <div className="mt-3 flex items-baseline gap-2">
-                <span className="text-3xl font-extrabold text-[var(--foreground)]">
+                <span className="text-xl sm:text-2xl md:text-3xl font-extrabold text-[var(--foreground)]">
                   {pricing[service][p.key][billing]}
                 </span>
               </div>
@@ -238,7 +238,7 @@ export default function FeaturesPage() {
               )}
               <a
                 href={p.key === 'enterprise' ? '/contact' : '/contact'}
-                className={`mt-6 inline-block w-full rounded-xl border border-white/20 px-4 py-3 text-center text-sm font-semibold transition hover:bg-white/5 ${
+                className={`mt-6 inline-block w-full rounded-xl border border-white/20 px-4 py-3 text-center text-sm font-semibold transition hover:bg-white/5 active:bg-white/10 min-h-[44px] flex items-center justify-center ${
                   p.tag ? 'bg-[var(--foreground)] text-black hover:bg-[var(--foreground)]/90' : 'text-[var(--text1)]'
                 }`}
               >
@@ -251,8 +251,8 @@ export default function FeaturesPage() {
         {/* Sections per plan (rows inside each column) */}
         {sections.map((section) => (
           <div key={section.title} className="mt-8">
-            <div className="mb-4 text-lg font-semibold text-white/90">{section.title}</div>
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+            <div className="mb-4 text-base sm:text-lg font-semibold text-white/90">{section.title}</div>
+            <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-3">
               {plans.map((p) => (
                 <div key={p.key} className="overflow-hidden rounded-2xl border border-white/10">
                   <div className="bg-white/[0.08] px-5 py-3 text-sm font-semibold">
@@ -262,7 +262,7 @@ export default function FeaturesPage() {
                     {section.rows.map((r, i) => (
                       <li
                         key={r.label}
-                        className={`flex items-center justify-between gap-3 px-5 py-4 text-sm ${
+                        className={`flex items-center justify-between gap-3 px-4 sm:px-5 py-3 sm:py-4 text-sm ${
                           i % 2 ? 'bg-white/[0.03]' : ''
                         }`}
                       >
@@ -280,21 +280,21 @@ export default function FeaturesPage() {
 
       {/* CTA */}
       <section className="mx-auto max-w-7xl px-4 pb-16">
-        <div className="rounded-2xl border border-white/10 bg-white/5 p-8 text-center">
-          <h2 className="text-3xl font-extrabold">Ready to start your project?</h2>
-          <p className="mx-auto mt-4 max-w-prose text-lg text-white/85">
+        <div className="rounded-2xl border border-white/10 bg-white/5 p-4 sm:p-6 md:p-8 text-center">
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-extrabold">Ready to start your project?</h2>
+          <p className="mx-auto mt-4 max-w-prose text-base sm:text-lg text-white/85">
             From web apps to mobile solutions, stunning visuals to growth marketing — we've got you covered.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mt-6">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center mt-6">
             <Link
               href="/contact"
-              className="inline-block rounded-full border border-white/20 bg-[var(--foreground)] px-8 py-4 font-semibold text-black hover:bg-[var(--foreground)]/90 transition"
+              className="inline-block rounded-full border border-white/20 bg-[var(--foreground)] px-6 sm:px-8 py-3 sm:py-4 font-semibold text-black hover:bg-[var(--foreground)]/90 active:bg-[var(--foreground)]/80 transition min-h-[44px] flex items-center justify-center"
             >
               Start a project
             </Link>
             <Link
               href="/"
-              className="inline-block rounded-full border border-white/20 px-8 py-4 font-semibold text-[var(--text1)] hover:bg-white/5 transition"
+              className="inline-block rounded-full border border-white/20 px-6 sm:px-8 py-3 sm:py-4 font-semibold text-[var(--text1)] hover:bg-white/5 active:bg-white/10 transition min-h-[44px] flex items-center justify-center"
             >
               Learn more
             </Link>
