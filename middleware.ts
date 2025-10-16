@@ -8,6 +8,32 @@ const supabase = createClient(env.SUPABASE_URL, env.SUPABASE_ANON_KEY);
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  // Handle admin API routes separately
+  if (pathname.startsWith('/api/admin/')) {
+    const token = request.cookies.get('sb-access-token')?.value;
+
+    if (!token) {
+      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+    }
+
+    try {
+      const { data: { user }, error } = await supabase.auth.getUser(token);
+
+      if (error || !user) {
+        return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
+      }
+
+      // Add user info to headers for API routes
+      const response = NextResponse.next();
+      response.headers.set('x-user-id', user.id);
+      response.headers.set('x-user-email', user.email || '');
+
+      return response;
+    } catch (error) {
+      return NextResponse.json({ error: 'Authentication error' }, { status: 401 });
+    }
+  }
+
   // Only protect /backoffice routes
   if (!pathname.startsWith('/backoffice')) {
     return NextResponse.next();
@@ -87,11 +113,11 @@ export const config = {
   matcher: [
     /*
      * Match all request paths except for the ones starting with:
-     * - api (API routes that handle their own auth)
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
+     * But DO match /api/admin/* routes for authentication
      */
-    '/((?!api|_next/static|_next/image|favicon.ico).*)',
+    '/((?!_next/static|_next/image|favicon.ico).*)',
   ],
 };

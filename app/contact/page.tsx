@@ -23,9 +23,17 @@ export default function ContactPage() {
   const rootRef = useRef<HTMLDivElement | null>(null);
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState<null | { ok: boolean; msg: string }>(null);
-  const [selectedService, setSelectedService] = useState<string>('');
+  const [selectedServices, setSelectedServices] = useState<string[]>([]);
   const [packages, setPackages] = useState<Package[]>([]);
   const [packagesLoading, setPackagesLoading] = useState(true);
+
+  const toggleService = (service: string) => {
+    setSelectedServices(prev =>
+      prev.includes(service)
+        ? prev.filter(s => s !== service)
+        : [...prev, service]
+    );
+  };
 
   // Fetch packages for pricing
   useEffect(() => {
@@ -76,7 +84,18 @@ export default function ContactPage() {
     setLoading(true);
 
     const form = e.currentTarget;
-    const data = Object.fromEntries(new FormData(form).entries());
+    const formData = new FormData(form);
+    const data: any = Object.fromEntries(formData.entries());
+
+    // Add selected services array
+    data.serviceType = selectedServices.join(', ');
+
+    // Validate at least one service is selected
+    if (selectedServices.length === 0) {
+      setStatus({ ok: false, msg: 'Please select at least one service type.' });
+      setLoading(false);
+      return;
+    }
 
     try {
       const res = await fetch('/api/contact', {
@@ -86,7 +105,7 @@ export default function ContactPage() {
       });
 
       const json = await res.json();
-      setStatus({ ok: res.ok, msg: json.message || (res.ok ? 'Thanks! We’ll be in touch.' : 'Something went wrong.') });
+      setStatus({ ok: res.ok, msg: json.message || (res.ok ? "Thanks! Well be in touch." : 'Something went wrong.') });
 
       if (res.ok) form.reset();
     } catch (err) {
@@ -191,7 +210,7 @@ export default function ContactPage() {
 
             {/* Service Type */}
             <div className="mt-4">
-              <label className="mb-2 block text-sm">Service type *</label>
+              <label className="mb-2 block text-sm">Service types * (Select all that apply)</label>
               <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                 {[
                   { name: 'Web Development', value: 'web' },
@@ -202,17 +221,16 @@ export default function ContactPage() {
                   <label
                     key={service.value}
                     className={`flex cursor-pointer items-center gap-3 rounded-lg border px-4 py-3 text-sm transition ${
-                      selectedService === service.value
+                      selectedServices.includes(service.value)
                         ? 'border-[var(--foreground)] bg-[var(--foreground)]/10'
                         : 'border-white/15 bg-white/5 hover:border-white/25'
                     }`}
                   >
-                    <input 
-                      type="radio" 
-                      name="serviceType" 
-                      value={service.value}
-                      onChange={(e) => setSelectedService(e.target.value)}
-                      className="text-[var(--foreground)] focus:ring-[var(--foreground)]"
+                    <input
+                      type="checkbox"
+                      checked={selectedServices.includes(service.value)}
+                      onChange={() => toggleService(service.value)}
+                      className="rounded text-[var(--foreground)] focus:ring-[var(--foreground)]"
                     />
                     <span className="font-medium">{service.name}</span>
                   </label>
@@ -229,36 +247,39 @@ export default function ContactPage() {
                   className="w-full rounded-lg border border-white/15 bg-transparent px-3 py-2 outline-none focus:border-[var(--foreground)]"
                 >
                   <option className="bg-black">Select budget</option>
-                  {selectedService && packages.length > 0 ? (
-                    packages
-                      .filter(pkg => pkg.category.toLowerCase() === selectedService)
-                      .sort((a, b) => a.sortOrder - b.sortOrder)
-                      .map((pkg) => {
-                        const tierName = pkg.tier;
-                        const onetime = pkg.priceOnetime !== 'Contact us' ? `$${pkg.priceOnetime}` : 'Contact us';
-                        const monthly = pkg.priceMonthly !== 'Contact us' ? `$${pkg.priceMonthly}/mo` : 'Contact us';
+                  {selectedServices.length > 0 && packages.length > 0 ? (
+                    selectedServices.flatMap(service =>
+                      packages
+                        .filter(pkg => pkg.category.toLowerCase() === service)
+                        .sort((a, b) => a.sortOrder - b.sortOrder)
+                        .map((pkg) => {
+                          const tierName = pkg.tier;
+                          const categoryName = pkg.category;
+                          const onetime = pkg.priceOnetime !== 'Contact us' ? `$${pkg.priceOnetime}` : 'Contact us';
+                          const monthly = pkg.priceMonthly !== 'Contact us' ? `$${pkg.priceMonthly}/mo` : 'Contact us';
 
-                        return (
-                          <optgroup key={pkg.tier} label={`${tierName} Package`} className="bg-black">
-                            {pkg.priceOnetime !== 'Contact us' && (
-                              <option className="bg-black" value={`${tierName}-onetime`}>
-                                {onetime} (One-time - {tierName})
-                              </option>
-                            )}
-                            {pkg.priceMonthly !== 'Contact us' && (
-                              <option className="bg-black" value={`${tierName}-monthly`}>
-                                {monthly} (Monthly - {tierName})
-                              </option>
-                            )}
-                            {(pkg.priceOnetime === 'Contact us' && pkg.priceMonthly === 'Contact us') && (
-                              <option className="bg-black" value={`${tierName}-contact`}>
-                                Contact for quote ({tierName})
-                              </option>
-                            )}
-                          </optgroup>
-                        );
-                      })
-                  ) : !selectedService ? (
+                          return (
+                            <optgroup key={`${pkg.category}-${pkg.tier}`} label={`${categoryName} - ${tierName}`} className="bg-black">
+                              {pkg.priceOnetime !== 'Contact us' && (
+                                <option className="bg-black" value={`${categoryName}-${tierName}-onetime`}>
+                                  {onetime} (One-time)
+                                </option>
+                              )}
+                              {pkg.priceMonthly !== 'Contact us' && (
+                                <option className="bg-black" value={`${categoryName}-${tierName}-monthly`}>
+                                  {monthly} (Monthly)
+                                </option>
+                              )}
+                              {(pkg.priceOnetime === 'Contact us' && pkg.priceMonthly === 'Contact us') && (
+                                <option className="bg-black" value={`${categoryName}-${tierName}-contact`}>
+                                  Contact for quote
+                                </option>
+                              )}
+                            </optgroup>
+                          );
+                        })
+                    )
+                  ) : selectedServices.length === 0 ? (
                     <>
                       <option className="bg-black">$1,000 - $5,000</option>
                       <option className="bg-black">$5,000 - $15,000</option>
@@ -282,35 +303,35 @@ export default function ContactPage() {
                 className="w-full rounded-lg border border-white/15 bg-transparent px-3 py-2 outline-none focus:border-[var(--foreground)]"
               >
                 <option className="bg-black">Select timeline</option>
-                {selectedService === 'web' && (
+                {selectedServices.includes('web') && (
                   <>
-                    <option className="bg-black">1-2 weeks (Basic site)</option>
-                    <option className="bg-black">2-4 weeks (Standard site)</option>
-                    <option className="bg-black">4-8 weeks (Enterprise site)</option>
+                    <option className="bg-black">1-2 weeks (Basic web site)</option>
+                    <option className="bg-black">2-4 weeks (Standard web site)</option>
+                    <option className="bg-black">4-8 weeks (Enterprise web site)</option>
                   </>
                 )}
-                {selectedService === 'mobile' && (
+                {selectedServices.includes('mobile') && (
                   <>
-                    <option className="bg-black">8-12 weeks (Basic app)</option>
-                    <option className="bg-black">12-16 weeks (Standard app)</option>
-                    <option className="bg-black">16-24 weeks (Enterprise app)</option>
+                    <option className="bg-black">8-12 weeks (Basic mobile app)</option>
+                    <option className="bg-black">12-16 weeks (Standard mobile app)</option>
+                    <option className="bg-black">16-24 weeks (Enterprise mobile app)</option>
                   </>
                 )}
-                {selectedService === 'graphic' && (
+                {selectedServices.includes('graphic') && (
                   <>
-                    <option className="bg-black">1-2 weeks (Basic package)</option>
-                    <option className="bg-black">2-3 weeks (Standard package)</option>
-                    <option className="bg-black">3-4 weeks (Enterprise package)</option>
+                    <option className="bg-black">1-2 weeks (Basic graphic design)</option>
+                    <option className="bg-black">2-3 weeks (Standard graphic design)</option>
+                    <option className="bg-black">3-4 weeks (Enterprise graphic design)</option>
                   </>
                 )}
-                {selectedService === 'marketing' && (
+                {selectedServices.includes('marketing') && (
                   <>
-                    <option className="bg-black">Ongoing - 6 month minimum</option>
-                    <option className="bg-black">Ongoing - 12 month contract</option>
-                    <option className="bg-black">Custom timeline</option>
+                    <option className="bg-black">Ongoing - 6 month minimum (Marketing)</option>
+                    <option className="bg-black">Ongoing - 12 month contract (Marketing)</option>
+                    <option className="bg-black">Custom timeline (Marketing)</option>
                   </>
                 )}
-                {!selectedService && (
+                {selectedServices.length === 0 && (
                   <>
                     <option className="bg-black">ASAP</option>
                     <option className="bg-black">2-4 weeks</option>

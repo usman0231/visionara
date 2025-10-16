@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 import nodemailer from 'nodemailer';
 import { contactEmailHtml } from '@/lib/email/contactEmailHtml';
 import { contactEmailText } from '@/lib/email/contactEmailText';
+import { ContactSubmission } from '@/lib/db/models';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -12,6 +13,7 @@ type ContactFormData = {
   email?: string;
   company?: string;
   phone?: string;
+  serviceType?: string | string[];
   projectType?: string | string[];
   budget?: string;
   timeline?: string;
@@ -71,19 +73,37 @@ export async function POST(req: Request) {
   try {
     const body = (await req.json()) as ContactFormData;
 
+    const serviceType = body.serviceType || body.projectType;
     const projectType =
-      Array.isArray(body.projectType)
-        ? body.projectType
-        : body.projectType
-        ? [body.projectType]
+      Array.isArray(serviceType)
+        ? serviceType
+        : serviceType
+        ? [serviceType]
         : [];
+
+    // Save to database
+    const submission = await ContactSubmission.create({
+      name: body.name || '',
+      email: body.email || '',
+      company: body.company || null,
+      phone: body.phone || null,
+      serviceType: projectType.join(', ') || null,
+      budget: body.budget || null,
+      timeline: body.timeline || null,
+      message: body.message || '',
+      status: 'pending',
+      meta: {
+        userAgent: req.headers.get('user-agent'),
+        submittedAt: new Date().toISOString(),
+      },
+    });
 
     const transporter = makeTransport();
 
     if (!transporter) {
-      console.log('CONTACT (dev fallback, no SMTP configured):', { ...body, projectType });
+      console.log('CONTACT (dev fallback, no SMTP configured):', { ...body, projectType, submissionId: submission.id });
       return NextResponse.json(
-        { message: 'Message received (dev mode, no SMTP configured).' },
+        { message: 'Message received (dev mode, no SMTP configured).', submissionId: submission.id },
         { status: 200 }
       );
     }
@@ -107,7 +127,7 @@ export async function POST(req: Request) {
       replyTo: body.email,
     });
 
-    return NextResponse.json({ message: 'Thanks! We’ll be in touch.' }, { status: 200 });
+    return NextResponse.json({ message: "Thanks! We'll be in touch.", submissionId: submission.id }, { status: 200 });
   } catch (err: unknown) {
     console.error('CONTACT_ERROR:', extractErrorInfo(err));
     return NextResponse.json(

@@ -24,8 +24,13 @@ interface ContactSubmission {
   budget: string | null;
   timeline: string | null;
   message: string;
+  status: 'pending' | 'replied' | 'archived';
+  replyMessage: string | null;
+  repliedAt: string | null;
+  repliedBy: string | null;
   meta: Record<string, any>;
   createdAt: string;
+  updatedAt: string;
 }
 
 type SortField = 'createdAt' | 'name' | 'email' | 'serviceType';
@@ -42,6 +47,8 @@ export default function ContactsPage() {
   const [error, setError] = useState<string | null>(null);
   const [selectedContact, setSelectedContact] = useState<ContactSubmission | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [lastFetchTime, setLastFetchTime] = useState<Date>(new Date());
+  const [isAutoRefreshEnabled, setIsAutoRefreshEnabled] = useState(true);
 
   // Filtering
   const [searchTerm, setSearchTerm] = useState('');
@@ -53,27 +60,61 @@ export default function ContactsPage() {
   const [sortField, setSortField] = useState<SortField>('createdAt');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
 
+  // Initial fetch
   useEffect(() => {
     fetchContacts();
   }, []);
 
-  const fetchContacts = async () => {
+  // Real-time polling - fetch every 10 seconds
+  useEffect(() => {
+    if (!isAutoRefreshEnabled) return;
+
+    const interval = setInterval(() => {
+      fetchContacts(true); // Pass true to indicate it's a background refresh
+    }, 10000); // 10 seconds
+
+    return () => clearInterval(interval);
+  }, [isAutoRefreshEnabled]);
+
+  const fetchContacts = async (isBackgroundRefresh = false) => {
     try {
-      const response = await fetch('/api/admin/contacts');
+      const response = await fetch('/api/admin/contact-submissions');
       if (!response.ok) {
         // If API fails, show empty state instead of error
-        setContacts([]);
-        setLoading(false);
+        if (!isBackgroundRefresh) {
+          setContacts([]);
+          setLoading(false);
+        }
         return;
       }
       const data = await response.json();
+
+      // Check for new contacts if this is a background refresh
+      if (isBackgroundRefresh && contacts.length > 0) {
+        const newContacts = data.filter((newContact: ContactSubmission) =>
+          !contacts.some(existingContact => existingContact.id === newContact.id)
+        );
+
+        if (newContacts.length > 0) {
+          showNotification(
+            `${newContacts.length} new contact${newContacts.length > 1 ? 's' : ''} received!`,
+            'success'
+          );
+        }
+      }
+
       setContacts(data);
+      setLastFetchTime(new Date());
     } catch (error: any) {
       // On any error, show empty state
-      setContacts([]);
-      setError(null);
+      if (!isBackgroundRefresh) {
+        setContacts([]);
+        setError(null);
+      }
     } finally {
-      setLoading(false);
+      if (!isBackgroundRefresh) {
+        setLoading(false);
+      }
     }
   };
 
@@ -81,7 +122,7 @@ export default function ContactsPage() {
     if (!confirm('Are you sure you want to delete this contact?')) return;
 
     try {
-      const response = await fetch(`/api/admin/contacts/${id}`, {
+      const response = await fetch(`/api/admin/contact-submissions/${id}`, {
         method: 'DELETE',
       });
 
@@ -246,6 +287,57 @@ export default function ContactsPage() {
           icon: <ArrowDownTrayIcon className="h-4 w-4" />
         }}
       />
+
+      {/* Real-time Status Bar */}
+      <div className="mt-4 flex items-center justify-between rounded-lg border border-gray-200 bg-white px-4 py-3 shadow-sm">
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            <div className={`h-2 w-2 rounded-full ${isAutoRefreshEnabled ? 'bg-green-500 animate-pulse' : 'bg-gray-300'}`}></div>
+            <span className="text-sm font-medium text-gray-700">
+              {isAutoRefreshEnabled ? 'Live updates enabled' : 'Live updates paused'}
+            </span>
+          </div>
+          <span className="text-xs text-gray-500">
+            Last updated: {lastFetchTime.toLocaleTimeString()}
+          </span>
+        </div>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => fetchContacts()}
+            className="inline-flex items-center gap-1 rounded-md bg-gray-100 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-200 transition-colors"
+          >
+            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+            Refresh
+          </button>
+          <button
+            onClick={() => setIsAutoRefreshEnabled(!isAutoRefreshEnabled)}
+            className={`inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
+              isAutoRefreshEnabled
+                ? 'bg-green-100 text-green-700 hover:bg-green-200'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            }`}
+          >
+            {isAutoRefreshEnabled ? (
+              <>
+                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Pause
+              </>
+            ) : (
+              <>
+                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Resume
+              </>
+            )}
+          </button>
+        </div>
+      </div>
 
       {/* Statistics */}
       <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-4">

@@ -11,11 +11,16 @@ interface ContactSubmissionAttributes {
   budget: string | null;
   timeline: string | null;
   message: string;
+  status: 'pending' | 'replied' | 'archived';
+  replyMessage: string | null;
+  repliedAt: Date | null;
+  repliedBy: string | null;
   meta: Record<string, any>;
   createdAt: Date;
+  updatedAt: Date;
 }
 
-interface ContactSubmissionCreationAttributes extends Optional<ContactSubmissionAttributes, 'id' | 'company' | 'phone' | 'serviceType' | 'budget' | 'timeline' | 'meta' | 'createdAt'> {}
+interface ContactSubmissionCreationAttributes extends Optional<ContactSubmissionAttributes, 'id' | 'company' | 'phone' | 'serviceType' | 'budget' | 'timeline' | 'status' | 'replyMessage' | 'repliedAt' | 'repliedBy' | 'meta' | 'createdAt' | 'updatedAt'> {}
 
 export class ContactSubmission extends Model<ContactSubmissionAttributes, ContactSubmissionCreationAttributes> implements ContactSubmissionAttributes {
   public id!: string;
@@ -27,8 +32,13 @@ export class ContactSubmission extends Model<ContactSubmissionAttributes, Contac
   public budget!: string | null;
   public timeline!: string | null;
   public message!: string;
+  public status!: 'pending' | 'replied' | 'archived';
+  public replyMessage!: string | null;
+  public repliedAt!: Date | null;
+  public repliedBy!: string | null;
   public meta!: Record<string, any>;
   public readonly createdAt!: Date;
+  public readonly updatedAt!: Date;
 }
 
 ContactSubmission.init(
@@ -73,6 +83,23 @@ ContactSubmission.init(
       type: DataTypes.TEXT,
       allowNull: false,
     },
+    status: {
+      type: DataTypes.ENUM('pending', 'replied', 'archived'),
+      defaultValue: 'pending',
+      allowNull: false,
+    },
+    replyMessage: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
+    repliedAt: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
+    repliedBy: {
+      type: DataTypes.UUID,
+      allowNull: true,
+    },
     meta: {
       type: DataTypes.JSONB,
       defaultValue: {},
@@ -81,13 +108,16 @@ ContactSubmission.init(
       type: DataTypes.DATE,
       allowNull: false,
     },
+    updatedAt: {
+      type: DataTypes.DATE,
+      allowNull: false,
+    },
   },
   {
     sequelize,
     modelName: 'ContactSubmission',
     tableName: 'contact_submissions',
-    timestamps: false,
-    updatedAt: false,
+    timestamps: true,
   }
 );
 
