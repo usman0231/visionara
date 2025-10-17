@@ -10,6 +10,12 @@ export async function middleware(request: NextRequest) {
 
   // Handle admin API routes separately
   if (pathname.startsWith('/api/admin/')) {
+    // Allow schema-status and setup endpoints without authentication
+    // These are needed for database initialization before login
+    if (pathname === '/api/admin/schema-status' || pathname === '/api/admin/setup') {
+      return NextResponse.next();
+    }
+
     const token = request.cookies.get('sb-access-token')?.value;
 
     if (!token) {
