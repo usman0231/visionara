@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-const SEO = require("@/lib/db/models/seo");
+import SEO from "@/lib/db/models/seo";
 
 // GET single SEO configuration by ID
 export async function GET(
