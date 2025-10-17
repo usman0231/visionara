@@ -29,8 +29,11 @@ export default function LoginClient() {
 
       if (data.session) {
         // Store tokens in cookies for middleware
-        document.cookie = `sb-access-token=${data.session.access_token}; path=/; max-age=3600; samesite=lax`;
-        document.cookie = `sb-refresh-token=${data.session.refresh_token}; path=/; max-age=${7 * 24 * 60 * 60}; samesite=lax`;
+        // Add secure flag for production (HTTPS) environments
+        const isProduction = window.location.protocol === 'https:';
+        const secureFlag = isProduction ? '; secure' : '';
+        document.cookie = `sb-access-token=${data.session.access_token}; path=/; max-age=3600; samesite=lax${secureFlag}`;
+        document.cookie = `sb-refresh-token=${data.session.refresh_token}; path=/; max-age=${7 * 24 * 60 * 60}; samesite=lax${secureFlag}`;
         
         // Log the login action
         try {
