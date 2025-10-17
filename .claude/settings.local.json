@@ -16,7 +16,9 @@
       "Bash(npx tsc:*)",
       "Bash(ipconfig)",
       "Bash(ls:*)",
-      "Bash(cp:*)"
+      "Bash(cp:*)",
+      "Bash(timeout:*)",
+      "Bash(echo:*)"
     ],
     "deny": [],
     "ask": []

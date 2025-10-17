@@ -70,18 +70,34 @@ const resolveDialectOptions = (): DialectOptions | undefined => {
 
 const dialectOptions = resolveDialectOptions();
 
+// Detect if running in serverless environment (Vercel)
+const isServerless = process.env.VERCEL === '1' || process.env.AWS_LAMBDA_FUNCTION_NAME !== undefined;
+
+// Pool configuration optimized for serverless and local development
+const poolConfig = isServerless
+  ? {
+      // Serverless: Minimal connections, fast acquisition, short idle
+      max: 1,  // Only 1 connection per function instance
+      min: 0,  // No minimum connections
+      acquire: 10000,  // 10 seconds timeout
+      idle: 1000,  // Close idle connections after 1 second
+      evict: 1000,  // Check for idle connections every second
+    }
+  : {
+      // Local development: More connections, longer timeouts
+      max: 3,  // Reduced from 5 to avoid Supabase session mode limits
+      min: 0,
+      acquire: 30000,
+      idle: 10000,
+    };
+
 // Create Sequelize instance
 export const sequelize = new Sequelize(env.DATABASE_URL, {
   dialect: 'postgres',
   dialectModule: pg,
   logging: process.env.NODE_ENV === 'development' ? console.log : false,
   ...(dialectOptions ? { dialectOptions } : {}),
-  pool: {
-    max: 5,
-    min: 0,
-    acquire: 30000,
-    idle: 10000,
-  },
+  pool: poolConfig,
 });
 
 // Test connection
