@@ -15,7 +15,8 @@
       "Read(//c/Users/YOC/Documents/Shuja/**)",
       "Bash(npx tsc:*)",
       "Bash(ipconfig)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(cp:*)"
     ],
     "deny": [],
     "ask": []

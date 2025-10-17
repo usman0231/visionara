@@ -10,9 +10,6 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://www.visionara.ca"),
   title: "VISIONARA",
   description: "Visionara, turn your visions into a reality.",
-  icons: {
-    icon: "/images/fav.png",
-  },
   openGraph: {
     title: "VISIONARA",
     description: "Turn your visions into reality with our innovative solutions.",
