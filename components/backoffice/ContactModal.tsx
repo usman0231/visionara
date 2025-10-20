@@ -70,9 +70,20 @@ export default function ContactModal({ isOpen, onClose, contact, onReplySuccess 
       });
 
       if (!response.ok) {
-        const error = await response.json();
-        console.error('Reply API error:', error);
-        throw new Error(error.error || error.message || 'Failed to send reply');
+        console.error('Reply API failed:', response.status, response.statusText);
+        const responseText = await response.text();
+        console.error('Response body:', responseText);
+
+        let errorMessage = 'Failed to send reply';
+        try {
+          const error = JSON.parse(responseText);
+          errorMessage = error.error || error.message || error.details || errorMessage;
+        } catch (e) {
+          // Response wasn't JSON, use status text
+          errorMessage = `Server error (${response.status}): ${response.statusText}`;
+        }
+
+        throw new Error(errorMessage);
       }
 
       setShowReplyForm(false);
