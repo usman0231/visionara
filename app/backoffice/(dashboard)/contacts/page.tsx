@@ -502,6 +502,9 @@ export default function ContactsPage() {
                 Service {sortField === 'serviceType' && (sortDirection === 'asc' ? '↑' : '↓')}
               </th>
               <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                Status
+              </th>
+              <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
                 Budget & Timeline
               </th>
               <th
@@ -556,6 +559,22 @@ export default function ContactsPage() {
                       {contact.serviceType}
                     </span>
                   )}
+                </td>
+                <td className="px-3 py-4 text-sm">
+                  <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                    contact.status === 'unseen'
+                      ? 'bg-gray-100 text-gray-800'
+                      : contact.status === 'seen'
+                      ? 'bg-blue-100 text-blue-800'
+                      : contact.status === 'replied'
+                      ? 'bg-green-100 text-green-800'
+                      : 'bg-purple-100 text-purple-800'
+                  }`}>
+                    {contact.status === 'unseen' ? '● Unseen' :
+                     contact.status === 'seen' ? '● Seen' :
+                     contact.status === 'replied' ? '✓ Replied' :
+                     '📁 Archived'}
+                  </span>
                 </td>
                 <td className="px-3 py-4 text-sm text-gray-500">
                   <div className="space-y-1">
