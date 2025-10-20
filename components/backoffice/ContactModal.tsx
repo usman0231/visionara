@@ -1,6 +1,6 @@
 'use client';
 
-import { Fragment } from 'react';
+import { Fragment, useState } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import {
   XMarkIcon,
@@ -8,7 +8,8 @@ import {
   PhoneIcon,
   BuildingOfficeIcon,
   ClipboardDocumentIcon,
-  CalendarIcon
+  CalendarIcon,
+  PaperAirplaneIcon
 } from '@heroicons/react/24/outline';
 
 interface ContactSubmission {
@@ -29,20 +30,62 @@ interface ContactModalProps {
   isOpen: boolean;
   onClose: () => void;
   contact: ContactSubmission | null;
+  onReplySuccess?: () => void;
 }
 
-export default function ContactModal({ isOpen, onClose, contact }: ContactModalProps) {
+export default function ContactModal({ isOpen, onClose, contact, onReplySuccess }: ContactModalProps) {
+  const [showReplyForm, setShowReplyForm] = useState(false);
+  const [replyMessage, setReplyMessage] = useState('');
+  const [sending, setSending] = useState(false);
+  const [replyError, setReplyError] = useState<string | null>(null);
+
   if (!contact) return null;
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
-    // You could add a toast notification here
   };
 
-  const sendEmail = () => {
-    const subject = `Re: ${contact.serviceType || 'Your inquiry'} - ${contact.name}`;
-    const body = `Hi ${contact.name},\n\nThank you for your interest in our ${contact.serviceType || 'services'}.\n\nBest regards,\nVisionara Team`;
-    window.location.href = `mailto:${contact.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  const handleReplyClick = () => {
+    setShowReplyForm(true);
+    setReplyMessage(`Hi ${contact.name},\n\nThank you for your interest in our ${contact.serviceType || 'services'}.\n\nBest regards,\nVISIONARA Team`);
+  };
+
+  const handleSendReply = async () => {
+    if (!replyMessage.trim()) {
+      setReplyError('Please enter a message');
+      return;
+    }
+
+    setSending(true);
+    setReplyError(null);
+
+    try {
+      const response = await fetch(`/api/admin/contact-submissions/${contact.id}/reply`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ replyMessage }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to send reply');
+      }
+
+      setShowReplyForm(false);
+      setReplyMessage('');
+
+      if (onReplySuccess) {
+        onReplySuccess();
+      }
+
+      onClose();
+    } catch (error: any) {
+      setReplyError(error.message || 'Failed to send reply');
+    } finally {
+      setSending(false);
+    }
   };
 
   const formatDate = (dateString: string) => {
@@ -106,7 +149,7 @@ export default function ContactModal({ isOpen, onClose, contact }: ContactModalP
                     </div>
                     <div className="flex gap-2">
                       <button
-                        onClick={sendEmail}
+                        onClick={handleReplyClick}
                         className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                       >
                         <EnvelopeIcon className="h-4 w-4 mr-1" />
@@ -114,6 +157,41 @@ export default function ContactModal({ isOpen, onClose, contact }: ContactModalP
                       </button>
                     </div>
                   </div>
+
+                  {/* Reply Form */}
+                  {showReplyForm && (
+                    <div className="mb-6 p-4 bg-indigo-50 rounded-lg border border-indigo-200">
+                      <label className="block text-sm font-medium text-gray-900 mb-2">
+                        Reply Message
+                      </label>
+                      <textarea
+                        value={replyMessage}
+                        onChange={(e) => setReplyMessage(e.target.value)}
+                        rows={8}
+                        className="block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                        placeholder="Type your reply here..."
+                      />
+                      {replyError && (
+                        <p className="mt-2 text-sm text-red-600">{replyError}</p>
+                      )}
+                      <div className="mt-3 flex gap-3">
+                        <button
+                          onClick={handleSendReply}
+                          disabled={sending}
+                          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+                        >
+                          <PaperAirplaneIcon className="h-4 w-4 mr-2" />
+                          {sending ? 'Sending...' : 'Send Reply'}
+                        </button>
+                        <button
+                          onClick={() => setShowReplyForm(false)}
+                          className="px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  )}
 
                   {/* Contact Information Grid */}
                   <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 mb-6">
@@ -258,12 +336,14 @@ export default function ContactModal({ isOpen, onClose, contact }: ContactModalP
                     >
                       Close
                     </button>
-                    <button
-                      onClick={sendEmail}
-                      className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                    >
-                      Reply to Customer
-                    </button>
+                    {!showReplyForm && (
+                      <button
+                        onClick={handleReplyClick}
+                        className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                      >
+                        Reply to Customer
+                      </button>
+                    )}
                   </div>
                 </div>
               </Dialog.Panel>

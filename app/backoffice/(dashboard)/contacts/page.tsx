@@ -24,7 +24,7 @@ interface ContactSubmission {
   budget: string | null;
   timeline: string | null;
   message: string;
-  status: 'pending' | 'replied' | 'archived';
+  status: 'unseen' | 'seen' | 'replied' | 'archived';
   replyMessage: string | null;
   repliedAt: string | null;
   repliedBy: string | null;
@@ -615,6 +615,10 @@ export default function ContactsPage() {
         isOpen={isModalOpen}
         onClose={closeModal}
         contact={selectedContact}
+        onReplySuccess={() => {
+          fetchContacts();
+          showNotification('Reply sent successfully!', 'success');
+        }}
       />
     </div>
   );
