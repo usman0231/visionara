@@ -51,34 +51,41 @@ const resolveDialectOptions = (): DialectOptions | undefined => {
     return undefined;
   }
 
-  // Check if using Supabase or other cloud providers with valid certificates
+  // Check if using Supabase pooler
   const isSupabase = hostname && (
     hostname.includes('supabase.com') ||
-    hostname.includes('supabase.co') ||
-    hostname.includes('pooler.supabase.com')
+    hostname.includes('supabase.co')
   );
 
-  const isCloudProvider = hostname && (
-    isSupabase ||
-    hostname.includes('amazonaws.com') ||
-    hostname.includes('azure.com') ||
-    hostname.includes('digitalocean.com') ||
-    hostname.includes('heroku.com')
-  );
-
-  // In production or with cloud providers, use proper SSL certificate validation
-  // Only allow self-signed certs in development with localhost
-  const allowSelfSigned = isLocalHost && process.env.NODE_ENV !== 'production';
-
-  // Only set NODE_TLS_REJECT_UNAUTHORIZED if we actually need self-signed certs
-  if (allowSelfSigned && process.env.NODE_TLS_REJECT_UNAUTHORIZED !== '0') {
-    process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+  // For Supabase pooler, we need to accept their certificates
+  // Supabase uses SSL but the certificate chain may not be in Node's default CA store
+  if (isSupabase) {
+    return {
+      ssl: {
+        require: true,
+        rejectUnauthorized: false, // Supabase pooler requires this
+      },
+    };
   }
 
+  // For localhost development, allow self-signed certificates
+  if (isLocalHost) {
+    if (process.env.NODE_TLS_REJECT_UNAUTHORIZED !== '0') {
+      process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+    }
+    return {
+      ssl: {
+        require: true,
+        rejectUnauthorized: false,
+      },
+    };
+  }
+
+  // For other cloud providers, use proper SSL validation
   return {
     ssl: {
       require: true,
-      rejectUnauthorized: !allowSelfSigned,
+      rejectUnauthorized: true,
     },
   };
 };
