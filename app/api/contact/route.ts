@@ -73,6 +73,23 @@ export async function POST(req: Request) {
   try {
     const body = (await req.json()) as ContactFormData;
 
+    // Validate required fields
+    if (!body.name || !body.email || !body.message) {
+      return NextResponse.json(
+        { message: 'Name, email, and message are required fields.' },
+        { status: 400 }
+      );
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(body.email)) {
+      return NextResponse.json(
+        { message: 'Please provide a valid email address.' },
+        { status: 400 }
+      );
+    }
+
     const serviceType = body.serviceType || body.projectType;
     const projectType =
       Array.isArray(serviceType)
@@ -83,15 +100,15 @@ export async function POST(req: Request) {
 
     // Save to database
     const submission = await ContactSubmission.create({
-      name: body.name || '',
-      email: body.email || '',
+      name: body.name,
+      email: body.email,
       company: body.company || null,
       phone: body.phone || null,
       serviceType: projectType.join(', ') || null,
       budget: body.budget || null,
       timeline: body.timeline || null,
-      message: body.message || '',
-      status: 'pending',
+      message: body.message,
+      status: 'unseen',
       meta: {
         userAgent: req.headers.get('user-agent'),
         submittedAt: new Date().toISOString(),
