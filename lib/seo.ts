@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import SEO from "@/lib/db/models/seo";
 
 interface SEOData {
   page: string;
@@ -20,26 +21,31 @@ interface SEOData {
 }
 
 /**
- * Fetches SEO data from the database for a specific page
+ * Fetches SEO data directly from the database
+ * Works during build time and runtime
  * Falls back to global SEO if page-specific data is not found
  */
 export async function getSEOData(page: string = "global"): Promise<SEOData | null> {
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://www.visionara.ca";
-    const apiUrl = `${baseUrl}/api/public/seo?page=${page}`;
-
-    const response = await fetch(apiUrl, {
-      next: { revalidate: 3600 }, // Cache for 1 hour
+    // Fetch directly from database (works during build and runtime)
+    const seoRecord = await SEO.findOne({
+      where: {
+        page,
+        isActive: true,
+      },
     });
 
-    if (!response.ok) {
-      console.error(`Failed to fetch SEO data for page: ${page}`);
+    if (!seoRecord) {
+      // Fallback to global SEO if page-specific not found
+      if (page !== "global") {
+        return getSEOData("global");
+      }
       return null;
     }
 
-    return await response.json();
+    return seoRecord.toJSON() as SEOData;
   } catch (error) {
-    console.error("Error fetching SEO data:", error);
+    console.error(`Error fetching SEO data for page: ${page}`, error);
     return null;
   }
 }

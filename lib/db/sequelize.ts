@@ -51,11 +51,18 @@ const resolveDialectOptions = (): DialectOptions | undefined => {
     return undefined;
   }
 
-  const allowSelfSigned = isTruthy(
-    process.env.DATABASE_SSL_ALLOW_SELF_SIGNED,
-    modeImpliesSelfSigned ?? (isLocalHost || process.env.NODE_ENV !== 'production')
-  );
+  // Check if using Supabase pooler (ports 5432 or 6543)
+  const isSupabasePooler = hostname && (hostname.includes('pooler.supabase.com') || hostname.includes('.supabase.co'));
 
+  // For Supabase, we can use their valid certificates
+  const allowSelfSigned = isSupabasePooler
+    ? false  // Supabase has valid certs, don't allow self-signed
+    : isTruthy(
+        process.env.DATABASE_SSL_ALLOW_SELF_SIGNED,
+        modeImpliesSelfSigned ?? (isLocalHost || process.env.NODE_ENV !== 'production')
+      );
+
+  // Only set NODE_TLS_REJECT_UNAUTHORIZED if we actually need self-signed certs
   if (allowSelfSigned && process.env.NODE_TLS_REJECT_UNAUTHORIZED !== '0') {
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
   }
