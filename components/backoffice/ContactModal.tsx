@@ -65,24 +65,27 @@ export default function ContactModal({ isOpen, onClose, contact, onReplySuccess 
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
         body: JSON.stringify({ replyMessage }),
       });
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.error || 'Failed to send reply');
+        console.error('Reply API error:', error);
+        throw new Error(error.error || error.message || 'Failed to send reply');
       }
 
       setShowReplyForm(false);
       setReplyMessage('');
+      onClose();
 
+      // Show success notification
       if (onReplySuccess) {
         onReplySuccess();
       }
-
-      onClose();
     } catch (error: any) {
-      setReplyError(error.message || 'Failed to send reply');
+      console.error('Send reply error:', error);
+      setReplyError(error.message || 'Failed to send reply. Please check console for details.');
     } finally {
       setSending(false);
     }
