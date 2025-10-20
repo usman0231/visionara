@@ -21,7 +21,8 @@
       "Bash(echo:*)",
       "Bash(git add lib/db/sequelize.ts)",
       "Bash(git commit -m \"$(cat <<''EOF''\nFix SSL certificate validation for production deployment\n\nUpdated SSL configuration to properly validate certificates from cloud providers (Supabase, AWS, Azure, etc.) in production while allowing self-signed certificates only for localhost in development.\n\nThis fixes the \"self-signed certificate in certificate chain\" error on Vercel.\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
-      "Bash(git push)"
+      "Bash(git push)",
+      "Bash(git commit -m \"$(cat <<''EOF''\nFix Supabase SSL certificate validation for Vercel\n\nSupabase pooler certificates require rejectUnauthorized: false in production environments like Vercel because the certificate chain is not in Node''s default CA store.\n\nThis is a known requirement for Supabase connections in serverless environments.\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")"
     ],
     "deny": [],
     "ask": []
