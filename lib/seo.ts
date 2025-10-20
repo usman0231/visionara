@@ -22,12 +22,17 @@ interface SEOData {
 
 /**
  * Fetches SEO data directly from the database
- * Works during build time and runtime
+ * Only works during runtime - skips during build/static generation
  * Falls back to global SEO if page-specific data is not found
  */
 export async function getSEOData(page: string = "global"): Promise<SEOData | null> {
+  // Skip database queries during build/static generation
+  if (process.env.NEXT_PHASE === 'phase-production-build') {
+    return null;
+  }
+
   try {
-    // Fetch directly from database (works during build and runtime)
+    // Fetch directly from database (runtime only)
     const seoRecord = await SEO.findOne({
       where: {
         page,
@@ -45,7 +50,8 @@ export async function getSEOData(page: string = "global"): Promise<SEOData | nul
 
     return seoRecord.toJSON() as SEOData;
   } catch (error) {
-    console.error(`Error fetching SEO data for page: ${page}`, error);
+    // Silently fail and use fallback metadata
+    console.warn(`Could not fetch SEO data for page: ${page}, using fallback`);
     return null;
   }
 }
@@ -58,10 +64,33 @@ export async function generateSEOMetadata(page: string = "global"): Promise<Meta
   const seoData = await getSEOData(page);
 
   if (!seoData) {
-    // Fallback metadata if no SEO data found
+    // Fallback metadata with full SEO if no SEO data found
     return {
-      title: "VISIONARA",
-      description: "Turn your visions into reality with our innovative solutions.",
+      title: "VISIONARA | Turn Your Visions Into Reality",
+      description: "Transform your business ideas into reality with VISIONARA. Expert web development, mobile apps, AI solutions, and digital transformation services in Canada.",
+      keywords: ["web development", "mobile app development", "AI solutions", "digital transformation", "software development", "custom software"],
+      openGraph: {
+        title: "VISIONARA | Your Vision, Our Technology",
+        description: "Turn your visions into reality with our innovative solutions. Expert web development, mobile apps, and AI-powered business solutions.",
+        url: "https://www.visionara.ca",
+        siteName: "VISIONARA",
+        images: [
+          {
+            url: "https://www.visionara.ca/images/medium_res_logo.webp",
+            width: 1200,
+            height: 630,
+            alt: "VISIONARA - Your Vision, Our Technology",
+          },
+        ],
+        locale: "en_US",
+        type: "website",
+      },
+      twitter: {
+        card: "summary_large_image",
+        title: "VISIONARA | Your Vision, Our Technology",
+        description: "Turn your visions into reality with our innovative solutions.",
+        images: ["https://www.visionara.ca/images/medium_res_logo.webp"],
+      },
     };
   }
 
