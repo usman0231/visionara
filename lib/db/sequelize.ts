@@ -21,40 +21,47 @@ const isTruthy = (value: string | undefined, fallback: boolean): boolean => {
 
 const resolveDialectOptions = (): DialectOptions | undefined => {
   let hostname = '';
+  let sslModeFromUrl: string | null = null;
 
   try {
     const parsed = new URL(env.DATABASE_URL);
     hostname = parsed.hostname;
+    sslModeFromUrl = parsed.searchParams.get('sslmode');
   } catch (error) {
     console.warn('Warning: Failed to parse DATABASE_URL for SSL configuration.', error);
   }
 
   const isLocalHost = hostname ? LOCAL_HOSTS.has(hostname) : false;
+  const explicitSslMode = process.env.DATABASE_SSL_MODE?.toLowerCase();
+  const mergedSslMode = explicitSslMode ?? sslModeFromUrl?.toLowerCase() ?? '';
 
-  // Check if using Supabase
-  const isSupabase = hostname && (
-    hostname.includes('supabase.com') ||
-    hostname.includes('supabase.co')
-  );
-
-  // For Supabase or localhost, disable certificate validation
-  // This is required because:
-  // - Supabase pooler certificates are not in Node's CA store
-  // - Localhost may use self-signed certificates
-  if (isSupabase || isLocalHost) {
-    return {
-      ssl: {
-        require: true,
-        rejectUnauthorized: false,
-      },
-    };
+  if (['disable', 'off', 'false', 'no'].includes(mergedSslMode)) {
+    return undefined;
   }
 
-  // For other databases, require proper SSL validation
+  const modeImpliesSelfSigned = mergedSslMode
+    ? ['require', 'prefer', 'allow'].includes(mergedSslMode)
+    : undefined;
+
+  const defaultRequireSsl = mergedSslMode ? mergedSslMode !== 'allow' : !isLocalHost;
+
+  const shouldForceSsl = isTruthy(process.env.DATABASE_SSL_REQUIRE, defaultRequireSsl);
+
+  if (!shouldForceSsl) {
+    return undefined;
+  }
+
+  // Always allow self-signed certificates (required for Supabase pooler)
+  const allowSelfSigned = true;
+
+  if (allowSelfSigned && process.env.NODE_TLS_REJECT_UNAUTHORIZED !== '0') {
+    process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+  }
+
   return {
     ssl: {
       require: true,
-      rejectUnauthorized: true,
+      rejectUnauthorized: !allowSelfSigned,
     },
   };
 };
@@ -94,7 +101,7 @@ export const sequelize = new Sequelize(env.DATABASE_URL, {
   dialect: 'postgres',
   dialectModule: pg,
   logging: process.env.NODE_ENV === 'development' ? console.log : false,
-  dialectOptions: dialectOptions || undefined,
+  ...(dialectOptions ? { dialectOptions } : {}),
   pool: poolConfig,
 });
 
