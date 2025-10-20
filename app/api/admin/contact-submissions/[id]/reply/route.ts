@@ -64,7 +64,23 @@ export async function POST(
       return NextResponse.json({ error: 'Submission not found' }, { status: 404 });
     }
 
-    console.log('🔵 Found submission:', submission.email);
+    console.log('🔵 Found submission for email:', submission.email);
+    console.log('🔵 Submission details:', {
+      id: submission.id,
+      name: submission.name,
+      email: submission.email,
+      hasEmail: !!submission.email,
+      emailLength: submission.email?.length
+    });
+
+    // Validate email exists
+    if (!submission.email || !submission.email.trim()) {
+      console.log('🔴 Submission has no email address');
+      return NextResponse.json(
+        { error: 'Contact submission has no email address' },
+        { status: 400 }
+      );
+    }
 
     // Update submission status
     console.log('🔵 Updating submission...');
@@ -83,25 +99,40 @@ export async function POST(
     let emailError = null;
 
     if (transporter) {
-      console.log('🔵 SMTP configured, sending email...');
+      console.log('🔵 SMTP configured, sending email to:', submission.email);
       const from = process.env.SMTP_FROM || process.env.SMTP_USER!;
 
-      try {
-        await transporter.sendMail({
-          from: `"VISIONARA" <${from}>`,
-          to: submission.email,
-          subject: `Re: Your inquiry to VISIONARA`,
-          html: generateReplyEmailHTML(submission.name, replyMessage, submission.message),
-          text: generateReplyEmailText(submission.name, replyMessage, submission.message),
-          replyTo: from,
-        });
+      // Validate email format
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(submission.email)) {
+        console.log('🔴 Invalid email format:', submission.email);
+        emailError = `Invalid email format: ${submission.email}`;
+      } else {
+        try {
+          const mailOptions = {
+            from: `"VISIONARA" <${from}>`,
+            to: submission.email,
+            subject: `Re: Your inquiry to VISIONARA`,
+            html: generateReplyEmailHTML(submission.name, replyMessage, submission.message),
+            text: generateReplyEmailText(submission.name, replyMessage, submission.message),
+            replyTo: from,
+          };
 
-        console.log(`✅ Reply email sent to ${submission.email} for submission ${id}`);
-        emailSent = true;
-      } catch (error: any) {
-        console.error('🔴 Email sending error:', error.message);
-        console.error('🔴 Email error details:', error);
-        emailError = error.message;
+          console.log('🔵 Email options:', {
+            from: mailOptions.from,
+            to: mailOptions.to,
+            subject: mailOptions.subject
+          });
+
+          await transporter.sendMail(mailOptions);
+
+          console.log(`✅ Reply email sent to ${submission.email} for submission ${id}`);
+          emailSent = true;
+        } catch (error: any) {
+          console.error('🔴 Email sending error:', error.message);
+          console.error('🔴 Email error details:', error);
+          emailError = error.message;
+        }
       }
     } else {
       console.log(`⚠️ SMTP not configured - reply saved to database but email not sent for submission ${id}`);
