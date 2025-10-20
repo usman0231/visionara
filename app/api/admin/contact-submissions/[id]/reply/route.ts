@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { ContactSubmission } from '@/lib/db/models';
 import nodemailer from 'nodemailer';
+import { generateReplyEmailHTML, generateReplyEmailText } from '@/lib/email/replyTemplate';
 
 export const runtime = 'nodejs';
 
@@ -66,53 +67,11 @@ export async function POST(
       const from = process.env.SMTP_FROM || process.env.SMTP_USER!;
 
       await transporter.sendMail({
-        from: `"Visionara" <${from}>`,
+        from: `"VISIONARA" <${from}>`,
         to: submission.email,
-        subject: 'Re: Your Contact Form Submission',
-        html: `
-          <!DOCTYPE html>
-          <html>
-            <head>
-              <style>
-                body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-                .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-                .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
-                .content { background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px; }
-                .message { background: white; padding: 20px; border-radius: 5px; margin: 20px 0; }
-                .original-message { background: #f0f0f0; padding: 15px; border-left: 4px solid #667eea; margin: 20px 0; }
-                .footer { text-align: center; margin-top: 20px; color: #666; font-size: 12px; }
-              </style>
-            </head>
-            <body>
-              <div class="container">
-                <div class="header">
-                  <h1>Visionara</h1>
-                  <p>We've received your inquiry</p>
-                </div>
-                <div class="content">
-                  <p>Hi ${submission.name},</p>
-
-                  <div class="message">
-                    ${replyMessage.replace(/\n/g, '<br>')}
-                  </div>
-
-                  <div class="original-message">
-                    <strong>Your Original Message:</strong><br>
-                    ${submission.message.replace(/\n/g, '<br>')}
-                  </div>
-
-                  <p>Best regards,<br>The Visionara Team</p>
-
-                  <div class="footer">
-                    <p>This email was sent in response to your contact form submission.</p>
-                    <p>If you have any questions, feel free to reply to this email.</p>
-                  </div>
-                </div>
-              </div>
-            </body>
-          </html>
-        `,
-        text: `Hi ${submission.name},\n\n${replyMessage}\n\n---\nYour Original Message:\n${submission.message}\n\nBest regards,\nThe Visionara Team`,
+        subject: `Re: Your inquiry to VISIONARA`,
+        html: generateReplyEmailHTML(submission.name, replyMessage, submission.message),
+        text: generateReplyEmailText(submission.name, replyMessage, submission.message),
         replyTo: from,
       });
 

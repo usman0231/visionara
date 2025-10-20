@@ -11,7 +11,7 @@ interface ContactSubmissionAttributes {
   budget: string | null;
   timeline: string | null;
   message: string;
-  status: 'pending' | 'replied' | 'archived';
+  status: 'unseen' | 'seen' | 'replied' | 'archived';
   replyMessage: string | null;
   repliedAt: Date | null;
   repliedBy: string | null;
@@ -32,7 +32,7 @@ export class ContactSubmission extends Model<ContactSubmissionAttributes, Contac
   public budget!: string | null;
   public timeline!: string | null;
   public message!: string;
-  public status!: 'pending' | 'replied' | 'archived';
+  public status!: 'unseen' | 'seen' | 'replied' | 'archived';
   public replyMessage!: string | null;
   public repliedAt!: Date | null;
   public repliedBy!: string | null;
@@ -84,8 +84,8 @@ ContactSubmission.init(
       allowNull: false,
     },
     status: {
-      type: DataTypes.ENUM('pending', 'replied', 'archived'),
-      defaultValue: 'pending',
+      type: DataTypes.ENUM('unseen', 'seen', 'replied', 'archived'),
+      defaultValue: 'unseen',
       allowNull: false,
     },
     replyMessage: {
