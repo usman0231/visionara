@@ -347,7 +347,7 @@ function SEOModal({
                       disabled={!!seo}
                       required
                       placeholder="e.g., home, contact, about, services"
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm disabled:bg-gray-100"
+                      className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm disabled:bg-gray-100 px-3 py-2"
                     />
                     <p className="mt-1 text-xs text-gray-500">
                       Unique identifier for this page (e.g., "home", "contact", "about")
@@ -369,7 +369,7 @@ function SEOModal({
                       required
                       maxLength={70}
                       placeholder="Compelling page title (50-60 characters optimal)"
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                      className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2"
                     />
                   </div>
 
@@ -388,7 +388,7 @@ function SEOModal({
                       maxLength={160}
                       rows={3}
                       placeholder="Compelling description for search results (150-160 characters optimal)"
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                      className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2"
                     />
                   </div>
 
@@ -402,7 +402,7 @@ function SEOModal({
                       onChange={handleChange}
                       rows={2}
                       placeholder="Comma-separated keywords (e.g., web development, mobile apps, AI solutions)"
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                      className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2"
                     />
                   </div>
                 </div>
@@ -425,7 +425,7 @@ function SEOModal({
                           onChange={handleChange}
                           maxLength={70}
                           placeholder="Title for social media shares"
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                          className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2"
                         />
                       </div>
 
@@ -440,7 +440,7 @@ function SEOModal({
                           rows={2}
                           maxLength={200}
                           placeholder="Description for social media shares"
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                          className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2"
                         />
                       </div>
 
@@ -454,7 +454,7 @@ function SEOModal({
                           value={formData.ogImage}
                           onChange={handleChange}
                           placeholder="https://www.visionara.ca/images/og-image.jpg"
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                          className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2"
                         />
                       </div>
 
@@ -468,7 +468,7 @@ function SEOModal({
                           value={formData.ogImageAlt}
                           onChange={handleChange}
                           placeholder="Description of the image"
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                          className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2"
                         />
                       </div>
                     </div>
@@ -485,7 +485,7 @@ function SEOModal({
                           name="twitterCard"
                           value={formData.twitterCard}
                           onChange={handleChange}
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                          className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2"
                         >
                           <option value="summary">Summary</option>
                           <option value="summary_large_image">Summary Large Image</option>
@@ -505,7 +505,7 @@ function SEOModal({
                           onChange={handleChange}
                           maxLength={70}
                           placeholder="Title for Twitter card"
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                          className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2"
                         />
                       </div>
 
@@ -520,7 +520,7 @@ function SEOModal({
                           rows={2}
                           maxLength={200}
                           placeholder="Description for Twitter card"
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                          className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2"
                         />
                       </div>
 
@@ -534,7 +534,7 @@ function SEOModal({
                           value={formData.twitterImage}
                           onChange={handleChange}
                           placeholder="https://www.visionara.ca/images/twitter-card.jpg"
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                          className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2"
                         />
                       </div>
                     </div>
@@ -555,7 +555,7 @@ function SEOModal({
                       value={formData.canonicalUrl}
                       onChange={handleChange}
                       placeholder="https://www.visionara.ca/page"
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                      className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2"
                     />
                     <p className="mt-1 text-xs text-gray-500">
                       The preferred URL for this page (helps prevent duplicate content)
@@ -570,7 +570,7 @@ function SEOModal({
                       name="robots"
                       value={formData.robots}
                       onChange={handleChange}
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                      className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2"
                     >
                       <option value="index, follow">Index, Follow (Default)</option>
                       <option value="noindex, follow">No Index, Follow</option>
@@ -589,7 +589,7 @@ function SEOModal({
                       onChange={handleChange}
                       rows={12}
                       placeholder='{"@context": "https://schema.org", "@type": "WebPage", ...}'
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm font-mono text-xs"
+                      className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm font-mono text-xs px-3 py-2"
                     />
                     <p className="mt-1 text-xs text-gray-500">
                       JSON-LD structured data for rich snippets in search results
