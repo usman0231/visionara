@@ -86,6 +86,17 @@ export default function ContactModal({ isOpen, onClose, contact, onReplySuccess 
         throw new Error(errorMessage);
       }
 
+      // Check if email was actually sent
+      const data = await response.json();
+      console.log('Reply response:', data);
+
+      if (!data.emailSent && data.emailError) {
+        console.warn('Email not sent:', data.emailError);
+        setReplyError(`Reply saved to database, but email was not sent: ${data.emailError}`);
+        setSending(false);
+        return;
+      }
+
       setShowReplyForm(false);
       setReplyMessage('');
       onClose();

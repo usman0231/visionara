@@ -79,6 +79,8 @@ export async function POST(
     // Send email reply
     console.log('🔵 Setting up email transport...');
     const transporter = makeTransport();
+    let emailSent = false;
+    let emailError = null;
 
     if (transporter) {
       console.log('🔵 SMTP configured, sending email...');
@@ -95,17 +97,24 @@ export async function POST(
         });
 
         console.log(`✅ Reply email sent to ${submission.email} for submission ${id}`);
-      } catch (emailError: any) {
-        console.error('🔴 Email sending error:', emailError.message);
-        // Don't fail the whole request if email fails
+        emailSent = true;
+      } catch (error: any) {
+        console.error('🔴 Email sending error:', error.message);
+        console.error('🔴 Email error details:', error);
+        emailError = error.message;
       }
     } else {
-      console.log(`⚠️ Reply saved but email not sent (SMTP not configured) for submission ${id}`);
+      console.log(`⚠️ SMTP not configured - reply saved to database but email not sent for submission ${id}`);
+      emailError = 'SMTP not configured. Please add SMTP_HOST, SMTP_USER, and SMTP_PASS to environment variables.';
     }
 
     console.log('🔵 Returning success response');
     return NextResponse.json({
-      message: 'Reply sent successfully',
+      message: emailSent
+        ? 'Reply sent successfully'
+        : 'Reply saved but email not sent',
+      emailSent,
+      emailError,
       submission: {
         id: submission.id,
         status: submission.status,
