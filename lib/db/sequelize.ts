@@ -21,58 +21,27 @@ const isTruthy = (value: string | undefined, fallback: boolean): boolean => {
 
 const resolveDialectOptions = (): DialectOptions | undefined => {
   let hostname = '';
-  let sslModeFromUrl: string | null = null;
 
   try {
     const parsed = new URL(env.DATABASE_URL);
     hostname = parsed.hostname;
-    sslModeFromUrl = parsed.searchParams.get('sslmode');
   } catch (error) {
     console.warn('Warning: Failed to parse DATABASE_URL for SSL configuration.', error);
   }
 
   const isLocalHost = hostname ? LOCAL_HOSTS.has(hostname) : false;
-  const explicitSslMode = process.env.DATABASE_SSL_MODE?.toLowerCase();
-  const mergedSslMode = explicitSslMode ?? sslModeFromUrl?.toLowerCase() ?? '';
 
-  if (['disable', 'off', 'false', 'no'].includes(mergedSslMode)) {
-    return undefined;
-  }
-
-  const modeImpliesSelfSigned = mergedSslMode
-    ? ['require', 'prefer', 'allow'].includes(mergedSslMode)
-    : undefined;
-
-  const defaultRequireSsl = mergedSslMode ? mergedSslMode !== 'allow' : !isLocalHost;
-
-  const shouldForceSsl = isTruthy(process.env.DATABASE_SSL_REQUIRE, defaultRequireSsl);
-
-  if (!shouldForceSsl) {
-    return undefined;
-  }
-
-  // Check if using Supabase pooler
+  // Check if using Supabase
   const isSupabase = hostname && (
     hostname.includes('supabase.com') ||
     hostname.includes('supabase.co')
   );
 
-  // For Supabase pooler, we need to accept their certificates
-  // Supabase uses SSL but the certificate chain may not be in Node's default CA store
-  if (isSupabase) {
-    return {
-      ssl: {
-        require: true,
-        rejectUnauthorized: false, // Supabase pooler requires this
-      },
-    };
-  }
-
-  // For localhost development, allow self-signed certificates
-  if (isLocalHost) {
-    if (process.env.NODE_TLS_REJECT_UNAUTHORIZED !== '0') {
-      process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
-    }
+  // For Supabase or localhost, disable certificate validation
+  // This is required because:
+  // - Supabase pooler certificates are not in Node's CA store
+  // - Localhost may use self-signed certificates
+  if (isSupabase || isLocalHost) {
     return {
       ssl: {
         require: true,
@@ -81,7 +50,7 @@ const resolveDialectOptions = (): DialectOptions | undefined => {
     };
   }
 
-  // For other cloud providers, use proper SSL validation
+  // For other databases, require proper SSL validation
   return {
     ssl: {
       require: true,
@@ -91,6 +60,13 @@ const resolveDialectOptions = (): DialectOptions | undefined => {
 };
 
 const dialectOptions = resolveDialectOptions();
+
+// Log SSL configuration for debugging
+console.log('🔒 SSL Configuration:', {
+  dialectOptions,
+  isVercel: process.env.VERCEL === '1',
+  nodeEnv: process.env.NODE_ENV,
+});
 
 // Detect if running in serverless environment (Vercel)
 const isServerless = process.env.VERCEL === '1' || process.env.AWS_LAMBDA_FUNCTION_NAME !== undefined;
@@ -118,7 +94,7 @@ export const sequelize = new Sequelize(env.DATABASE_URL, {
   dialect: 'postgres',
   dialectModule: pg,
   logging: process.env.NODE_ENV === 'development' ? console.log : false,
-  ...(dialectOptions ? { dialectOptions } : {}),
+  dialectOptions: dialectOptions || undefined,
   pool: poolConfig,
 });
 
