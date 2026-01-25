@@ -159,7 +159,8 @@ export default function NewsletterPage() {
     <div className="newsletter-page">
       <PageHeader
         title="Newsletter Subscriptions"
-        subtitle="Manage and export your newsletter subscriber list"
+        description="Manage and export your newsletter subscriber list"
+        icon={<EnvelopeIcon className="h-6 w-6" />}
       />
 
       {/* Stats Cards */}
