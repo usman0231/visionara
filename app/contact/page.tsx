@@ -23,7 +23,7 @@ interface ContactSettings {
   email?: string;
   phone?: string;
   address?: string;
-  contactHours?: string;
+  workHours?: string;
   officeHours?: string;
 }
 
@@ -32,7 +32,7 @@ const FALLBACK_CONTACT: ContactSettings = {
   email: 'visionara0231@gmail.com',
   phone: '+1 437-430-3922',
   address: '1454 Dundas St E, Mississauga, ON L4X 1L4',
-  contactHours: '24/7',
+  workHours: '24/7',
   officeHours: 'Appointment Only',
 };
 
@@ -77,7 +77,7 @@ export default function ContactPage() {
           const settings = data.settings || data || [];
 
           settings.forEach((setting: { key: string; value: any }) => {
-            if (setting.key === 'contact.info') {
+            if (setting.key === 'site.settings') {
               setContact({ ...FALLBACK_CONTACT, ...setting.value });
             }
           });
@@ -181,7 +181,7 @@ export default function ContactPage() {
                 </a>
               </li>
               <li>Phone: <span className="opacity-90">{contact.phone}</span></li>
-              <li>Contact Hours: <span className="opacity-90">{contact.contactHours || '24/7'}</span></li>
+              <li>Work Hours: <span className="opacity-90">{contact.workHours || '24/7'}</span></li>
               <li>Office Hours: <span className="opacity-90">{contact.officeHours || 'Appointment Only'}</span></li>
               <li>Address: <span className="opacity-90">{contact.address}</span></li>
             </ul>
@@ -275,62 +275,6 @@ export default function ContactPage() {
               </div>
             </div>
 
-            {/* Budget */}
-            <div className="mt-4">
-              <div>
-                <label className="mb-1 block text-sm">Budget range (CAD)</label>
-                <select
-                  name="budget"
-                  className="w-full rounded-lg border border-white/15 bg-transparent px-3 py-2 outline-none focus:border-[var(--foreground)]"
-                >
-                  <option className="bg-black">Select budget</option>
-                  {selectedServices.length > 0 && packages.length > 0 ? (
-                    selectedServices.flatMap(service =>
-                      packages
-                        .filter(pkg => pkg.category.toLowerCase() === service)
-                        .sort((a, b) => a.sortOrder - b.sortOrder)
-                        .map((pkg) => {
-                          const tierName = pkg.tier;
-                          const categoryName = pkg.category;
-                          const onetime = pkg.priceOnetime !== 'Contact us' ? `$${pkg.priceOnetime}` : 'Contact us';
-                          const monthly = pkg.priceMonthly !== 'Contact us' ? `$${pkg.priceMonthly}/mo` : 'Contact us';
-
-                          return (
-                            <optgroup key={`${pkg.category}-${pkg.tier}`} label={`${categoryName} - ${tierName}`} className="bg-black">
-                              {pkg.priceOnetime !== 'Contact us' && (
-                                <option className="bg-black" value={`${categoryName}-${tierName}-onetime`}>
-                                  {onetime} (One-time)
-                                </option>
-                              )}
-                              {pkg.priceMonthly !== 'Contact us' && (
-                                <option className="bg-black" value={`${categoryName}-${tierName}-monthly`}>
-                                  {monthly} (Monthly)
-                                </option>
-                              )}
-                              {(pkg.priceOnetime === 'Contact us' && pkg.priceMonthly === 'Contact us') && (
-                                <option className="bg-black" value={`${categoryName}-${tierName}-contact`}>
-                                  Contact for quote
-                                </option>
-                              )}
-                            </optgroup>
-                          );
-                        })
-                    )
-                  ) : selectedServices.length === 0 ? (
-                    <>
-                      <option className="bg-black">$1,000 - $5,000</option>
-                      <option className="bg-black">$5,000 - $15,000</option>
-                      <option className="bg-black">$15,000 - $50,000</option>
-                      <option className="bg-black">$50,000+</option>
-                    </>
-                  ) : packagesLoading ? (
-                    <option className="bg-black">Loading pricing...</option>
-                  ) : (
-                    <option className="bg-black">Contact for custom quote</option>
-                  )}
-                </select>
-              </div>
-            </div>
 
             {/* Timeline */}
             <div className="mt-4">

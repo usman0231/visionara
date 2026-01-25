@@ -37,7 +37,6 @@ type SortField = 'createdAt' | 'name' | 'email' | 'serviceType';
 type SortDirection = 'asc' | 'desc';
 
 const serviceTypes = ['Web Development', 'Mobile App', 'Graphic Design', 'Marketing', 'Other'];
-const budgetRanges = ['Under $1,000', '$1,000 - $5,000', '$5,000 - $15,000', '$15,000 - $50,000', '$50,000+'];
 const timelineOptions = ['ASAP', '1-2 weeks', '1-2 months', '3-6 months', '6+ months'];
 
 export default function ContactsPage() {
@@ -53,7 +52,6 @@ export default function ContactsPage() {
   // Filtering
   const [searchTerm, setSearchTerm] = useState('');
   const [serviceFilter, setServiceFilter] = useState('');
-  const [budgetFilter, setBudgetFilter] = useState('');
   const [dateFilter, setDateFilter] = useState('');
 
   // Sorting
@@ -156,14 +154,13 @@ export default function ContactsPage() {
 
   const exportContacts = () => {
     const csv = [
-      'Name,Email,Company,Phone,Service Type,Budget,Timeline,Message,Created At',
+      'Name,Email,Company,Phone,Service Type,Timeline,Message,Created At',
       ...filteredAndSortedContacts.map(contact => [
         contact.name,
         contact.email,
         contact.company || '',
         contact.phone || '',
         contact.serviceType || '',
-        contact.budget || '',
         contact.timeline || '',
         `"${contact.message.replace(/"/g, '""')}"`,
         new Date(contact.createdAt).toLocaleString()
@@ -189,7 +186,6 @@ export default function ContactsPage() {
         contact.company?.toLowerCase().includes(searchTerm.toLowerCase());
 
       const matchesService = !serviceFilter || contact.serviceType === serviceFilter;
-      const matchesBudget = !budgetFilter || contact.budget === budgetFilter;
 
       let matchesDate = true;
       if (dateFilter) {
@@ -210,7 +206,7 @@ export default function ContactsPage() {
         }
       }
 
-      return matchesSearch && matchesService && matchesBudget && matchesDate;
+      return matchesSearch && matchesService && matchesDate;
     })
     .sort((a, b) => {
       let aValue: any, bValue: any;
@@ -340,7 +336,7 @@ export default function ContactsPage() {
       </div>
 
       {/* Statistics */}
-      <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-4">
+      <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-3">
         <div className="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6">
           <dt className="truncate text-sm font-medium text-gray-500">Total Contacts</dt>
           <dd className="mt-1 text-3xl font-semibold tracking-tight text-gray-900">{contacts.length}</dd>
@@ -361,12 +357,6 @@ export default function ContactsPage() {
             {contacts.filter(c => c.serviceType === 'Web Development').length}
           </dd>
         </div>
-        <div className="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6">
-          <dt className="truncate text-sm font-medium text-gray-500">High Budget</dt>
-          <dd className="mt-1 text-3xl font-semibold tracking-tight text-gray-900">
-            {contacts.filter(c => c.budget && (c.budget.includes('$15,000') || c.budget.includes('$50,000+'))).length}
-          </dd>
-        </div>
       </div>
 
       {/* Enhanced Filter Section matching About Us pattern */}
@@ -381,7 +371,7 @@ export default function ContactsPage() {
           </span>
         </div>
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <div>
             <input
               type="text"
@@ -407,19 +397,6 @@ export default function ContactsPage() {
 
           <div>
             <select
-              value={budgetFilter}
-              onChange={(e) => setBudgetFilter(e.target.value)}
-              className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm transition-all duration-200"
-            >
-              <option value="">All Budgets</option>
-              {budgetRanges.map(budget => (
-                <option key={budget} value={budget}>{budget}</option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <select
               value={dateFilter}
               onChange={(e) => setDateFilter(e.target.value)}
               className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm transition-all duration-200"
@@ -436,7 +413,6 @@ export default function ContactsPage() {
               onClick={() => {
                 setSearchTerm('');
                 setServiceFilter('');
-                setBudgetFilter('');
                 setDateFilter('');
               }}
               className="w-full px-3 py-2 text-sm font-medium text-gray-600 bg-gray-100 rounded-md hover:bg-gray-200 transition-all duration-200"
@@ -505,7 +481,7 @@ export default function ContactsPage() {
                 Status
               </th>
               <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                Budget & Timeline
+                Timeline
               </th>
               <th
                 scope="col"
@@ -577,14 +553,9 @@ export default function ContactsPage() {
                   </span>
                 </td>
                 <td className="px-3 py-4 text-sm text-gray-500">
-                  <div className="space-y-1">
-                    {contact.budget && (
-                      <div className="text-sm">{contact.budget}</div>
-                    )}
-                    {contact.timeline && (
-                      <div className="text-xs text-gray-400">{contact.timeline}</div>
-                    )}
-                  </div>
+                  {contact.timeline && (
+                    <div className="text-sm">{contact.timeline}</div>
+                  )}
                 </td>
                 <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                   {new Date(contact.createdAt).toLocaleDateString()}

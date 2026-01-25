@@ -22,7 +22,6 @@ export function contactEmailText(data: ContactFormData) {
     `Company: ${data.company || ''}`,
     `Phone: ${data.phone || ''}`,
     `Project Type: ${types}`,
-    `Budget: ${data.budget || 'N/A'}`,
     `Timeline: ${data.timeline || 'N/A'}`,
     '',
     'Message:',

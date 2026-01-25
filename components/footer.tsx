@@ -7,51 +7,37 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 interface SiteSettings {
-  siteName?: string;
-  tagline?: string;
-  description?: string;
-}
-
-interface ContactSettings {
   email?: string;
   phone?: string;
   address?: string;
-}
-
-interface SocialSettings {
+  workHours?: string;
+  officeHours?: string;
   facebook?: string;
-  twitter?: string;
   instagram?: string;
-  linkedin?: string;
+  twitter?: string;
   github?: string;
+  threads?: string;
 }
 
 // Fallback data
-const FALLBACK_SITE: SiteSettings = {
-  siteName: 'VISIONARA',
-  tagline: 'We craft digital experiences that inspire growth and innovation.',
-};
-
-const FALLBACK_CONTACT: ContactSettings = {
+const FALLBACK_SETTINGS: SiteSettings = {
   email: 'visionara0231@gmail.com',
   phone: '+1 437-430-3922',
   address: '1454 Dundas St E, Mississauga, ON L4X 1L4',
-};
-
-const FALLBACK_SOCIAL: SocialSettings = {
-  twitter: '#',
-  linkedin: '#',
-  github: '#',
-  instagram: '#',
+  workHours: '24/7',
+  officeHours: 'Appointment Only',
+  facebook: '',
+  instagram: '',
+  twitter: '',
+  github: '',
+  threads: '',
 };
 
 export default function InteractiveFooter() {
   const ref = useRef<HTMLDivElement | null>(null);
   const [year] = useState<number>(new Date().getFullYear());
   const [copied, setCopied] = useState(false);
-  const [site, setSite] = useState<SiteSettings>(FALLBACK_SITE);
-  const [contact, setContact] = useState<ContactSettings>(FALLBACK_CONTACT);
-  const [social, setSocial] = useState<SocialSettings>(FALLBACK_SOCIAL);
+  const [settings, setSettings] = useState<SiteSettings>(FALLBACK_SETTINGS);
 
   // Fetch settings from database
   useEffect(() => {
@@ -60,15 +46,11 @@ export default function InteractiveFooter() {
         const response = await fetch('/api/settings');
         if (response.ok) {
           const data = await response.json();
-          const settings = data.settings || data || [];
+          const allSettings = data.settings || data || [];
 
-          settings.forEach((setting: { key: string; value: any }) => {
-            if (setting.key === 'site.info') {
-              setSite({ ...FALLBACK_SITE, ...setting.value });
-            } else if (setting.key === 'contact.info') {
-              setContact({ ...FALLBACK_CONTACT, ...setting.value });
-            } else if (setting.key === 'social.links') {
-              setSocial({ ...FALLBACK_SOCIAL, ...setting.value });
+          allSettings.forEach((setting: { key: string; value: any }) => {
+            if (setting.key === 'site.settings') {
+              setSettings({ ...FALLBACK_SETTINGS, ...setting.value });
             }
           });
         }
@@ -138,7 +120,7 @@ export default function InteractiveFooter() {
 
   const copyEmail = async () => {
     try {
-      await navigator.clipboard.writeText(contact.email || FALLBACK_CONTACT.email!);
+      await navigator.clipboard.writeText(settings.email || FALLBACK_SETTINGS.email!);
       setCopied(true);
       setTimeout(() => setCopied(false), 1500);
     } catch {}
@@ -149,34 +131,34 @@ export default function InteractiveFooter() {
   // Social icons with their SVG paths
   const socialIcons = [
     {
-      key: 'twitter',
-      url: social.twitter,
-      label: 'Twitter / X',
-      svg: <svg width="18" height="18" viewBox="0 0 24 24"><path fill="currentColor" d="M17.5 3h3l-7.5 8.6L22 21h-5.9l-4.6-5.6L6 21H3l8-9.2L2 3h6l4.1 5L17.5 3Z"/></svg>
-    },
-    {
-      key: 'linkedin',
-      url: social.linkedin,
-      label: 'LinkedIn',
-      svg: <svg width="18" height="18" viewBox="0 0 24 24"><path fill="currentColor" d="M6.94 6.5A2.44 2.44 0 1 1 4.5 4.06 2.44 2.44 0 0 1 6.94 6.5ZM4.75 20h4.38V9H4.75v11ZM13 9v11h4.38v-5.83c0-3.21 4.17-3.47 4.17 0V20H26V13.94c0-6.31-6.87-6.07-8.62-2.97V9H13Z"/></svg>
-    },
-    {
-      key: 'github',
-      url: social.github,
-      label: 'GitHub',
-      svg: <svg width="18" height="18" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2a10 10 0 0 0-3.16 19.5c.5.09.68-.22.68-.48v-1.7c-2.78.6-3.36-1.17-3.36-1.17-.46-1.15-1.12-1.45-1.12-1.45-.92-.63.07-.62.07-.62 1.02.07 1.56 1.05 1.56 1.05.9 1.56 2.36 1.11 2.94.85.09-.65.35-1.11.64-1.36-2.22-.26-4.56-1.11-4.56-4.96 0-1.1.39-2 .1-2.7 0 0 .84-.27 2.75 1.03A9.56 9.56 0 0 1 12 7.07c.85 0 1.7.11 2.5.32 1.9-1.3 2.74-1.03 2.74-1.03.54 1.37.2 2.4.1 2.7.62.67 1 1.53 1 2.58 0 3.86-2.34 4.7-4.57 4.96.36.31.69.94.69 1.9v2.82c0 .26.18.57.69.48A10 10 0 0 0 12 2Z"/></svg>
+      key: 'facebook',
+      url: settings.facebook,
+      label: 'Facebook',
+      svg: <svg width="18" height="18" viewBox="0 0 24 24"><path fill="currentColor" d="M22 12c0-5.52-4.48-10-10-10S2 6.48 2 12c0 4.84 3.44 8.87 8 9.8V15H8v-3h2V9.5C10 7.57 11.57 6 13.5 6H16v3h-2c-.55 0-1 .45-1 1v2h3v3h-3v6.95c5.05-.5 9-4.76 9-9.95z"/></svg>
     },
     {
       key: 'instagram',
-      url: social.instagram,
+      url: settings.instagram,
       label: 'Instagram',
       svg: <svg width="18" height="18" viewBox="0 0 24 24"><path fill="currentColor" d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3H7m5 3a5 5 0 1 1 0 10 5 5 0 0 1 0-10m6.5-.25a1.25 1.25 0 1 1 0 2.5 1.25 1.25 0 0 1 0-2.5Z"/></svg>
     },
     {
-      key: 'facebook',
-      url: social.facebook,
-      label: 'Facebook',
-      svg: <svg width="18" height="18" viewBox="0 0 24 24"><path fill="currentColor" d="M22 12c0-5.52-4.48-10-10-10S2 6.48 2 12c0 4.84 3.44 8.87 8 9.8V15H8v-3h2V9.5C10 7.57 11.57 6 13.5 6H16v3h-2c-.55 0-1 .45-1 1v2h3v3h-3v6.95c5.05-.5 9-4.76 9-9.95z"/></svg>
+      key: 'twitter',
+      url: settings.twitter,
+      label: 'X (Twitter)',
+      svg: <svg width="18" height="18" viewBox="0 0 24 24"><path fill="currentColor" d="M17.5 3h3l-7.5 8.6L22 21h-5.9l-4.6-5.6L6 21H3l8-9.2L2 3h6l4.1 5L17.5 3Z"/></svg>
+    },
+    {
+      key: 'github',
+      url: settings.github,
+      label: 'GitHub',
+      svg: <svg width="18" height="18" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2a10 10 0 0 0-3.16 19.5c.5.09.68-.22.68-.48v-1.7c-2.78.6-3.36-1.17-3.36-1.17-.46-1.15-1.12-1.45-1.12-1.45-.92-.63.07-.62.07-.62 1.02.07 1.56 1.05 1.56 1.05.9 1.56 2.36 1.11 2.94.85.09-.65.35-1.11.64-1.36-2.22-.26-4.56-1.11-4.56-4.96 0-1.1.39-2 .1-2.7 0 0 .84-.27 2.75 1.03A9.56 9.56 0 0 1 12 7.07c.85 0 1.7.11 2.5.32 1.9-1.3 2.74-1.03 2.74-1.03.54 1.37.2 2.4.1 2.7.62.67 1 1.53 1 2.58 0 3.86-2.34 4.7-4.57 4.96.36.31.69.94.69 1.9v2.82c0 .26.18.57.69.48A10 10 0 0 0 12 2Z"/></svg>
+    },
+    {
+      key: 'threads',
+      url: settings.threads,
+      label: 'Threads',
+      svg: <svg width="18" height="18" viewBox="0 0 24 24"><path fill="currentColor" d="M12.186 24h-.007c-3.581-.024-6.334-1.205-8.184-3.509C2.35 18.44 1.5 15.586 1.472 12.01v-.017c.03-3.579.879-6.43 2.525-8.482C5.845 1.205 8.6.024 12.18 0h.014c2.746.02 5.043.725 6.826 2.098 1.677 1.29 2.858 3.13 3.509 5.467l-2.04.569c-1.104-3.96-3.898-5.984-8.304-6.015-2.91.022-5.11.936-6.54 2.717C4.307 6.504 3.616 8.914 3.589 12c.027 3.086.718 5.496 2.057 7.164 1.43 1.783 3.631 2.698 6.54 2.717 2.623-.02 4.358-.631 5.8-2.045 1.647-1.613 1.618-3.593 1.09-4.798-.31-.71-.873-1.3-1.634-1.75-.192 1.352-.622 2.446-1.284 3.272-.886 1.102-2.14 1.704-3.73 1.79-1.202.065-2.361-.218-3.259-.801-1.063-.689-1.685-1.74-1.752-2.96-.065-1.182.408-2.256 1.332-3.024.88-.731 2.177-1.14 3.65-1.152 1.2-.01 2.267.145 3.194.467.043-.988-.054-1.768-.29-2.317-.388-.904-1.298-1.363-2.703-1.363l-.082.001c-.952.016-1.678.283-2.156.794-.36.384-.605.914-.727 1.576l-2.008-.434c.186-.989.57-1.81 1.14-2.441.958-1.058 2.334-1.614 3.985-1.614l.099.001c2.291.04 3.863.967 4.672 2.757.37.815.544 1.838.524 3.035l.006.078c.032.084.06.17.084.255 1.047.478 1.876 1.165 2.46 2.042.882 1.323 1.074 2.986.54 4.681-.759 2.412-2.84 4.209-6.197 4.354-.206.01-.415.014-.626.014Zm-.766-5.861c.304-.004.6-.012.867-.048.926-.086 1.64-.426 2.123-1.01.458-.554.783-1.371.915-2.298-.795-.216-1.71-.33-2.738-.33-.048 0-.095 0-.142.001-.923.013-1.647.239-2.092.655-.386.36-.575.815-.533 1.28.05.55.333 1.012.8 1.303.49.306 1.123.454 1.8.447Z"/></svg>
     },
   ];
 
@@ -194,13 +176,13 @@ export default function InteractiveFooter() {
         {/* Brand */}
         <div className="ft__col ft__brand">
           <Link href="/" className="ft__logoLink">
-            <Image src="/images/medium_res_logo.webp" alt={`${site.siteName} logo`} width={56} height={56} className="ft__logo mx-auto sm:mx-0" />
-            <span className="ft__brandName">{site.siteName}</span>
+            <Image src="/images/medium_res_logo.webp" alt="VISIONARA logo" width={56} height={56} className="ft__logo mx-auto sm:mx-0" />
+            <span className="ft__brandName">VISIONARA</span>
           </Link>
-          <p className="ft__tag">{site.tagline}</p>
+          <p className="ft__tag">We craft digital experiences that inspire growth and innovation.</p>
 
           <button className="ft__email" onClick={copyEmail} aria-label="Copy email">
-            {contact.email}
+            {settings.email}
             <span className={`ft__copied ${copied ? 'is-on' : ''}`}>Copied!</span>
           </button>
 
@@ -265,7 +247,7 @@ export default function InteractiveFooter() {
 
       {/* bottom bar */}
       <div className="ft__bottom">
-        <p>© {year} {site.siteName}. All rights reserved.</p>
+        <p>© {year} VISIONARA. All rights reserved.</p>
         <div className="ft__bottomLinks">
           <Link href="#">Privacy</Link>
           <Link href="#">Terms</Link>

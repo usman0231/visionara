@@ -296,17 +296,6 @@ export default function ContactModal({ isOpen, onClose, contact, onReplySuccess 
                         </div>
                       )}
 
-                      {contact.budget && (
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Budget
-                          </label>
-                          <div className="bg-gray-50 px-3 py-2 rounded-md">
-                            <span className="text-gray-900">{contact.budget}</span>
-                          </div>
-                        </div>
-                      )}
-
                       {contact.timeline && (
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-1">

@@ -116,7 +116,6 @@ export function contactEmailHtml(data: ContactPayload) {
                     <tr>
                       <td style="padding:6px 0 14px 0;">
                         <span class="pill" style="display:inline-block;background:${brand.primarySoft};color:${brand.text};border:1px solid ${brand.border};padding:8px 10px;border-radius:999px;font-size:12px;margin-right:8px;margin-bottom:4px;"><strong style="color:${brand.primary}">Type</strong>: ${safe(types)}</span>
-                        <span class="pill" style="display:inline-block;background:${brand.primarySoft};color:${brand.text};border:1px solid ${brand.border};padding:8px 10px;border-radius:999px;font-size:12px;margin-right:8px;margin-bottom:4px;"><strong style="color:${brand.primary}">Budget</strong>: ${safe(data.budget) || 'N/A'}</span>
                         <span class="pill" style="display:inline-block;background:${brand.primarySoft};color:${brand.text};border:1px solid ${brand.border};padding:8px 10px;border-radius:999px;font-size:12px;margin-right:8px;margin-bottom:4px;"><strong style="color:${brand.primary}">Timeline</strong>: ${safe(data.timeline) || 'N/A'}</span>
                       </td>
                     </tr>

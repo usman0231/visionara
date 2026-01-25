@@ -64,18 +64,25 @@ export async function POST(
       return NextResponse.json({ error: 'Submission not found' }, { status: 404 });
     }
 
-    console.log('🔵 Found submission for email:', submission.email);
+    // Get email using Sequelize's get method to ensure proper data access
+    const recipientEmail = submission.get('email') as string || submission.dataValues?.email;
+    const recipientName = submission.get('name') as string || submission.dataValues?.name;
+    const originalMessage = submission.get('message') as string || submission.dataValues?.message;
+
+    console.log('🔵 Found submission for email:', recipientEmail);
     console.log('🔵 Submission details:', {
       id: submission.id,
-      name: submission.name,
-      email: submission.email,
-      hasEmail: !!submission.email,
-      emailLength: submission.email?.length
+      name: recipientName,
+      email: recipientEmail,
+      hasEmail: !!recipientEmail,
+      emailLength: recipientEmail?.length,
+      dataValues: submission.dataValues
     });
 
     // Validate email exists
-    if (!submission.email || !submission.email.trim()) {
+    if (!recipientEmail || !recipientEmail.trim()) {
       console.log('🔴 Submission has no email address');
+      console.log('🔴 Raw dataValues:', JSON.stringify(submission.dataValues));
       return NextResponse.json(
         { error: 'Contact submission has no email address' },
         { status: 400 }
@@ -99,22 +106,22 @@ export async function POST(
     let emailError = null;
 
     if (transporter) {
-      console.log('🔵 SMTP configured, sending email to:', submission.email);
+      console.log('🔵 SMTP configured, sending email to:', recipientEmail);
       const from = process.env.SMTP_FROM || process.env.SMTP_USER!;
 
       // Validate email format
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(submission.email)) {
-        console.log('🔴 Invalid email format:', submission.email);
-        emailError = `Invalid email format: ${submission.email}`;
+      if (!emailRegex.test(recipientEmail)) {
+        console.log('🔴 Invalid email format:', recipientEmail);
+        emailError = `Invalid email format: ${recipientEmail}`;
       } else {
         try {
           const mailOptions = {
             from: `"VISIONARA" <${from}>`,
-            to: submission.email,
+            to: recipientEmail,
             subject: `Re: Your inquiry to VISIONARA`,
-            html: generateReplyEmailHTML(submission.name, replyMessage, submission.message),
-            text: generateReplyEmailText(submission.name, replyMessage, submission.message),
+            html: generateReplyEmailHTML(recipientName, replyMessage, originalMessage),
+            text: generateReplyEmailText(recipientName, replyMessage, originalMessage),
             replyTo: from,
           };
 
@@ -126,7 +133,7 @@ export async function POST(
 
           await transporter.sendMail(mailOptions);
 
-          console.log(`✅ Reply email sent to ${submission.email} for submission ${id}`);
+          console.log(`✅ Reply email sent to ${recipientEmail} for submission ${id}`);
           emailSent = true;
         } catch (error: any) {
           console.error('🔴 Email sending error:', error.message);
