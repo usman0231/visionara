@@ -211,7 +211,7 @@ export default function PackagesSection() {
 
   const fetchPackages = async () => {
     try {
-      const response = await fetch('/api/admin/packages');
+      const response = await fetch('/api/packages');
       if (!response.ok) {
         // Use fallback data if API fails
         console.warn('API not available, using fallback data');
@@ -220,9 +220,8 @@ export default function PackagesSection() {
         return;
       }
       const data = await response.json();
-      // Filter only active packages
-      const activePackages = data.filter((pkg: Package) => pkg.active);
-      setPackages(activePackages);
+      // API already returns only active packages
+      setPackages(data);
     } catch (error) {
       // Use fallback data on error
       console.warn('Error fetching packages, using fallback data:', error);

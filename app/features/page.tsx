@@ -1,11 +1,21 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import Footer from '@/components/footer';
 
 type PlanKey = 'basic' | 'standard' | 'enterprise';
 type ServiceKey = 'web' | 'mobile' | 'graphic' | 'marketing';
+
+interface Package {
+  id: string;
+  category: string;
+  tier: string;
+  priceOnetime: string;
+  priceMonthly: string;
+  priceYearly: string;
+  features: string[];
+}
 
 const plans: { key: PlanKey; name: string; tag?: string; cta: string }[] = [
   { key: 'basic', name: 'Basic', cta: 'Get Started' },
@@ -13,7 +23,8 @@ const plans: { key: PlanKey; name: string; tag?: string; cta: string }[] = [
   { key: 'enterprise', name: 'Enterprise', cta: 'Contact Sales' },
 ];
 
-const pricing: Record<ServiceKey, Record<PlanKey, { onetime: string; monthly: string; yearly: string }>> = {
+// Fallback pricing data
+const FALLBACK_PRICING: Record<ServiceKey, Record<PlanKey, { onetime: string; monthly: string; yearly: string }>> = {
   web: {
     basic: { onetime: 'CAD $1,499', monthly: 'CAD $99/mo', yearly: 'CAD $1,188/yr' },
     standard: { onetime: 'CAD $2,499', monthly: 'CAD $199/mo', yearly: 'CAD $2,388/yr' },
@@ -154,7 +165,58 @@ const renderCell = (v: Cell) =>
 export default function FeaturesPage() {
   const [service, setService] = useState<ServiceKey>('web');
   const [billing, setBilling] = useState<'onetime' | 'monthly' | 'yearly'>('onetime');
+  const [packages, setPackages] = useState<Package[]>([]);
+  const [loading, setLoading] = useState(true);
   const sections = useMemo(() => dataByService[service], [service]);
+
+  useEffect(() => {
+    fetchPackages();
+  }, []);
+
+  const fetchPackages = async () => {
+    try {
+      const response = await fetch('/api/packages');
+      if (!response.ok) {
+        console.warn('API not available, using fallback pricing');
+        setLoading(false);
+        return;
+      }
+      const data = await response.json();
+      if (Array.isArray(data) && data.length > 0) {
+        setPackages(data);
+      }
+    } catch (error) {
+      console.warn('Error fetching packages, using fallback pricing:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Build pricing from packages or use fallback
+  const pricing = useMemo(() => {
+    if (packages.length === 0) return FALLBACK_PRICING;
+
+    const result: Record<ServiceKey, Record<PlanKey, { onetime: string; monthly: string; yearly: string }>> = {
+      web: { ...FALLBACK_PRICING.web },
+      mobile: { ...FALLBACK_PRICING.mobile },
+      graphic: { ...FALLBACK_PRICING.graphic },
+      marketing: { ...FALLBACK_PRICING.marketing },
+    };
+
+    packages.forEach((pkg) => {
+      const category = pkg.category.toLowerCase() as ServiceKey;
+      const tier = pkg.tier.toLowerCase() as PlanKey;
+      if (result[category] && result[category][tier]) {
+        result[category][tier] = {
+          onetime: pkg.priceOnetime,
+          monthly: pkg.priceMonthly,
+          yearly: pkg.priceYearly,
+        };
+      }
+    });
+
+    return result;
+  }, [packages]);
 
   return (
     <main className="bg-[var(--background)] text-[var(--text1)] min-h-screen">

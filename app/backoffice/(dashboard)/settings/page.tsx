@@ -1,9 +1,21 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
-import { CogIcon, PlusIcon, PencilIcon, TrashIcon, CheckIcon, XMarkIcon } from '@heroicons/react/24/outline';
-import { ChevronDownIcon, ChevronRightIcon } from '@heroicons/react/20/solid';
-import SettingModal from '@/components/backoffice/SettingModal';
+import { useState, useEffect } from 'react';
+import {
+  CogIcon,
+  PlusIcon,
+  PencilSquareIcon,
+  TrashIcon,
+  GlobeAltIcon,
+  LinkIcon,
+  BellIcon,
+  ShieldCheckIcon,
+  EnvelopeIcon,
+  PhoneIcon,
+  MapPinIcon,
+  CheckIcon,
+  XMarkIcon
+} from '@heroicons/react/24/outline';
 import PageHeader from '@/components/backoffice/PageHeader';
 import { useNotification } from '@/components/backoffice/NotificationProvider';
 
@@ -15,15 +27,104 @@ interface Setting {
   updatedAt: string;
 }
 
+// Predefined setting categories for better organization
+const SETTING_CATEGORIES = {
+  'site': {
+    label: 'Site Info',
+    icon: GlobeAltIcon,
+    color: 'bg-blue-100 text-blue-600',
+    description: 'Basic site information'
+  },
+  'contact': {
+    label: 'Contact',
+    icon: EnvelopeIcon,
+    color: 'bg-green-100 text-green-600',
+    description: 'Contact information'
+  },
+  'social': {
+    label: 'Social Media',
+    icon: LinkIcon,
+    color: 'bg-purple-100 text-purple-600',
+    description: 'Social media links'
+  },
+  'features': {
+    label: 'Features',
+    icon: ShieldCheckIcon,
+    color: 'bg-yellow-100 text-yellow-600',
+    description: 'Feature toggles'
+  },
+  'notifications': {
+    label: 'Notifications',
+    icon: BellIcon,
+    color: 'bg-red-100 text-red-600',
+    description: 'Notification settings'
+  },
+  'other': {
+    label: 'Other',
+    icon: CogIcon,
+    color: 'bg-gray-100 text-gray-600',
+    description: 'Other settings'
+  },
+};
+
+// Quick templates for common settings
+const QUICK_TEMPLATES = [
+  {
+    key: 'site.info',
+    label: 'Site Information',
+    icon: GlobeAltIcon,
+    fields: [
+      { name: 'siteName', label: 'Site Name', type: 'text', default: 'Visionara' },
+      { name: 'tagline', label: 'Tagline', type: 'text', default: 'Digital Excellence' },
+      { name: 'description', label: 'Description', type: 'textarea', default: '' },
+    ]
+  },
+  {
+    key: 'contact.info',
+    label: 'Contact Information',
+    icon: PhoneIcon,
+    fields: [
+      { name: 'email', label: 'Email', type: 'email', default: '' },
+      { name: 'phone', label: 'Phone', type: 'text', default: '' },
+      { name: 'address', label: 'Address', type: 'textarea', default: '' },
+      { name: 'contactHours', label: 'Contact Hours', type: 'text', default: '24/7' },
+      { name: 'officeHours', label: 'Office Hours', type: 'text', default: 'Appointment Only' },
+    ]
+  },
+  {
+    key: 'social.links',
+    label: 'Social Media Links',
+    icon: LinkIcon,
+    fields: [
+      { name: 'facebook', label: 'Facebook URL', type: 'url', default: '' },
+      { name: 'twitter', label: 'Twitter/X URL', type: 'url', default: '' },
+      { name: 'instagram', label: 'Instagram URL', type: 'url', default: '' },
+      { name: 'linkedin', label: 'LinkedIn URL', type: 'url', default: '' },
+      { name: 'github', label: 'GitHub URL', type: 'url', default: '' },
+    ]
+  },
+  {
+    key: 'features.toggles',
+    label: 'Feature Toggles',
+    icon: ShieldCheckIcon,
+    fields: [
+      { name: 'maintenanceMode', label: 'Maintenance Mode', type: 'boolean', default: false },
+      { name: 'showNewsletter', label: 'Show Newsletter', type: 'boolean', default: true },
+      { name: 'enableChat', label: 'Enable Chat Widget', type: 'boolean', default: false },
+    ]
+  },
+];
+
 export default function SettingsPage() {
   const { showNotification } = useNotification();
   const [settings, setSettings] = useState<Setting[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingSetting, setEditingSetting] = useState<Setting | null>(null);
-  const [expandedSettings, setExpandedSettings] = useState<Set<string>>(new Set());
-  const [searchTerm, setSearchTerm] = useState('');
+  const [editingKey, setEditingKey] = useState<string | null>(null);
+  const [editValues, setEditValues] = useState<Record<string, any>>({});
+  const [saving, setSaving] = useState(false);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [selectedTemplate, setSelectedTemplate] = useState<typeof QUICK_TEMPLATES[0] | null>(null);
+  const [newSettingValues, setNewSettingValues] = useState<Record<string, any>>({});
 
   useEffect(() => {
     fetchSettings();
@@ -32,123 +133,178 @@ export default function SettingsPage() {
   const fetchSettings = async () => {
     try {
       const response = await fetch('/api/admin/settings');
-      if (!response.ok) {
-        // If API fails, show empty state instead of error
-        setSettings([]);
-        setLoading(false);
-        return;
+      if (response.ok) {
+        const data = await response.json();
+        setSettings(Array.isArray(data) ? data : data.settings || []);
       }
-      const data = await response.json();
-      setSettings(data);
-    } catch (error: any) {
-      // On any error, show empty state
-      setSettings([]);
-      setError(null);
+    } catch (error) {
+      console.error('Failed to fetch settings:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleDelete = async (id: string) => {
+  const getCategory = (key: string) => {
+    const prefix = key.split('.')[0];
+    return SETTING_CATEGORIES[prefix as keyof typeof SETTING_CATEGORIES] || SETTING_CATEGORIES.other;
+  };
+
+  const startEditing = (setting: Setting) => {
+    setEditingKey(setting.key);
+    setEditValues(setting.value);
+  };
+
+  const cancelEditing = () => {
+    setEditingKey(null);
+    setEditValues({});
+  };
+
+  const saveSetting = async (setting: Setting) => {
+    setSaving(true);
+    try {
+      const response = await fetch(`/api/admin/settings/${setting.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key: setting.key, value: editValues }),
+      });
+
+      if (response.ok) {
+        showNotification('Setting saved successfully', 'success');
+        await fetchSettings();
+        cancelEditing();
+      } else {
+        throw new Error('Failed to save');
+      }
+    } catch (error) {
+      showNotification('Failed to save setting', 'error');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const deleteSetting = async (id: string) => {
     if (!confirm('Are you sure you want to delete this setting?')) return;
 
     try {
-      const response = await fetch(`/api/admin/settings/${id}`, {
-        method: 'DELETE',
+      const response = await fetch(`/api/admin/settings/${id}`, { method: 'DELETE' });
+      if (response.ok) {
+        showNotification('Setting deleted', 'success');
+        await fetchSettings();
+      }
+    } catch (error) {
+      showNotification('Failed to delete setting', 'error');
+    }
+  };
+
+  const openAddModal = (template: typeof QUICK_TEMPLATES[0]) => {
+    setSelectedTemplate(template);
+    const defaults: Record<string, any> = {};
+    template.fields.forEach(f => { defaults[f.name] = f.default; });
+    setNewSettingValues(defaults);
+    setShowAddModal(true);
+  };
+
+  const createSetting = async () => {
+    if (!selectedTemplate) return;
+    setSaving(true);
+
+    try {
+      const response = await fetch('/api/admin/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key: selectedTemplate.key, value: newSettingValues }),
       });
 
-      if (!response.ok) throw new Error('Failed to delete setting');
-
-      await fetchSettings();
-      showNotification('Setting deleted successfully', 'success');
+      if (response.ok) {
+        showNotification('Setting created successfully', 'success');
+        await fetchSettings();
+        setShowAddModal(false);
+        setSelectedTemplate(null);
+        setNewSettingValues({});
+      } else {
+        const err = await response.json();
+        throw new Error(err.error || 'Failed to create');
+      }
     } catch (error: any) {
-      showNotification('Failed to delete setting: ' + error.message, 'error');
+      showNotification(error.message || 'Failed to create setting', 'error');
+    } finally {
+      setSaving(false);
     }
   };
 
-  const openModal = (setting?: Setting) => {
-    setEditingSetting(setting || null);
-    setIsModalOpen(true);
-  };
-
-  const closeModal = () => {
-    setEditingSetting(null);
-    setIsModalOpen(false);
-  };
-
-  const handleSaveSetting = async () => {
-    await fetchSettings();
-    closeModal();
-  };
-
-  const toggleExpanded = (id: string) => {
-    const newExpanded = new Set(expandedSettings);
-    if (newExpanded.has(id)) {
-      newExpanded.delete(id);
-    } else {
-      newExpanded.add(id);
-    }
-    setExpandedSettings(newExpanded);
-  };
-
-  const renderJsonValue = (value: any, depth = 0): React.ReactNode => {
-    if (value === null) return <span className="text-gray-400">null</span>;
-    if (typeof value === 'boolean') return <span className="text-blue-600">{value.toString()}</span>;
-    if (typeof value === 'number') return <span className="text-green-600">{value}</span>;
-    if (typeof value === 'string') return <span className="text-orange-600">"{value}"</span>;
-
-    if (Array.isArray(value)) {
-      if (value.length === 0) return <span className="text-gray-500">[]</span>;
+  const renderFieldInput = (
+    fieldName: string,
+    value: any,
+    onChange: (name: string, val: any) => void,
+    type: string = 'text',
+    label?: string
+  ) => {
+    if (type === 'boolean' || typeof value === 'boolean') {
       return (
-        <div className={depth > 0 ? 'ml-4' : ''}>
-          <span className="text-gray-500">[</span>
-          {value.map((item, index) => (
-            <div key={index} className="ml-4">
-              {renderJsonValue(item, depth + 1)}
-              {index < value.length - 1 && <span className="text-gray-500">,</span>}
+        <label className="flex items-center gap-3 cursor-pointer">
+          <div className="relative">
+            <input
+              type="checkbox"
+              checked={!!value}
+              onChange={(e) => onChange(fieldName, e.target.checked)}
+              className="sr-only"
+            />
+            <div className={`w-11 h-6 rounded-full transition-colors ${value ? 'bg-indigo-600' : 'bg-gray-300'}`}>
+              <div className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${value ? 'translate-x-5' : ''}`} />
             </div>
-          ))}
-          <span className="text-gray-500">]</span>
+          </div>
+          <span className="text-sm text-gray-700">{label || fieldName}</span>
+        </label>
+      );
+    }
+
+    if (type === 'textarea') {
+      return (
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">{label || fieldName}</label>
+          <textarea
+            value={value || ''}
+            onChange={(e) => onChange(fieldName, e.target.value)}
+            rows={3}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
+          />
         </div>
       );
     }
 
-    if (typeof value === 'object') {
-      const keys = Object.keys(value);
-      if (keys.length === 0) return <span className="text-gray-500">{'{}'}</span>;
-
-      return (
-        <div className={depth > 0 ? 'ml-4' : ''}>
-          <span className="text-gray-500">{'{'}</span>
-          {keys.map((key, index) => (
-            <div key={key} className="ml-4">
-              <span className="text-purple-600">"{key}"</span>
-              <span className="text-gray-500">: </span>
-              {renderJsonValue(value[key], depth + 1)}
-              {index < keys.length - 1 && <span className="text-gray-500">,</span>}
-            </div>
-          ))}
-          <span className="text-gray-500">{'}'}</span>
-        </div>
-      );
-    }
-
-    return <span className="text-gray-400">{String(value)}</span>;
+    return (
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">{label || fieldName}</label>
+        <input
+          type={type}
+          value={value || ''}
+          onChange={(e) => onChange(fieldName, e.target.value)}
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
+        />
+      </div>
+    );
   };
 
-  const filteredSettings = settings.filter(setting =>
-    setting.key.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    JSON.stringify(setting.value).toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Group settings by category
+  const groupedSettings = settings.reduce((acc, setting) => {
+    const prefix = setting.key.split('.')[0];
+    const category = SETTING_CATEGORIES[prefix as keyof typeof SETTING_CATEGORIES] ? prefix : 'other';
+    if (!acc[category]) acc[category] = [];
+    acc[category].push(setting);
+    return acc;
+  }, {} as Record<string, Setting[]>);
+
+  // Check which templates are already created
+  const existingKeys = new Set(settings.map(s => s.key));
 
   if (loading) {
     return (
       <div className="px-4 sm:px-6 lg:px-8">
-        <div className="animate-pulse">
-          <div className="h-8 bg-gray-200 rounded mb-4"></div>
-          <div className="space-y-4">
-            {[...Array(3)].map((_, i) => (
-              <div key={i} className="h-32 bg-gray-200 rounded-lg"></div>
+        <div className="animate-pulse space-y-6">
+          <div className="h-10 bg-gray-200 rounded w-1/3"></div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {[1, 2, 3, 4].map(i => (
+              <div key={i} className="h-40 bg-gray-200 rounded-xl"></div>
             ))}
           </div>
         </div>
@@ -156,213 +312,239 @@ export default function SettingsPage() {
     );
   }
 
-  // Remove error display - we show empty state instead
-
   return (
-    <div className="px-4 sm:px-6 lg:px-8">
+    <div className="px-4 sm:px-6 lg:px-8 pb-12">
       <PageHeader
         title="Settings"
-        description="Manage application settings and configuration values for your system."
-        icon={
-          <CogIcon className="h-6 w-6" />
-        }
+        description="Manage your website settings and configuration"
+        icon={<CogIcon className="h-6 w-6" />}
         iconBgColor="bg-gray-100"
         iconColor="text-gray-600"
-        action={{
-          label: "Add Setting",
-          onClick: () => openModal(),
-          icon: <PlusIcon className="h-4 w-4" />
-        }}
       />
 
-      <Suspense fallback={
+      {/* Quick Add Section */}
+      {QUICK_TEMPLATES.some(t => !existingKeys.has(t.key)) && (
         <div className="mt-8">
-          <div className="max-w-md">
-            <div className="animate-pulse h-10 bg-gray-200 rounded"></div>
-          </div>
-          <div className="mt-6 space-y-4">
-            {[...Array(3)].map((_, i) => (
-              <div key={i} className="h-32 bg-gray-200 rounded-lg animate-pulse"></div>
-            ))}
-          </div>
-        </div>
-      }>
-        {/* Enhanced Instructions */}
-        <div className="mt-8 mb-6 rounded-lg border border-blue-200 bg-blue-50 p-4">
-          <div className="flex items-start">
-            <div className="flex-shrink-0">
-              <svg className="h-5 w-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-              </svg>
-            </div>
-            <div className="ml-3">
-              <h3 className="text-sm font-medium text-blue-800">Settings Management</h3>
-              <div className="mt-1 text-sm text-blue-700">
-                Store application configuration as key-value pairs with JSON values. Click the arrow next to each setting to expand and view the full configuration structure.
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Search */}
-        <div className="mb-6">
-          <div className="max-w-md">
-            <input
-              type="text"
-              placeholder="Search settings..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-            />
-          </div>
-        </div>
-
-        {/* Settings Cards */}
-        <div className="mt-6 space-y-4">
-        {filteredSettings.map((setting) => (
-          <div key={setting.id} className="bg-white shadow-sm ring-1 ring-gray-900/5 sm:rounded-lg">
-            <div className="px-4 py-5 sm:p-6">
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-2">
-                    <button
-                      onClick={() => toggleExpanded(setting.id)}
-                      className="flex items-center text-sm font-medium text-gray-900 hover:text-gray-700"
-                    >
-                      {expandedSettings.has(setting.id) ? (
-                        <ChevronDownIcon className="h-4 w-4 mr-1" />
-                      ) : (
-                        <ChevronRightIcon className="h-4 w-4 mr-1" />
-                      )}
-                      <code className="bg-gray-100 px-2 py-1 rounded text-sm font-mono">
-                        {setting.key}
-                      </code>
-                    </button>
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">Quick Setup</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {QUICK_TEMPLATES.filter(t => !existingKeys.has(t.key)).map((template) => {
+              const Icon = template.icon;
+              return (
+                <button
+                  key={template.key}
+                  onClick={() => openAddModal(template)}
+                  className="flex items-center gap-3 p-4 bg-white border-2 border-dashed border-gray-300 rounded-xl hover:border-indigo-400 hover:bg-indigo-50 transition-all group"
+                >
+                  <div className="p-2 bg-gray-100 rounded-lg group-hover:bg-indigo-100 transition-colors">
+                    <Icon className="h-5 w-5 text-gray-600 group-hover:text-indigo-600" />
                   </div>
-
-                  <div className="text-xs text-gray-500 mb-3">
-                    Created: {new Date(setting.createdAt).toLocaleString()} •
-                    Updated: {new Date(setting.updatedAt).toLocaleString()}
+                  <div className="text-left">
+                    <div className="font-medium text-gray-900 group-hover:text-indigo-600">{template.label}</div>
+                    <div className="text-xs text-gray-500">Click to add</div>
                   </div>
+                  <PlusIcon className="h-5 w-5 text-gray-400 ml-auto group-hover:text-indigo-600" />
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
-                  {expandedSettings.has(setting.id) ? (
-                    <div className="bg-gray-50 p-4 rounded-lg">
-                      <div className="font-mono text-sm whitespace-pre-wrap overflow-auto max-h-96">
-                        {renderJsonValue(setting.value)}
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="bg-gray-50 p-3 rounded-lg">
-                      <div className="font-mono text-sm text-gray-600 truncate">
-                        {JSON.stringify(setting.value)}
-                      </div>
-                    </div>
-                  )}
+      {/* Settings List */}
+      {Object.keys(groupedSettings).length > 0 ? (
+        <div className="mt-8 space-y-8">
+          {Object.entries(groupedSettings).map(([categoryKey, categorySettings]) => {
+            const category = SETTING_CATEGORIES[categoryKey as keyof typeof SETTING_CATEGORIES] || SETTING_CATEGORIES.other;
+            const Icon = category.icon;
+
+            return (
+              <div key={categoryKey}>
+                <div className="flex items-center gap-3 mb-4">
+                  <div className={`p-2 rounded-lg ${category.color}`}>
+                    <Icon className="h-5 w-5" />
+                  </div>
+                  <h2 className="text-lg font-semibold text-gray-900">{category.label}</h2>
                 </div>
 
-                <div className="ml-4 flex flex-col gap-2">
-                  <button
-                    onClick={() => openModal(setting)}
-                    className="text-indigo-600 hover:text-indigo-900"
-                  >
-                    <PencilIcon className="h-5 w-5" />
-                    <span className="sr-only">Edit {setting.key}</span>
-                  </button>
-                  <button
-                    onClick={() => handleDelete(setting.id)}
-                    className="text-red-600 hover:text-red-900"
-                  >
-                    <TrashIcon className="h-5 w-5" />
-                    <span className="sr-only">Delete {setting.key}</span>
-                  </button>
+                <div className="space-y-4">
+                  {categorySettings.map((setting) => {
+                    const isEditing = editingKey === setting.key;
+                    const template = QUICK_TEMPLATES.find(t => t.key === setting.key);
+
+                    return (
+                      <div
+                        key={setting.id}
+                        className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden"
+                      >
+                        <div className="px-6 py-4">
+                          <div className="flex items-center justify-between mb-4">
+                            <div>
+                              <h3 className="font-medium text-gray-900">
+                                {template?.label || setting.key}
+                              </h3>
+                              <p className="text-xs text-gray-500 mt-0.5">
+                                Key: <code className="bg-gray-100 px-1 rounded">{setting.key}</code>
+                              </p>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              {isEditing ? (
+                                <>
+                                  <button
+                                    onClick={() => saveSetting(setting)}
+                                    disabled={saving}
+                                    className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors disabled:opacity-50"
+                                  >
+                                    <CheckIcon className="h-5 w-5" />
+                                  </button>
+                                  <button
+                                    onClick={cancelEditing}
+                                    className="p-2 text-gray-500 hover:bg-gray-100 rounded-lg transition-colors"
+                                  >
+                                    <XMarkIcon className="h-5 w-5" />
+                                  </button>
+                                </>
+                              ) : (
+                                <>
+                                  <button
+                                    onClick={() => startEditing(setting)}
+                                    className="p-2 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                                  >
+                                    <PencilSquareIcon className="h-5 w-5" />
+                                  </button>
+                                  <button
+                                    onClick={() => deleteSetting(setting.id)}
+                                    className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                  >
+                                    <TrashIcon className="h-5 w-5" />
+                                  </button>
+                                </>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Fields */}
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {template ? (
+                              // Render with template fields
+                              template.fields.map((field) => (
+                                <div key={field.name}>
+                                  {renderFieldInput(
+                                    field.name,
+                                    isEditing ? editValues[field.name] : setting.value[field.name],
+                                    isEditing
+                                      ? (name, val) => setEditValues(prev => ({ ...prev, [name]: val }))
+                                      : () => {},
+                                    field.type,
+                                    field.label
+                                  )}
+                                  {!isEditing && (
+                                    <div className="mt-1 text-sm text-gray-600">
+                                      {typeof setting.value[field.name] === 'boolean'
+                                        ? (setting.value[field.name] ? 'Enabled' : 'Disabled')
+                                        : setting.value[field.name] || <span className="text-gray-400 italic">Not set</span>}
+                                    </div>
+                                  )}
+                                </div>
+                              ))
+                            ) : (
+                              // Render raw JSON values
+                              Object.entries(setting.value).map(([key, val]) => (
+                                <div key={key}>
+                                  {isEditing ? (
+                                    renderFieldInput(
+                                      key,
+                                      editValues[key],
+                                      (name, v) => setEditValues(prev => ({ ...prev, [name]: v })),
+                                      typeof val === 'boolean' ? 'boolean' : 'text',
+                                      key
+                                    )
+                                  ) : (
+                                    <div>
+                                      <label className="block text-sm font-medium text-gray-700 mb-1">{key}</label>
+                                      <div className="text-sm text-gray-600">
+                                        {typeof val === 'boolean'
+                                          ? (val ? 'Enabled' : 'Disabled')
+                                          : typeof val === 'object'
+                                            ? JSON.stringify(val)
+                                            : val || <span className="text-gray-400 italic">Not set</span>}
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+                              ))
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="px-6 py-3 bg-gray-50 border-t border-gray-100 text-xs text-gray-500">
+                          Last updated: {new Date(setting.updatedAt).toLocaleString()}
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {filteredSettings.length === 0 && !searchTerm && (
-        <div className="text-center py-12">
+            );
+          })}
+        </div>
+      ) : (
+        <div className="mt-12 text-center">
           <CogIcon className="mx-auto h-12 w-12 text-gray-400" />
-          <h3 className="mt-2 text-sm font-semibold text-gray-900">No settings</h3>
-          <p className="mt-1 text-sm text-gray-500">Get started by creating your first setting.</p>
-          <div className="mt-6">
-            <button
-              onClick={() => openModal()}
-              className="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-            >
-              <PlusIcon className="-ml-0.5 mr-1.5 h-5 w-5" aria-hidden="true" />
-              Add Setting
-            </button>
-          </div>
+          <h3 className="mt-3 text-lg font-medium text-gray-900">No settings yet</h3>
+          <p className="mt-1 text-gray-500">Get started by adding your first setting using the Quick Setup above.</p>
         </div>
       )}
 
-      {filteredSettings.length === 0 && searchTerm && (
-        <div className="text-center py-12">
-          <p className="text-sm text-gray-500">No settings found matching "{searchTerm}"</p>
-        </div>
-      )}
+      {/* Add Setting Modal */}
+      {showAddModal && selectedTemplate && (
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+          <div className="flex min-h-full items-center justify-center p-4">
+            <div className="fixed inset-0 bg-black/30" onClick={() => setShowAddModal(false)} />
 
-      {/* Common Settings Templates */}
-      {settings.length === 0 && (
-        <div className="mt-8">
-          <h3 className="text-sm font-medium text-gray-900 mb-4">Common Settings Examples:</h3>
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <div className="font-mono text-xs text-gray-600 mb-2">site.general</div>
-              <pre className="text-xs text-gray-700 whitespace-pre-wrap">
-{`{
-  "title": "Visionara",
-  "description": "Professional web development services",
-  "email": "contact@visionara.com",
-  "phone": "+1 234 567 8900"
-}`}
-              </pre>
-            </div>
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <div className="font-mono text-xs text-gray-600 mb-2">features.enabled</div>
-              <pre className="text-xs text-gray-700 whitespace-pre-wrap">
-{`{
-  "darkMode": true,
-  "analytics": true,
-  "chatWidget": false,
-  "maintenance": false
-}`}
-              </pre>
-            </div>
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <div className="font-mono text-xs text-gray-600 mb-2">social.links</div>
-              <pre className="text-xs text-gray-700 whitespace-pre-wrap">
-{`{
-  "twitter": "https://twitter.com/visionara",
-  "linkedin": "https://linkedin.com/company/visionara",
-  "github": "https://github.com/visionara"
-}`}
-              </pre>
-            </div>
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <div className="font-mono text-xs text-gray-600 mb-2">api.limits</div>
-              <pre className="text-xs text-gray-700 whitespace-pre-wrap">
-{`{
-  "maxRequests": 1000,
-  "rateLimitWindow": "1h",
-  "allowedOrigins": ["localhost", "visionara.com"]
-}`}
-              </pre>
+            <div className="relative bg-white rounded-2xl shadow-xl max-w-lg w-full p-6">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="p-2 bg-indigo-100 rounded-lg">
+                  <selectedTemplate.icon className="h-6 w-6 text-indigo-600" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">{selectedTemplate.label}</h3>
+                  <p className="text-sm text-gray-500">Configure your {selectedTemplate.label.toLowerCase()}</p>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                {selectedTemplate.fields.map((field) => (
+                  <div key={field.name}>
+                    {renderFieldInput(
+                      field.name,
+                      newSettingValues[field.name],
+                      (name, val) => setNewSettingValues(prev => ({ ...prev, [name]: val })),
+                      field.type,
+                      field.label
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              <div className="flex gap-3 mt-6">
+                <button
+                  onClick={() => setShowAddModal(false)}
+                  className="flex-1 px-4 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={createSetting}
+                  disabled={saving}
+                  className="flex-1 px-4 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-medium transition-colors disabled:opacity-50"
+                >
+                  {saving ? 'Saving...' : 'Save Setting'}
+                </button>
+              </div>
             </div>
           </div>
         </div>
-        )}
-      </Suspense>
-
-      <SettingModal
-        isOpen={isModalOpen}
-        onClose={closeModal}
-        onSave={handleSaveSetting}
-        setting={editingSetting}
-      />
+      )}
     </div>
   );
 }

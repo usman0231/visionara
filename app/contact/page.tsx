@@ -19,6 +19,23 @@ interface Package {
   active: boolean;
 }
 
+interface ContactSettings {
+  email?: string;
+  phone?: string;
+  address?: string;
+  contactHours?: string;
+  officeHours?: string;
+}
+
+// Fallback data
+const FALLBACK_CONTACT: ContactSettings = {
+  email: 'visionara0231@gmail.com',
+  phone: '+1 437-430-3922',
+  address: '1454 Dundas St E, Mississauga, ON L4X 1L4',
+  contactHours: '24/7',
+  officeHours: 'Appointment Only',
+};
+
 export default function ContactPage() {
   const rootRef = useRef<HTMLDivElement | null>(null);
   const [loading, setLoading] = useState(false);
@@ -26,6 +43,7 @@ export default function ContactPage() {
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
   const [packages, setPackages] = useState<Package[]>([]);
   const [packagesLoading, setPackagesLoading] = useState(true);
+  const [contact, setContact] = useState<ContactSettings>(FALLBACK_CONTACT);
 
   const toggleService = (service: string) => {
     setSelectedServices(prev =>
@@ -35,7 +53,7 @@ export default function ContactPage() {
     );
   };
 
-  // Fetch packages for pricing
+  // Fetch packages and settings
   useEffect(() => {
     const fetchPackages = async () => {
       try {
@@ -51,7 +69,26 @@ export default function ContactPage() {
       }
     };
 
+    const fetchSettings = async () => {
+      try {
+        const response = await fetch('/api/settings');
+        if (response.ok) {
+          const data = await response.json();
+          const settings = data.settings || data || [];
+
+          settings.forEach((setting: { key: string; value: any }) => {
+            if (setting.key === 'contact.info') {
+              setContact({ ...FALLBACK_CONTACT, ...setting.value });
+            }
+          });
+        }
+      } catch (error) {
+        console.warn('Using fallback contact data');
+      }
+    };
+
     fetchPackages();
+    fetchSettings();
   }, []);
 
   useEffect(() => {
@@ -139,14 +176,14 @@ export default function ContactPage() {
             <ul className="mt-3 space-y-2 text-sm text-[var(--text1)]/90">
               <li>
                 Email:{' '}
-                <a className="text-[var(--foreground)] underline" href="mailto:visionara0231@gmail.com">
-                  visionara0231@gmail.com
+                <a className="text-[var(--foreground)] underline" href={`mailto:${contact.email}`}>
+                  {contact.email}
                 </a>
               </li>
-              <li>Phone: <span className="opacity-90">+1 437-430-3922</span></li>
-              <li>Contact Hours: <span className="opacity-90">24/7</span></li>
-              <li>Office Hours: <span className="opacity-90">Appointment Only</span></li>
-              <li>Adress: <span className="opacity-90">1454 Dundas St E, Mississauga, ON L4X 1L4</span></li>
+              <li>Phone: <span className="opacity-90">{contact.phone}</span></li>
+              <li>Contact Hours: <span className="opacity-90">{contact.contactHours || '24/7'}</span></li>
+              <li>Office Hours: <span className="opacity-90">{contact.officeHours || 'Appointment Only'}</span></li>
+              <li>Address: <span className="opacity-90">{contact.address}</span></li>
             </ul>
           </div>
 

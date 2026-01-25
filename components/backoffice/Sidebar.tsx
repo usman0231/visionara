@@ -21,7 +21,7 @@ import {
 } from "@heroicons/react/24/outline";
 
 const navigation = [
-  { name: "Dashboard", href: "/backoffice", icon: HomeIcon },
+  { name: "Dashboard", href: "/backoffice/home", icon: HomeIcon },
   { name: "Users", href: "/backoffice/users", icon: UsersIcon },
   {
     name: "Services",
@@ -87,7 +87,7 @@ export default function Sidebar() {
           {navigation.map((item) => {
             const isActive =
               pathname === item.href ||
-              (item.href !== "/backoffice" && pathname.startsWith(item.href));
+              pathname.startsWith(item.href + "/");
 
             return (
               <li key={item.name}>

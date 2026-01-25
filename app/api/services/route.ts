@@ -7,7 +7,7 @@ export const runtime = 'nodejs';
 export async function GET() {
   try {
     const services = await Service.findAll({
-      where: { deletedAt: null },
+      where: { deletedAt: null, active: true },
       order: [['sortOrder', 'ASC'], ['createdAt', 'DESC']],
     });
 

@@ -1,40 +1,42 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 type Review = {
-  name: string;
-  role?: string;
-  rating: number; // 1..5
-  text: string;
+  id?: string;
+  clientName: string;
+  clientTitle?: string;
+  rating: number;
+  content: string;
 };
 
-const REVIEWS: Review[] = [
+// Fallback data for when database is unavailable
+const FALLBACK_REVIEWS: Review[] = [
   {
-    name: 'Amina K.',
-    role: 'Product Designer',
+    clientName: 'Amina K.',
+    clientTitle: 'Product Designer',
     rating: 5,
-    text: 'The experience was buttery smooth. The micro-animations made everything feel premium without being flashy.'
+    content: 'The experience was buttery smooth. The micro-animations made everything feel premium without being flashy.'
   },
   {
-    name: 'Usman H.',
-    role: 'Founder, Fintly',
+    clientName: 'Usman H.',
+    clientTitle: 'Founder, Fintly',
     rating: 5,
-    text: 'Fantastic. Performance is snappy and the UI polish stands out—customers noticed immediately.'
+    content: 'Fantastic. Performance is snappy and the UI polish stands out—customers noticed immediately.'
   },
   {
-    name: 'Sana R.',
-    role: 'Marketing Lead',
+    clientName: 'Sana R.',
+    clientTitle: 'Marketing Lead',
     rating: 4,
-    text: 'Love the details: hover states, subtle glow, and the way cards slide in. Instantly elevated our brand feel.'
+    content: 'Love the details: hover states, subtle glow, and the way cards slide in. Instantly elevated our brand feel.'
   },
   {
-    name: 'Zayn M.',
-    role: 'Engineer',
+    clientName: 'Zayn M.',
+    clientTitle: 'Engineer',
     rating: 5,
-    text: 'Setup was effortless and the animations are configurable. Dark-mode friendly out of the box.'
+    content: 'Setup was effortless and the animations are configurable. Dark-mode friendly out of the box.'
   },
 ];
 
@@ -71,8 +73,39 @@ function Stars({ rating }: { rating: number }) {
 
 export default function ReviewsSection() {
   const sectionRef = useRef<HTMLDivElement | null>(null);
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    fetchReviews();
+  }, []);
+
+  const fetchReviews = async () => {
+    try {
+      const response = await fetch('/api/reviews?published=true');
+      if (!response.ok) {
+        console.warn('API not available, using fallback data');
+        setReviews(FALLBACK_REVIEWS);
+        setLoading(false);
+        return;
+      }
+      const data = await response.json();
+      if (data.reviews && data.reviews.length > 0) {
+        setReviews(data.reviews);
+      } else {
+        setReviews(FALLBACK_REVIEWS);
+      }
+    } catch (error) {
+      console.warn('Error fetching reviews, using fallback data:', error);
+      setReviews(FALLBACK_REVIEWS);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (loading) return;
+
     // GSAP + ScrollTrigger safely on client
     gsap.registerPlugin(ScrollTrigger);
 
@@ -178,7 +211,7 @@ export default function ReviewsSection() {
       ctx.revert();
       cleanups.forEach((fn) => fn());
     };
-  }, []);
+  }, [loading]);
 
   return (
     <section ref={sectionRef} className="reviews">
@@ -195,24 +228,45 @@ export default function ReviewsSection() {
       </header>
 
       <div className="grid">
-        {REVIEWS.map((r, idx) => (
-          <article className="review-card" key={idx}>
-            <div className="review-card__border" aria-hidden />
-            <div className="review-card__inner">
-              <div className="review-card__top">
-                <div className="avatar" aria-hidden>
-                  {r.name.split(' ').map(p => p[0]).slice(0,2).join('').toUpperCase()}
+        {loading ? (
+          [...Array(4)].map((_, i) => (
+            <article className="review-card" key={i}>
+              <div className="review-card__border" aria-hidden />
+              <div className="review-card__inner animate-pulse">
+                <div className="review-card__top">
+                  <div className="avatar bg-gray-300" aria-hidden></div>
+                  <div className="meta">
+                    <div className="h-4 bg-gray-200 rounded w-24 mb-2"></div>
+                    <div className="h-3 bg-gray-200 rounded w-20"></div>
+                  </div>
                 </div>
-                <div className="meta">
-                  <div className="name">{r.name}</div>
-                  {r.role && <div className="role">{r.role}</div>}
+                <div className="mt-4 space-y-2">
+                  <div className="h-3 bg-gray-200 rounded"></div>
+                  <div className="h-3 bg-gray-200 rounded w-5/6"></div>
                 </div>
-                <Stars rating={r.rating} />
               </div>
-              <p className="text">“{r.text}”</p>
-            </div>
-          </article>
-        ))}
+            </article>
+          ))
+        ) : (
+          reviews.map((r, idx) => (
+            <article className="review-card" key={r.id || idx}>
+              <div className="review-card__border" aria-hidden />
+              <div className="review-card__inner">
+                <div className="review-card__top">
+                  <div className="avatar" aria-hidden>
+                    {r.clientName.split(' ').map(p => p[0]).slice(0,2).join('').toUpperCase()}
+                  </div>
+                  <div className="meta">
+                    <div className="name">{r.clientName}</div>
+                    {r.clientTitle && <div className="role">{r.clientTitle}</div>}
+                  </div>
+                  <Stars rating={r.rating} />
+                </div>
+                <p className="text">"{r.content}"</p>
+              </div>
+            </article>
+          ))
+        )}
       </div>
 
       <style jsx>{`

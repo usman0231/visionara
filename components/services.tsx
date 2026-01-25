@@ -1,34 +1,35 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Image from 'next/image';
 
-type Svc = { title: string; icon: string; text: string };
+type Svc = { id?: string; title: string; iconUrl: string; text: string };
 
-const SERVICES: Svc[] = [
+// Fallback data for when database is unavailable
+const FALLBACK_SERVICES: Svc[] = [
   {
     title: 'Web Development',
-    icon: '/icons/computer.gif',
+    iconUrl: '/icons/computer.gif',
     text:
       'Pixel-perfect, responsive websites with fast load times and clean, scalable code.',
   },
   {
     title: 'Mobile App Development',
-    icon: '/icons/computer.gif',
+    iconUrl: '/icons/computer.gif',
     text:
       'iOS & Android apps with modern UI and smooth, native-feel interactions.',
   },
   {
     title: 'Graphic Designing',
-    icon: '/icons/computer.gif',
+    iconUrl: '/icons/computer.gif',
     text:
       'Logos, brand systems, and marketing collateral that feel premium and consistent.',
   },
   {
     title: 'Marketing',
-    icon: '/icons/computer.gif',
+    iconUrl: '/icons/computer.gif',
     text:
       'Full-funnel strategy across SEO, paid, and lifecycle—creative that converts.',
   },
@@ -38,8 +39,41 @@ export default function Services() {
   const sectionRef = useRef<HTMLDivElement | null>(null);
   const stageRef = useRef<HTMLDivElement | null>(null);
   const trackRef = useRef<HTMLDivElement | null>(null);
+  const [services, setServices] = useState<Svc[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    fetchServices();
+  }, []);
+
+  const fetchServices = async () => {
+    try {
+      const response = await fetch('/api/services');
+      if (!response.ok) {
+        console.warn('API not available, using fallback data');
+        setServices(FALLBACK_SERVICES);
+        setLoading(false);
+        return;
+      }
+      const data = await response.json();
+      if (data.services && data.services.length > 0) {
+        // Filter only active services
+        const activeServices = data.services.filter((s: any) => s.active !== false);
+        setServices(activeServices);
+      } else {
+        setServices(FALLBACK_SERVICES);
+      }
+    } catch (error) {
+      console.warn('Error fetching services, using fallback data:', error);
+      setServices(FALLBACK_SERVICES);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (loading || services.length === 0) return;
+
     gsap.registerPlugin(ScrollTrigger);
 
     const reduce =
@@ -190,7 +224,7 @@ export default function Services() {
       mm.revert();
       ScrollTrigger.removeEventListener('refreshInit', setStageHeight);
     };
-  }, []);
+  }, [loading, services]);
 
   return (
     <section ref={sectionRef} className="home_section2 svc">
@@ -266,13 +300,13 @@ export default function Services() {
       {/* Stage keeps slides centered below header space */}
       <div ref={stageRef} className="svc__stage">
         <div ref={trackRef} className="svc__track">
-          {SERVICES.map((s) => (
-            <section key={s.title} className="svc__panel">
+          {(loading ? FALLBACK_SERVICES : services).map((s) => (
+            <section key={s.id || s.title} className="svc__panel">
               <article className="svc__card">
                 <div className="svc__cardBorder" aria-hidden />
                 <div className="svc__iconWrap">
                   <Image
-                    src={s.icon}
+                    src={s.iconUrl || '/icons/computer.gif'}
                     alt={`${s.title} icon`}
                     width={120}
                     height={120}

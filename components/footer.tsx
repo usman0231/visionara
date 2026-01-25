@@ -6,10 +6,79 @@ import Link from 'next/link';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
+interface SiteSettings {
+  siteName?: string;
+  tagline?: string;
+  description?: string;
+}
+
+interface ContactSettings {
+  email?: string;
+  phone?: string;
+  address?: string;
+}
+
+interface SocialSettings {
+  facebook?: string;
+  twitter?: string;
+  instagram?: string;
+  linkedin?: string;
+  github?: string;
+}
+
+// Fallback data
+const FALLBACK_SITE: SiteSettings = {
+  siteName: 'VISIONARA',
+  tagline: 'We craft digital experiences that inspire growth and innovation.',
+};
+
+const FALLBACK_CONTACT: ContactSettings = {
+  email: 'visionara0231@gmail.com',
+  phone: '+1 437-430-3922',
+  address: '1454 Dundas St E, Mississauga, ON L4X 1L4',
+};
+
+const FALLBACK_SOCIAL: SocialSettings = {
+  twitter: '#',
+  linkedin: '#',
+  github: '#',
+  instagram: '#',
+};
+
 export default function InteractiveFooter() {
   const ref = useRef<HTMLDivElement | null>(null);
   const [year] = useState<number>(new Date().getFullYear());
   const [copied, setCopied] = useState(false);
+  const [site, setSite] = useState<SiteSettings>(FALLBACK_SITE);
+  const [contact, setContact] = useState<ContactSettings>(FALLBACK_CONTACT);
+  const [social, setSocial] = useState<SocialSettings>(FALLBACK_SOCIAL);
+
+  // Fetch settings from database
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const response = await fetch('/api/settings');
+        if (response.ok) {
+          const data = await response.json();
+          const settings = data.settings || data || [];
+
+          settings.forEach((setting: { key: string; value: any }) => {
+            if (setting.key === 'site.info') {
+              setSite({ ...FALLBACK_SITE, ...setting.value });
+            } else if (setting.key === 'contact.info') {
+              setContact({ ...FALLBACK_CONTACT, ...setting.value });
+            } else if (setting.key === 'social.links') {
+              setSocial({ ...FALLBACK_SOCIAL, ...setting.value });
+            }
+          });
+        }
+      } catch (error) {
+        console.warn('Using fallback footer data');
+      }
+    };
+
+    fetchSettings();
+  }, []);
 
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
@@ -69,13 +138,50 @@ export default function InteractiveFooter() {
 
   const copyEmail = async () => {
     try {
-      await navigator.clipboard.writeText('visionara0231@gmail.com');
+      await navigator.clipboard.writeText(contact.email || FALLBACK_CONTACT.email!);
       setCopied(true);
       setTimeout(() => setCopied(false), 1500);
     } catch {}
   };
 
   const scrollTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  // Social icons with their SVG paths
+  const socialIcons = [
+    {
+      key: 'twitter',
+      url: social.twitter,
+      label: 'Twitter / X',
+      svg: <svg width="18" height="18" viewBox="0 0 24 24"><path fill="currentColor" d="M17.5 3h3l-7.5 8.6L22 21h-5.9l-4.6-5.6L6 21H3l8-9.2L2 3h6l4.1 5L17.5 3Z"/></svg>
+    },
+    {
+      key: 'linkedin',
+      url: social.linkedin,
+      label: 'LinkedIn',
+      svg: <svg width="18" height="18" viewBox="0 0 24 24"><path fill="currentColor" d="M6.94 6.5A2.44 2.44 0 1 1 4.5 4.06 2.44 2.44 0 0 1 6.94 6.5ZM4.75 20h4.38V9H4.75v11ZM13 9v11h4.38v-5.83c0-3.21 4.17-3.47 4.17 0V20H26V13.94c0-6.31-6.87-6.07-8.62-2.97V9H13Z"/></svg>
+    },
+    {
+      key: 'github',
+      url: social.github,
+      label: 'GitHub',
+      svg: <svg width="18" height="18" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2a10 10 0 0 0-3.16 19.5c.5.09.68-.22.68-.48v-1.7c-2.78.6-3.36-1.17-3.36-1.17-.46-1.15-1.12-1.45-1.12-1.45-.92-.63.07-.62.07-.62 1.02.07 1.56 1.05 1.56 1.05.9 1.56 2.36 1.11 2.94.85.09-.65.35-1.11.64-1.36-2.22-.26-4.56-1.11-4.56-4.96 0-1.1.39-2 .1-2.7 0 0 .84-.27 2.75 1.03A9.56 9.56 0 0 1 12 7.07c.85 0 1.7.11 2.5.32 1.9-1.3 2.74-1.03 2.74-1.03.54 1.37.2 2.4.1 2.7.62.67 1 1.53 1 2.58 0 3.86-2.34 4.7-4.57 4.96.36.31.69.94.69 1.9v2.82c0 .26.18.57.69.48A10 10 0 0 0 12 2Z"/></svg>
+    },
+    {
+      key: 'instagram',
+      url: social.instagram,
+      label: 'Instagram',
+      svg: <svg width="18" height="18" viewBox="0 0 24 24"><path fill="currentColor" d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3H7m5 3a5 5 0 1 1 0 10 5 5 0 0 1 0-10m6.5-.25a1.25 1.25 0 1 1 0 2.5 1.25 1.25 0 0 1 0-2.5Z"/></svg>
+    },
+    {
+      key: 'facebook',
+      url: social.facebook,
+      label: 'Facebook',
+      svg: <svg width="18" height="18" viewBox="0 0 24 24"><path fill="currentColor" d="M22 12c0-5.52-4.48-10-10-10S2 6.48 2 12c0 4.84 3.44 8.87 8 9.8V15H8v-3h2V9.5C10 7.57 11.57 6 13.5 6H16v3h-2c-.55 0-1 .45-1 1v2h3v3h-3v6.95c5.05-.5 9-4.76 9-9.95z"/></svg>
+    },
+  ];
+
+  // Filter out empty social links
+  const activeSocials = socialIcons.filter(s => s.url && s.url !== '#' && s.url.trim() !== '');
 
   return (
     <footer ref={ref} className="ft">
@@ -88,31 +194,32 @@ export default function InteractiveFooter() {
         {/* Brand */}
         <div className="ft__col ft__brand">
           <Link href="/" className="ft__logoLink">
-            <Image src="/images/medium_res_logo.webp" alt="Visionara logo" width={56} height={56} className="ft__logo mx-auto sm:mx-0" />
-            <span className="ft__brandName">VISIONARA</span>
+            <Image src="/images/medium_res_logo.webp" alt={`${site.siteName} logo`} width={56} height={56} className="ft__logo mx-auto sm:mx-0" />
+            <span className="ft__brandName">{site.siteName}</span>
           </Link>
-          <p className="ft__tag">We craft digital experiences that inspire growth and innovation.</p>
+          <p className="ft__tag">{site.tagline}</p>
 
           <button className="ft__email" onClick={copyEmail} aria-label="Copy email">
-            visionara0231@gmail.com
+            {contact.email}
             <span className={`ft__copied ${copied ? 'is-on' : ''}`}>Copied!</span>
           </button>
 
-          <div className="ft__social">
-            <a className="ft__magnet ft__socialBtn" href="#" aria-label="Twitter / X">
-              {/* X */}
-              <svg width="18" height="18" viewBox="0 0 24 24"><path fill="currentColor" d="M17.5 3h3l-7.5 8.6L22 21h-5.9l-4.6-5.6L6 21H3l8-9.2L2 3h6l4.1 5L17.5 3Z"/></svg>
-            </a>
-            <a className="ft__magnet ft__socialBtn" href="#" aria-label="LinkedIn">
-              <svg width="18" height="18" viewBox="0 0 24 24"><path fill="currentColor" d="M6.94 6.5A2.44 2.44 0 1 1 4.5 4.06 2.44 2.44 0 0 1 6.94 6.5ZM4.75 20h4.38V9H4.75v11ZM13 9v11h4.38v-5.83c0-3.21 4.17-3.47 4.17 0V20H26V13.94c0-6.31-6.87-6.07-8.62-2.97V9H13Z"/></svg>
-            </a>
-            <a className="ft__magnet ft__socialBtn" href="#" aria-label="GitHub">
-              <svg width="18" height="18" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2a10 10 0 0 0-3.16 19.5c.5.09.68-.22.68-.48v-1.7c-2.78.6-3.36-1.17-3.36-1.17-.46-1.15-1.12-1.45-1.12-1.45-.92-.63.07-.62.07-.62 1.02.07 1.56 1.05 1.56 1.05.9 1.56 2.36 1.11 2.94.85.09-.65.35-1.11.64-1.36-2.22-.26-4.56-1.11-4.56-4.96 0-1.1.39-2 .1-2.7 0 0 .84-.27 2.75 1.03A9.56 9.56 0 0 1 12 7.07c.85 0 1.7.11 2.5.32 1.9-1.3 2.74-1.03 2.74-1.03.54 1.37.2 2.4.1 2.7.62.67 1 1.53 1 2.58 0 3.86-2.34 4.7-4.57 4.96.36.31.69.94.69 1.9v2.82c0 .26.18.57.69.48A10 10 0 0 0 12 2Z"/></svg>
-            </a>
-            <a className="ft__magnet ft__socialBtn" href="#" aria-label="Instagram">
-              <svg width="18" height="18" viewBox="0 0 24 24"><path fill="currentColor" d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3H7m5 3a5 5 0 1 1 0 10 5 5 0 0 1 0-10m6.5-.25a1.25 1.25 0 1 1 0 2.5 1.25 1.25 0 0 1 0-2.5Z"/></svg>
-            </a>
-          </div>
+          {activeSocials.length > 0 && (
+            <div className="ft__social">
+              {activeSocials.map((s) => (
+                <a
+                  key={s.key}
+                  className="ft__magnet ft__socialBtn"
+                  href={s.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={s.label}
+                >
+                  {s.svg}
+                </a>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Links */}
@@ -143,7 +250,7 @@ export default function InteractiveFooter() {
             className="ft__form"
             onSubmit={(e) => {
               e.preventDefault();
-              alert('Thanks! We will keep you posted.'); // hook up later
+              alert('Thanks! We will keep you posted.');
             }}
           >
             <label className="ft__field">
@@ -158,7 +265,7 @@ export default function InteractiveFooter() {
 
       {/* bottom bar */}
       <div className="ft__bottom">
-        <p>© {year} Visionara. All rights reserved.</p>
+        <p>© {year} {site.siteName}. All rights reserved.</p>
         <div className="ft__bottomLinks">
           <Link href="#">Privacy</Link>
           <Link href="#">Terms</Link>
@@ -312,51 +419,51 @@ export default function InteractiveFooter() {
         }
           /* Mobile: center-align all footer content */
         @media (max-width: 560px) {
-            .ft { 
+            .ft {
                 text-align: center;
                 padding-bottom: 10rem;
             }
 
             /* one-column grid, centered items */
-            .ft__grid { 
-                grid-template-columns: 1fr; 
+            .ft__grid {
+                grid-template-columns: 1fr;
                 justify-items: center;
             }
 
             /* brand block */
-            .ft__brand .ft__logoLink { 
-                justify-content: center; 
+            .ft__brand .ft__logoLink {
+                justify-content: center;
             }
-            .ft__tag, .ft__email, .ft__note { 
-                margin-left: auto; 
-                margin-right: auto; 
+            .ft__tag, .ft__email, .ft__note {
+                margin-left: auto;
+                margin-right: auto;
             }
 
             /* socials */
-            .ft__social { 
-                justify-content: center; 
+            .ft__social {
+                justify-content: center;
             }
 
             /* newsletter */
-            .ft__form { 
-                width: 100%; 
-                justify-items: center; 
+            .ft__form {
+                width: 100%;
+                justify-items: center;
             }
-            .ft__field { 
-                width: min(100%, 360px); 
+            .ft__field {
+                width: min(100%, 360px);
             }
-            .ft__send { 
-                justify-self: center; 
+            .ft__send {
+                justify-self: center;
             }
 
             /* bottom bar */
-            .ft__bottom { 
-                flex-direction: column; 
-                align-items: center; 
-                text-align: center; 
+            .ft__bottom {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
             }
-            .ft__bottomLinks { 
-                justify-content: center; 
+            .ft__bottomLinks {
+                justify-content: center;
             }
 
         }
