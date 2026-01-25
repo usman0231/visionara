@@ -38,6 +38,9 @@ export default function InteractiveFooter() {
   const [year] = useState<number>(new Date().getFullYear());
   const [copied, setCopied] = useState(false);
   const [settings, setSettings] = useState<SiteSettings>(FALLBACK_SETTINGS);
+  const [newsletterEmail, setNewsletterEmail] = useState('');
+  const [newsletterStatus, setNewsletterStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [newsletterMessage, setNewsletterMessage] = useState('');
 
   // Fetch settings from database
   useEffect(() => {
@@ -124,6 +127,51 @@ export default function InteractiveFooter() {
       setCopied(true);
       setTimeout(() => setCopied(false), 1500);
     } catch {}
+  };
+
+  const handleNewsletterSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!newsletterEmail) return;
+
+    setNewsletterStatus('loading');
+    setNewsletterMessage('');
+
+    try {
+      const response = await fetch('/api/public/newsletter', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email: newsletterEmail }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setNewsletterStatus('success');
+        setNewsletterMessage(data.message || 'Successfully subscribed!');
+        setNewsletterEmail('');
+        setTimeout(() => {
+          setNewsletterStatus('idle');
+          setNewsletterMessage('');
+        }, 5000);
+      } else {
+        setNewsletterStatus('error');
+        setNewsletterMessage(data.message || 'Subscription failed. Please try again.');
+        setTimeout(() => {
+          setNewsletterStatus('idle');
+          setNewsletterMessage('');
+        }, 5000);
+      }
+    } catch (error) {
+      setNewsletterStatus('error');
+      setNewsletterMessage('Failed to subscribe. Please check your connection.');
+      setTimeout(() => {
+        setNewsletterStatus('idle');
+        setNewsletterMessage('');
+      }, 5000);
+    }
   };
 
   const scrollTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -228,19 +276,32 @@ export default function InteractiveFooter() {
         {/* Newsletter */}
         <div className="ft__col">
           <p className="ft__h">Newsletter</p>
-          <form
-            className="ft__form"
-            onSubmit={(e) => {
-              e.preventDefault();
-              alert('Thanks! We will keep you posted.');
-            }}
-          >
+          <form className="ft__form" onSubmit={handleNewsletterSubmit}>
             <label className="ft__field">
-              <input type="email" required placeholder=" " aria-label="Email address" />
+              <input
+                type="email"
+                required
+                placeholder=" "
+                aria-label="Email address"
+                value={newsletterEmail}
+                onChange={(e) => setNewsletterEmail(e.target.value)}
+                disabled={newsletterStatus === 'loading'}
+              />
               <span>Email address</span>
             </label>
-            <button className="ft__magnet ft__send" aria-label="Subscribe">Subscribe</button>
+            <button
+              className="ft__magnet ft__send"
+              aria-label="Subscribe"
+              disabled={newsletterStatus === 'loading'}
+            >
+              {newsletterStatus === 'loading' ? 'Subscribing...' : 'Subscribe'}
+            </button>
           </form>
+          {newsletterMessage && (
+            <p className={`ft__newsletter-msg ft__newsletter-msg--${newsletterStatus}`}>
+              {newsletterMessage}
+            </p>
+          )}
           <p className="ft__note">🇨🇦 Proudly Canadian • Built with care in Canada</p>
         </div>
       </div>
@@ -249,8 +310,8 @@ export default function InteractiveFooter() {
       <div className="ft__bottom">
         <p>© {year} VISIONARA. All rights reserved.</p>
         <div className="ft__bottomLinks">
-          <Link href="#">Privacy</Link>
-          <Link href="#">Terms</Link>
+          <Link href="/privacy">Privacy</Link>
+          <Link href="/terms">Terms</Link>
           <button className="ft__top" onClick={scrollTop} aria-label="Back to top">↑ Top</button>
         </div>
       </div>
@@ -367,7 +428,34 @@ export default function InteractiveFooter() {
           font-weight: 700;
           transition: transform .2s, box-shadow .2s, background .25s;
         }
-        .ft__send:hover { transform: translateY(-2px); box-shadow: 0 14px 32px rgba(118,60,172,.35); }
+        .ft__send:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 14px 32px rgba(118,60,172,.35); }
+        .ft__send:disabled {
+          opacity: .6;
+          cursor: not-allowed;
+        }
+
+        .ft__newsletter-msg {
+          margin-top: .6rem;
+          padding: .6rem .8rem;
+          border-radius: 8px;
+          font-size: .9rem;
+          animation: slideIn .3s ease;
+        }
+        .ft__newsletter-msg--success {
+          background: rgba(34, 197, 94, 0.15);
+          border: 1px solid rgba(34, 197, 94, 0.3);
+          color: rgb(134, 239, 172);
+        }
+        .ft__newsletter-msg--error {
+          background: rgba(239, 68, 68, 0.15);
+          border: 1px solid rgba(239, 68, 68, 0.3);
+          color: rgb(252, 165, 165);
+        }
+
+        @keyframes slideIn {
+          from { opacity: 0; transform: translateY(-10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
 
         .ft__note { opacity: .75; font-size: .9rem; margin-top: .6rem; }
 

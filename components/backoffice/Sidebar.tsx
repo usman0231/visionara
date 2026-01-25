@@ -11,13 +11,13 @@ import {
   StarIcon,
   PhotoIcon,
   ChartBarIcon,
-  ListBulletIcon,
   Cog6ToothIcon,
   EnvelopeIcon,
   DocumentTextIcon,
   QuestionMarkCircleIcon,
   UserIcon,
   MagnifyingGlassIcon,
+  NewspaperIcon,
 } from "@heroicons/react/24/outline";
 
 const navigation = [
@@ -34,11 +34,11 @@ const navigation = [
   { name: "About Us", href: "/backoffice/about-us", icon: DocumentTextIcon },
   { name: "FAQs", href: "/backoffice/faqs", icon: QuestionMarkCircleIcon },
   { name: "Stats", href: "/backoffice/stats", icon: ChartBarIcon },
-  { name: "Features", href: "/backoffice/features", icon: ListBulletIcon },
   { name: "SEO", href: "/backoffice/seo", icon: MagnifyingGlassIcon },
   { name: "Settings", href: "/backoffice/settings", icon: Cog6ToothIcon },
   { name: "Profile", href: "/backoffice/profile", icon: UserIcon },
   { name: "Contacts", href: "/backoffice/contacts", icon: EnvelopeIcon },
+  { name: "Newsletter", href: "/backoffice/newsletter", icon: NewspaperIcon },
 ];
 
 export default function Sidebar() {

@@ -23,6 +23,13 @@ const plans: { key: PlanKey; name: string; tag?: string; cta: string }[] = [
   { key: 'enterprise', name: 'Enterprise', cta: 'Contact Sales' },
 ];
 
+const serviceLabels: Record<ServiceKey, string> = {
+  web: 'Web Development',
+  mobile: 'Mobile Apps',
+  graphic: 'Graphic Design',
+  marketing: 'Marketing',
+};
+
 // Fallback pricing data
 const FALLBACK_PRICING: Record<ServiceKey, Record<PlanKey, { onetime: string; monthly: string; yearly: string }>> = {
   web: {
@@ -47,119 +54,159 @@ const FALLBACK_PRICING: Record<ServiceKey, Record<PlanKey, { onetime: string; mo
   },
 };
 
-type Cell = string | boolean;
-
-type Section = {
-  title: string;
-  rows: { label: string; values: Record<PlanKey, Cell> }[];
-};
-
-const dataByService: Record<ServiceKey, Section[]> = {
-  web: [
-    {
-      title: 'Web Development — Core Features',
-      rows: [
-        { label: 'Custom website pages', values: { basic: '5 pages', standard: '10 pages', enterprise: 'Unlimited pages' } },
-        { label: 'Domain & hosting', values: { basic: 'Free .ca domain + hosting', standard: 'Free .ca domain + hosting', enterprise: 'Premium hosting' } },
-        { label: 'Mobile-friendly design', values: { basic: true, standard: true, enterprise: true } },
-        { label: 'Contact forms', values: { basic: 'Basic integration', standard: 'Advanced forms', enterprise: 'Custom integrations' } },
-        { label: 'SEO optimization', values: { basic: 'Basic setup', standard: 'Standard optimization', enterprise: 'Marketing analytics' } },
-        { label: 'Support & updates', values: { basic: '1 hour/month', standard: '2 hours/month', enterprise: 'Weekly updates' } },
-      ],
-    },
-    {
-      title: 'Advanced Features',
-      rows: [
-        { label: 'Logo design', values: { basic: false, standard: 'Custom logo design', enterprise: 'Professional branding' } },
-        { label: 'Social media integration', values: { basic: false, standard: true, enterprise: true } },
-        { label: 'Google Business setup', values: { basic: false, standard: true, enterprise: true } },
-        { label: 'Blog functionality', values: { basic: false, standard: true, enterprise: true } },
-        { label: 'E-commerce/Reservations', values: { basic: false, standard: false, enterprise: 'E-commerce OR reservations' } },
-        { label: 'Content creation', values: { basic: false, standard: false, enterprise: 'Professional content creation' } },
-        { label: 'Priority support', values: { basic: false, standard: false, enterprise: true } },
-      ],
-    },
-  ],
-  mobile: [
-    {
-      title: 'Mobile Development — Core',
-      rows: [
-        { label: 'Platform support', values: { basic: 'iOS OR Android', standard: 'Cross-platform (iOS + Android)', enterprise: 'Complex cross-platform' } },
-        { label: 'App screens', values: { basic: '5-8 core screens', standard: '12-15 screens', enterprise: 'Unlimited complexity' } },
-        { label: 'User authentication', values: { basic: true, standard: 'User accounts & profiles', enterprise: 'Advanced security features' } },
-        { label: 'Push notifications', values: { basic: true, standard: true, enterprise: true } },
-        { label: 'App store submission', values: { basic: true, standard: true, enterprise: true } },
-        { label: 'UI/UX design', values: { basic: 'Basic UI/UX design', standard: 'Professional design', enterprise: 'Custom design system' } },
-      ],
-    },
-    {
-      title: 'Backend & Integration',
-      rows: [
-        { label: 'Payment integration', values: { basic: false, standard: true, enterprise: 'Advanced payment systems' } },
-        { label: 'Backend development', values: { basic: false, standard: 'Backend API development', enterprise: 'Custom backend development' } },
-        { label: 'Database setup', values: { basic: false, standard: 'Cloud database setup', enterprise: 'Enterprise database architecture' } },
-        { label: 'Third-party integrations', values: { basic: false, standard: 'Standard integrations', enterprise: 'Advanced integrations' } },
-        { label: 'Admin dashboard', values: { basic: false, standard: false, enterprise: true } },
-        { label: 'Support team', values: { basic: 'Basic support', standard: 'Standard support', enterprise: 'Dedicated support team' } },
-      ],
-    },
-  ],
-  graphic: [
-    {
-      title: 'Brand Design — Core',
-      rows: [
-        { label: 'Logo design', values: { basic: 'Custom logo (3 concepts)', standard: 'Logo + 3 variations', enterprise: 'Complete brand identity' } },
-        { label: 'Business materials', values: { basic: 'Business card + letterhead', standard: 'Business stationery suite', enterprise: 'Marketing materials' } },
-        { label: 'Brand guidelines', values: { basic: 'Brand color palette', standard: 'Brand guidelines document', enterprise: 'Comprehensive guidelines' } },
-        { label: 'Social media assets', values: { basic: false, standard: 'Social media templates (10)', enterprise: 'Unlimited templates' } },
-        { label: 'Delivery time', values: { basic: '1-2 weeks', standard: '2-3 weeks', enterprise: '3-4 weeks' } },
-        { label: 'Design support', values: { basic: 'Basic support', standard: '10 hours/month design work', enterprise: 'Unlimited design requests' } },
-      ],
-    },
-    {
-      title: 'Advanced Design Services',
-      rows: [
-        { label: 'Presentation templates', values: { basic: false, standard: false, enterprise: true } },
-        { label: 'Email signature designs', values: { basic: false, standard: false, enterprise: true } },
-        { label: 'Brand photography guidelines', values: { basic: false, standard: false, enterprise: true } },
-        { label: 'Marketing collateral', values: { basic: false, standard: 'Standard templates', enterprise: 'Marketing material templates' } },
-        { label: 'Brand extensions', values: { basic: false, standard: 'Limited variations', enterprise: 'Everything in Standard +' } },
-      ],
-    },
-  ],
-  marketing: [
-    {
-      title: 'Digital Marketing — Core',
-      rows: [
-        { label: 'Social media management', values: { basic: '3 platforms', standard: '5 platforms', enterprise: 'All platforms + LinkedIn/TikTok' } },
-        { label: 'Content posting', values: { basic: '12 posts/month/platform', standard: '20 posts/month/platform', enterprise: 'Content creation (blogs, videos)' } },
-        { label: 'SEO optimization', values: { basic: 'Basic SEO optimization', standard: 'Advanced SEO + content marketing', enterprise: 'Comprehensive digital strategy' } },
-        { label: 'Google Business', values: { basic: 'Google Business optimization', standard: 'Google Ads management', enterprise: 'Advanced PPC campaigns' } },
-        { label: 'Reporting', values: { basic: 'Monthly performance reports', standard: 'Bi-weekly reports', enterprise: 'Real-time analytics' } },
-        { label: 'Contract terms', values: { basic: '6-month minimum', standard: '6-month minimum', enterprise: 'Flexible terms' } },
-      ],
-    },
-    {
-      title: 'Advanced Marketing',
-      rows: [
-        { label: 'Email marketing', values: { basic: false, standard: 'Email marketing campaigns', enterprise: 'Marketing automation' } },
-        { label: 'Dedicated support', values: { basic: 'Shared account manager', standard: 'Account manager', enterprise: 'Dedicated marketing manager' } },
-        { label: 'Strategy development', values: { basic: 'Basic strategy', standard: 'Growth strategy', enterprise: 'Comprehensive digital strategy' } },
-        { label: 'Advanced campaigns', values: { basic: false, standard: 'Multi-channel campaigns', enterprise: 'Advanced PPC campaigns' } },
-      ],
-    },
-  ],
+// Fallback features data
+const FALLBACK_FEATURES: Record<ServiceKey, Record<PlanKey, string[]>> = {
+  web: {
+    basic: [
+      '5 custom website pages',
+      'Free .ca domain + hosting',
+      'Mobile-friendly design',
+      'Basic contact form integration',
+      'Basic SEO setup',
+      '1 hour/month support & updates',
+    ],
+    standard: [
+      '10 custom website pages',
+      'Free .ca domain + hosting',
+      'Mobile-friendly design',
+      'Advanced contact forms',
+      'Standard SEO optimization',
+      '2 hours/month support & updates',
+      'Custom logo design',
+      'Social media integration',
+      'Google Business setup',
+      'Blog functionality',
+    ],
+    enterprise: [
+      'Unlimited custom pages',
+      'Premium hosting',
+      'Mobile-friendly design',
+      'Custom integrations',
+      'Marketing analytics',
+      'Weekly updates',
+      'Professional branding',
+      'Social media integration',
+      'Google Business setup',
+      'Blog functionality',
+      'E-commerce OR reservations',
+      'Professional content creation',
+      'Priority support',
+    ],
+  },
+  mobile: {
+    basic: [
+      'iOS OR Android platform',
+      '5-8 core screens',
+      'User authentication',
+      'Push notifications',
+      'App store submission',
+      'Basic UI/UX design',
+      'Basic support',
+    ],
+    standard: [
+      'Cross-platform (iOS + Android)',
+      '12-15 screens',
+      'User accounts & profiles',
+      'Push notifications',
+      'App store submission',
+      'Professional UI/UX design',
+      'Payment integration',
+      'Backend API development',
+      'Cloud database setup',
+      'Standard third-party integrations',
+      'Standard support',
+    ],
+    enterprise: [
+      'Complex cross-platform',
+      'Unlimited complexity',
+      'Advanced security features',
+      'Push notifications',
+      'App store submission',
+      'Custom design system',
+      'Advanced payment systems',
+      'Custom backend development',
+      'Enterprise database architecture',
+      'Advanced integrations',
+      'Admin dashboard',
+      'Dedicated support team',
+    ],
+  },
+  graphic: {
+    basic: [
+      'Custom logo (3 concepts)',
+      'Business card + letterhead',
+      'Brand color palette',
+      '1-2 weeks delivery',
+      'Basic design support',
+    ],
+    standard: [
+      'Logo + 3 variations',
+      'Business stationery suite',
+      'Brand guidelines document',
+      'Social media templates (10)',
+      '2-3 weeks delivery',
+      '10 hours/month design work',
+      'Standard marketing templates',
+    ],
+    enterprise: [
+      'Complete brand identity',
+      'Marketing materials',
+      'Comprehensive brand guidelines',
+      'Unlimited social media templates',
+      '3-4 weeks delivery',
+      'Unlimited design requests',
+      'Presentation templates',
+      'Email signature designs',
+      'Brand photography guidelines',
+      'Marketing material templates',
+    ],
+  },
+  marketing: {
+    basic: [
+      '3 social media platforms',
+      '12 posts/month/platform',
+      'Basic SEO optimization',
+      'Google Business optimization',
+      'Monthly performance reports',
+      '6-month minimum contract',
+      'Shared account manager',
+      'Basic strategy',
+    ],
+    standard: [
+      '5 social media platforms',
+      '20 posts/month/platform',
+      'Advanced SEO + content marketing',
+      'Google Ads management',
+      'Bi-weekly reports',
+      '6-month minimum contract',
+      'Email marketing campaigns',
+      'Dedicated account manager',
+      'Growth strategy',
+      'Multi-channel campaigns',
+    ],
+    enterprise: [
+      'All platforms + LinkedIn/TikTok',
+      'Content creation (blogs, videos)',
+      'Comprehensive digital strategy',
+      'Advanced PPC campaigns',
+      'Real-time analytics',
+      'Flexible contract terms',
+      'Marketing automation',
+      'Dedicated marketing manager',
+      'Comprehensive digital strategy',
+      'Advanced PPC campaigns',
+    ],
+  },
 };
 
 /* ----------------------------- UI helpers ----------------------------- */
 const Check = () => (
-  <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-[var(--foreground)]/18">
-    <svg viewBox="0 0 24 24" className="h-3.5 w-3.5 fill-[var(--foreground)]"><path d="M20.285 6.709a1 1 0 0 1 0 1.414l-9.9 9.9a1 1 0 0 1-1.414 0l-5.256-5.255a1 1 0 1 1 1.414-1.415l4.549 4.55 9.193-9.194a1 1 0 0 1 1.414 0z"/></svg>
+  <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-[var(--foreground)]/20 flex-shrink-0">
+    <svg viewBox="0 0 24 24" className="h-3 w-3 fill-[var(--foreground)]">
+      <path d="M20.285 6.709a1 1 0 0 1 0 1.414l-9.9 9.9a1 1 0 0 1-1.414 0l-5.256-5.255a1 1 0 1 1 1.414-1.415l4.549 4.55 9.193-9.194a1 1 0 0 1 1.414 0z" />
+    </svg>
   </span>
 );
-const Dash = () => <span className="text-white/40">—</span>;
-const renderCell = (v: Cell) =>
-  typeof v === 'boolean' ? (v ? <Check /> : <Dash />) : <span className="text-sm">{v}</span>;
 
 /* --------------------------------- Page -------------------------------- */
 export default function FeaturesPage() {
@@ -167,7 +214,6 @@ export default function FeaturesPage() {
   const [billing, setBilling] = useState<'onetime' | 'monthly' | 'yearly'>('onetime');
   const [packages, setPackages] = useState<Package[]>([]);
   const [loading, setLoading] = useState(true);
-  const sections = useMemo(() => dataByService[service], [service]);
 
   useEffect(() => {
     fetchPackages();
@@ -177,7 +223,7 @@ export default function FeaturesPage() {
     try {
       const response = await fetch('/api/packages');
       if (!response.ok) {
-        console.warn('API not available, using fallback pricing');
+        console.warn('API not available, using fallback data');
         setLoading(false);
         return;
       }
@@ -186,7 +232,7 @@ export default function FeaturesPage() {
         setPackages(data);
       }
     } catch (error) {
-      console.warn('Error fetching packages, using fallback pricing:', error);
+      console.warn('Error fetching packages, using fallback data:', error);
     } finally {
       setLoading(false);
     }
@@ -218,6 +264,56 @@ export default function FeaturesPage() {
     return result;
   }, [packages]);
 
+  // Build features from packages or use fallback
+  const features = useMemo(() => {
+    if (packages.length === 0) return FALLBACK_FEATURES;
+
+    const result: Record<ServiceKey, Record<PlanKey, string[]>> = {
+      web: { ...FALLBACK_FEATURES.web },
+      mobile: { ...FALLBACK_FEATURES.mobile },
+      graphic: { ...FALLBACK_FEATURES.graphic },
+      marketing: { ...FALLBACK_FEATURES.marketing },
+    };
+
+    packages.forEach((pkg) => {
+      const category = pkg.category.toLowerCase() as ServiceKey;
+      const tier = pkg.tier.toLowerCase() as PlanKey;
+      if (result[category] && result[category][tier] && pkg.features && pkg.features.length > 0) {
+        result[category][tier] = pkg.features;
+      }
+    });
+
+    return result;
+  }, [packages]);
+
+  // Get all unique features across all tiers for the current service
+  const allFeaturesForService = useMemo(() => {
+    const currentFeatures = features[service];
+    const allFeatures: string[] = [];
+    const featureSet = new Set<string>();
+
+    // Collect all features in order (basic -> standard -> enterprise)
+    ['basic', 'standard', 'enterprise'].forEach((tier) => {
+      const tierFeatures = currentFeatures[tier as PlanKey] || [];
+      tierFeatures.forEach((feature) => {
+        const normalizedFeature = feature.toLowerCase().trim();
+        if (!featureSet.has(normalizedFeature)) {
+          featureSet.add(normalizedFeature);
+          allFeatures.push(feature);
+        }
+      });
+    });
+
+    return allFeatures;
+  }, [features, service]);
+
+  // Check if a tier has a specific feature
+  const tierHasFeature = (tier: PlanKey, feature: string): boolean => {
+    const tierFeatures = features[service][tier] || [];
+    const normalizedFeature = feature.toLowerCase().trim();
+    return tierFeatures.some((f) => f.toLowerCase().trim() === normalizedFeature);
+  };
+
   return (
     <main className="bg-[var(--background)] text-[var(--text1)] min-h-screen">
       {/* HERO */}
@@ -231,53 +327,43 @@ export default function FeaturesPage() {
 
           {/* SERVICE SELECTOR */}
           <div className="mt-6 flex flex-col sm:inline-flex sm:flex-row rounded-xl sm:rounded-full border border-white/15 bg-white/5 p-1 gap-1 sm:gap-0">
-            {([
-              { key: 'web', label: 'Web Development' },
-              { key: 'mobile', label: 'Mobile Apps' },
-              { key: 'graphic', label: 'Graphic Design' },
-              { key: 'marketing', label: 'Marketing' },
-            ] as { key: ServiceKey; label: string }[]).map((opt) => (
+            {(['web', 'mobile', 'graphic', 'marketing'] as ServiceKey[]).map((opt) => (
               <button
-                key={opt.key}
-                onClick={() => setService(opt.key)}
+                key={opt}
+                onClick={() => setService(opt)}
                 className={`px-4 py-3 text-sm rounded-xl sm:rounded-full transition min-h-[44px] flex items-center justify-center ${
-                  service === opt.key
+                  service === opt
                     ? 'bg-[var(--foreground)] text-black font-semibold'
                     : 'text-[var(--text1)] hover:text-white active:bg-white/10'
                 }`}
               >
-                {opt.label}
+                {serviceLabels[opt]}
               </button>
             ))}
           </div>
 
           {/* BILLING TOGGLE */}
           <div className="mt-4 flex flex-col sm:inline-flex sm:flex-row rounded-xl sm:rounded-full border border-white/15 bg-white/5 p-1 gap-1 sm:gap-0 sm:ml-4">
-            {([
-              { key: 'onetime', label: 'One-time' },
-              { key: 'monthly', label: 'Monthly' },
-              { key: 'yearly', label: 'Yearly' },
-            ] as { key: 'onetime' | 'monthly' | 'yearly'; label: string }[]).map((opt) => (
+            {(['onetime', 'monthly', 'yearly'] as const).map((opt) => (
               <button
-                key={opt.key}
-                onClick={() => setBilling(opt.key)}
+                key={opt}
+                onClick={() => setBilling(opt)}
                 className={`px-4 py-2 text-sm rounded-xl sm:rounded-full transition min-h-[44px] flex items-center justify-center ${
-                  billing === opt.key
+                  billing === opt
                     ? 'bg-[var(--foreground)] text-black font-semibold'
                     : 'text-[var(--text1)] hover:text-white active:bg-white/10'
                 }`}
               >
-                {opt.label}
-                {opt.key === 'yearly' && <span className="ml-1 text-xs bg-orange-500 text-white px-1.5 py-0.5 rounded">20% OFF</span>}
+                {opt === 'onetime' ? 'One-time' : opt === 'monthly' ? 'Monthly' : 'Yearly'}
+                {opt === 'yearly' && <span className="ml-1 text-xs bg-orange-500 text-white px-1.5 py-0.5 rounded">20% OFF</span>}
               </button>
             ))}
           </div>
         </div>
       </section>
 
-      {/* SIDE-BY-SIDE COLUMNS */}
-      <section className="mx-auto max-w-7xl px-4 pb-12">
-        {/* Header row */}
+      {/* PRICING CARDS */}
+      <section className="mx-auto max-w-7xl px-4 pb-8">
         <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-3">
           {plans.map((p) => (
             <div key={p.key} className="rounded-2xl border border-white/10 bg-white/5 p-4 sm:p-6 relative">
@@ -294,12 +380,13 @@ export default function FeaturesPage() {
               </div>
               {service !== 'marketing' && (
                 <div className="text-sm text-white/70 mt-2">
-                  Monthly: {pricing[service][p.key].monthly}<br/>
+                  Monthly: {pricing[service][p.key].monthly}
+                  <br />
                   Yearly: {pricing[service][p.key].yearly} {billing === 'yearly' && <span className="text-orange-400">(20% off)</span>}
                 </div>
               )}
               <a
-                href={p.key === 'enterprise' ? '/contact' : '/contact'}
+                href="/contact"
                 className={`mt-6 inline-block w-full rounded-xl border border-white/20 px-4 py-3 text-center text-sm font-semibold transition hover:bg-white/5 active:bg-white/10 min-h-[44px] flex items-center justify-center ${
                   p.tag ? 'bg-[var(--foreground)] text-black hover:bg-[var(--foreground)]/90' : 'text-[var(--text1)]'
                 }`}
@@ -309,35 +396,114 @@ export default function FeaturesPage() {
             </div>
           ))}
         </div>
+      </section>
 
-        {/* Sections per plan (rows inside each column) */}
-        {sections.map((section) => (
-          <div key={section.title} className="mt-8">
-            <div className="mb-4 text-base sm:text-lg font-semibold text-white/90">{section.title}</div>
-            <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-3">
-              {plans.map((p) => (
-                <div key={p.key} className="overflow-hidden rounded-2xl border border-white/10">
-                  <div className="bg-white/[0.08] px-5 py-3 text-sm font-semibold">
-                    {p.name}
-                  </div>
-                  <ul>
-                    {section.rows.map((r, i) => (
-                      <li
-                        key={r.label}
-                        className={`flex items-center justify-between gap-3 px-4 sm:px-5 py-3 sm:py-4 text-sm ${
-                          i % 2 ? 'bg-white/[0.03]' : ''
-                        }`}
-                      >
-                        <span className="text-white/90 flex-1">{r.label}</span>
-                        <span className="flex-shrink-0">{renderCell(r.values[p.key])}</span>
-                      </li>
+      {/* FEATURES COMPARISON */}
+      <section className="mx-auto max-w-7xl px-4 pb-12">
+        <div className="mb-6">
+          <h2 className="text-xl sm:text-2xl font-bold text-white/95">{serviceLabels[service]} Features</h2>
+          <p className="mt-2 text-white/70">Compare what's included in each tier</p>
+        </div>
+
+        {loading ? (
+          <div className="text-center py-12 text-white/60">Loading features...</div>
+        ) : (
+          <>
+            {/* Desktop: Full Comparison Table */}
+            <div className="hidden md:block overflow-hidden rounded-2xl border border-white/10">
+              <table className="w-full">
+                <thead>
+                  <tr className="bg-white/[0.08]">
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-white/90 w-1/3">Feature</th>
+                    {plans.map((p) => (
+                      <th key={p.key} className="px-6 py-4 text-center text-sm font-semibold text-white/90">
+                        {p.name}
+                        {p.tag && <span className="ml-2 text-xs text-[var(--foreground)]">★</span>}
+                      </th>
                     ))}
-                  </ul>
+                  </tr>
+                </thead>
+                <tbody>
+                  {allFeaturesForService.map((feature, idx) => (
+                    <tr key={feature} className={idx % 2 ? 'bg-white/[0.03]' : ''}>
+                      <td className="px-6 py-4 text-sm text-white/90">{feature}</td>
+                      {plans.map((p) => (
+                        <td key={p.key} className="px-6 py-4 text-center">
+                          {tierHasFeature(p.key, feature) ? (
+                            <span className="inline-flex justify-center">
+                              <Check />
+                            </span>
+                          ) : (
+                            <span className="text-white/30">—</span>
+                          )}
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile: Card-based Feature Lists */}
+            <div className="md:hidden space-y-6">
+              {plans.map((p) => (
+                <div key={p.key} className="rounded-2xl border border-white/10 overflow-hidden">
+                  <div className="bg-white/[0.08] px-5 py-4 flex items-center justify-between">
+                    <span className="text-lg font-semibold">{p.name}</span>
+                    {p.tag && (
+                      <span className="text-xs bg-[var(--foreground)] text-black px-2 py-1 rounded-full font-semibold">
+                        {p.tag}
+                      </span>
+                    )}
+                  </div>
+                  <div className="p-4">
+                    <div className="mb-3">
+                      <span className="text-2xl font-extrabold text-[var(--foreground)]">
+                        {pricing[service][p.key][billing]}
+                      </span>
+                    </div>
+                    <ul className="space-y-3">
+                      {features[service][p.key].map((feature, idx) => (
+                        <li key={idx} className="flex items-start gap-3 text-sm text-white/90">
+                          <Check />
+                          <span>{feature}</span>
+                        </li>
+                      ))}
+                    </ul>
+                    <a
+                      href="/contact"
+                      className={`mt-6 inline-block w-full rounded-xl border border-white/20 px-4 py-3 text-center text-sm font-semibold transition ${
+                        p.tag ? 'bg-[var(--foreground)] text-black' : 'text-[var(--text1)] hover:bg-white/5'
+                      }`}
+                    >
+                      {p.cta}
+                    </a>
+                  </div>
                 </div>
               ))}
             </div>
-          </div>
-        ))}
+          </>
+        )}
+      </section>
+
+      {/* FEATURE COUNT SUMMARY */}
+      <section className="mx-auto max-w-7xl px-4 pb-12">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          {plans.map((p) => {
+            const featureCount = features[service][p.key].length;
+            return (
+              <div
+                key={p.key}
+                className={`rounded-xl border p-4 text-center ${
+                  p.tag ? 'border-[var(--foreground)]/50 bg-[var(--foreground)]/10' : 'border-white/10 bg-white/5'
+                }`}
+              >
+                <div className="text-3xl font-extrabold text-[var(--foreground)]">{featureCount}</div>
+                <div className="text-sm text-white/70">{p.name} Features</div>
+              </div>
+            );
+          })}
+        </div>
       </section>
 
       {/* CTA */}
