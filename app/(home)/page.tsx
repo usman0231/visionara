@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import InteractiveBg from "./scripts/bg";
+import InteractiveBg from "@/app/scripts/bg";
 import Services from "@/components/services";
 import Package_detail from "@/components/package";
 import ReviewsSection from "@/components/reviews";
@@ -35,7 +35,7 @@ export default function Home() {
             <div className="g5"></div>
             <div className="interactive"></div>
           </div>
-        </div>  
+        </div>
         <div className=" flex flex-col justify-center items-center order-2 md:order-1 h-fit md:h-full">
           <p className="home_section1_heading text-7xl md:text-6xl lg:text-9xl">VISIONARA</p>
           <p className="home_section1_text text-lg md:text-2xl text-center md:text-right w-120">Turn your visions into reality</p>
@@ -54,11 +54,11 @@ export default function Home() {
       <InteractiveBg />
 
       {/* Services */}
-      
+
       <Services/>
 
       {/* Gallery */}
-      
+
       <Gallery />
 
       {/* Quote */}
@@ -78,37 +78,37 @@ export default function Home() {
       <Stats />
 
       {/* Proudly Canadian Section */}
-      <ProudlyCanadian /> 
+      <ProudlyCanadian />
 
       {/* Footer */}
       <Footer />
 
       <style jsx>{`
         .page-background {
-          background: 
-            radial-gradient(2000px 1200px at 30% 20%, 
+          background:
+            radial-gradient(2000px 1200px at 30% 20%,
               rgba(118, 60, 172, 0.06) 0%,
               rgba(118, 60, 172, 0.04) 30%,
               rgba(118, 60, 172, 0.02) 60%,
               rgba(118, 60, 172, 0.01) 80%,
               transparent 100%),
-            radial-gradient(1800px 1000px at 70% 80%, 
+            radial-gradient(1800px 1000px at 70% 80%,
               rgba(118, 60, 172, 0.05) 0%,
               rgba(118, 60, 172, 0.03) 40%,
               rgba(118, 60, 172, 0.02) 70%,
               rgba(118, 60, 172, 0.01) 85%,
               transparent 100%),
-            radial-gradient(1600px 800px at 50% 50%, 
+            radial-gradient(1600px 800px at 50% 50%,
               rgba(118, 60, 172, 0.04) 0%,
               rgba(118, 60, 172, 0.02) 50%,
               rgba(118, 60, 172, 0.01) 75%,
               transparent 100%);
           min-height: 100vh;
         }
-        
+
         .package-section-bg {
-          background: 
-            radial-gradient(1800px 900px at 50% 30%, 
+          background:
+            radial-gradient(1800px 900px at 50% 30%,
               rgba(118, 60, 172, 0.08) 0%,
               rgba(118, 60, 172, 0.05) 40%,
               rgba(118, 60, 172, 0.03) 70%,
@@ -120,6 +120,6 @@ export default function Home() {
       `}</style>
 
     </div>
-    
+
   );
 }

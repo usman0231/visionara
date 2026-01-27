@@ -39,6 +39,7 @@ export default function Services() {
   const sectionRef = useRef<HTMLDivElement | null>(null);
   const stageRef = useRef<HTMLDivElement | null>(null);
   const trackRef = useRef<HTMLDivElement | null>(null);
+  const progressFillRef = useRef<HTMLSpanElement | null>(null);
   const [services, setServices] = useState<Svc[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -93,10 +94,10 @@ export default function Services() {
     ScrollTrigger.addEventListener('refreshInit', setStageHeight);
 
     // ===== Desktop / Tablet: horizontal slider with PROGRESS-BASED SNAP =====
-    mm.add('(min-width: 768px)', () => {
+    mm.add('(min-width: 640px)', () => {
       if (!trackRef.current || !stageRef.current || !sectionRef.current) return;
 
-      const panels = gsap.utils.toArray<HTMLElement>('.svc__panel');
+      const panels = gsap.utils.toArray<HTMLElement>('[data-panel="true"]');
       const steps = 1 / (panels.length - 1);
       const distance = () =>
         trackRef.current!.scrollWidth - stageRef.current!.clientWidth;
@@ -124,9 +125,9 @@ export default function Services() {
         },
       });
 
-      if (!reduce) {
-        // progress fill
-        gsap.to('.svc__progressFill', {
+      // progress fill animation
+      if (progressFillRef.current) {
+        gsap.to(progressFillRef.current, {
           width: '100%',
           ease: 'none',
           scrollTrigger: {
@@ -137,11 +138,14 @@ export default function Services() {
             invalidateOnRefresh: true,
           },
         });
+      }
+
+      if (!reduce) {
 
         // per-panel reveals tied to containerAnimation
         panels.forEach((panel) => {
-          const card = panel.querySelector('.svc__card');
-          const icon = panel.querySelector('.svc__icon');
+          const card = panel.querySelector('[data-card="true"]');
+          const icon = panel.querySelector('[data-icon="true"]');
           if (card) {
             gsap.from(card, {
               opacity: 0,
@@ -179,9 +183,9 @@ export default function Services() {
     });
 
     // ===== Mobile: stacked cards with fade-up =====
-    mm.add('(max-width: 767px)', () => {
+    mm.add('(max-width: 639px)', () => {
       if (reduce) return;
-      gsap.utils.toArray<HTMLElement>('.svc__card').forEach((card, i) => {
+      gsap.utils.toArray<HTMLElement>('[data-card="true"]').forEach((card, i) => {
         gsap.from(card, {
           opacity: 0,
           y: 26,
@@ -194,29 +198,34 @@ export default function Services() {
     });
 
     // ===== Floating 3D-ish decorative icons roaming around =====
-    if (!reduce) {
-      const floats = gsap.utils.toArray<HTMLElement>('.svc__float');
+    // Only animate if not reduced motion and screen is large enough
+    const isLargeScreen = window.matchMedia('(min-width: 640px)').matches;
+    if (!reduce && isLargeScreen) {
+      const floats = gsap.utils.toArray<HTMLElement>('[data-float="true"]');
       floats.forEach((el, idx) => {
-        const roam = () =>
-          gsap.to(el, {
-            x: gsap.utils.random(-120, 120),
-            y: gsap.utils.random(-70, 70),
-            rotateX: gsap.utils.random(-25, 25),
-            rotateY: gsap.utils.random(-25, 25),
-            rotateZ: gsap.utils.random(-15, 15),
-            scale: gsap.utils.random(0.9, 1.1),
-            duration: gsap.utils.random(4, 7),
-            ease: 'sine.inOut',
-            onComplete: roam,
-          });
-        roam();
+        // Continuous floating animation
         gsap.to(el, {
-          y: '+=12',
-          duration: 2.2 + idx * 0.2,
+          y: '+=15',
+          duration: 2.5 + idx * 0.3,
           yoyo: true,
           repeat: -1,
           ease: 'sine.inOut',
         });
+
+        // Roaming animation
+        const roam = () => {
+          gsap.to(el, {
+            x: gsap.utils.random(-60, 60),
+            y: gsap.utils.random(-40, 40),
+            rotateZ: gsap.utils.random(-10, 10),
+            scale: gsap.utils.random(0.95, 1.05),
+            duration: gsap.utils.random(5, 8),
+            ease: 'sine.inOut',
+            onComplete: roam,
+          });
+        };
+        // Delay start of roaming for each icon
+        gsap.delayedCall(idx * 0.5, roam);
       });
     }
 
@@ -238,13 +247,13 @@ export default function Services() {
 
       {/* Progress bar (explicit margin top) */}
       <div className="svc__progress">
-        <span className="svc__progressFill" />
+        <span ref={progressFillRef} className="svc__progressFill" />
       </div>
 
       {/* Roaming 3D-ish icons (decorative) */}
       <div className="svc__floats" aria-hidden>
         {/* cube */}
-        <svg className="svc__float svc__float--cube" width="48" height="48" viewBox="0 0 24 24">
+        <svg className="svc__float svc__float--cube" data-float="true" width="48" height="48" viewBox="0 0 24 24">
           <g transform="translate(2,2)">
             <path d="M10 0 20 6 10 12 0 6Z" fill="url(#g1)" />
             <path d="M20 6v8l-10 6V12z" fill="url(#g2)" />
@@ -267,7 +276,7 @@ export default function Services() {
         </svg>
 
         {/* pyramid */}
-        <svg className="svc__float svc__float--pyr" width="44" height="44" viewBox="0 0 24 24">
+        <svg className="svc__float svc__float--pyr" data-float="true" width="44" height="44" viewBox="0 0 24 24">
           <g transform="translate(2,2)">
             <path d="M10 0 20 16H0z" fill="url(#p1)" />
             <path d="M10 0 20 16 10 12z" fill="url(#p2)" />
@@ -285,7 +294,7 @@ export default function Services() {
         </svg>
 
         {/* ring */}
-        <svg className="svc__float svc__float--ring" width="50" height="50" viewBox="0 0 48 48">
+        <svg className="svc__float svc__float--ring" data-float="true" width="50" height="50" viewBox="0 0 48 48">
           <defs>
             <radialGradient id="r1" cx="50%" cy="50%" r="50%">
               <stop offset="0" stopColor="var(--text1)" stopOpacity=".9" />
@@ -301,8 +310,8 @@ export default function Services() {
       <div ref={stageRef} className="svc__stage">
         <div ref={trackRef} className="svc__track">
           {(loading ? FALLBACK_SERVICES : services).map((s) => (
-            <section key={s.id || s.title} className="svc__panel">
-              <article className="svc__card">
+            <section key={s.id || s.title} className="svc__panel" data-panel="true">
+              <article className="svc__card" data-card="true">
                 <div className="svc__cardBorder" aria-hidden />
                 <div className="svc__iconWrap">
                   <Image
@@ -311,6 +320,7 @@ export default function Services() {
                     width={120}
                     height={120}
                     className="svc__icon"
+                    data-icon="true"
                     loading="lazy"
                   />
                   <span className="svc__orb" aria-hidden />
@@ -431,6 +441,12 @@ export default function Services() {
           inset: 0;
           pointer-events: none;
           z-index: 1;
+          display: none;
+        }
+        @media (min-width: 640px) {
+          .svc__floats {
+            display: block;
+          }
         }
         .svc__float {
           position: absolute;
@@ -440,15 +456,27 @@ export default function Services() {
         }
         .svc__float--cube {
           top: 22%;
-          left: 12%;
+          left: 8%;
         }
         .svc__float--pyr {
           top: 68%;
-          left: 16%;
+          left: 10%;
         }
         .svc__float--ring {
           top: 36%;
-          left: 84%;
+          right: 8%;
+          left: auto;
+        }
+        @media (min-width: 1024px) {
+          .svc__float--cube {
+            left: 12%;
+          }
+          .svc__float--pyr {
+            left: 16%;
+          }
+          .svc__float--ring {
+            right: 12%;
+          }
         }
 
         /* centered stage; JS sets exact height with header space subtracted */
@@ -579,7 +607,7 @@ export default function Services() {
         }
 
         /* Mobile: vertical stack */
-        @media (max-width: 767px) {
+        @media (max-width: 639px) {
           .svc {
             height: auto;
             overflow: visible;
@@ -591,9 +619,7 @@ export default function Services() {
             margin-top: 1.8rem;
           }
           .svc__progress {
-            position: relative;
-            top: auto;
-            margin: 0.8rem auto 1rem;
+            display: none; /* Hide progress bar on mobile since it's vertical scroll */
           }
           .svc__stage {
             height: auto;
@@ -606,6 +632,24 @@ export default function Services() {
             min-width: auto;
             height: auto;
             padding: 0;
+          }
+        }
+
+        /* Tablet adjustments */
+        @media (min-width: 640px) and (max-width: 1023px) {
+          .svc__card {
+            max-width: 28rem;
+            padding: 1.2rem;
+          }
+          .svc__iconWrap {
+            width: 100px;
+            height: 100px;
+          }
+          .svc__cardTitle {
+            font-size: 1.2rem;
+          }
+          .svc__cardText {
+            font-size: 0.95rem;
           }
         }
       `}</style>

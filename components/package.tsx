@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import PlanModal from './PlanModal';
 
 type Billing = 'onetime' | 'monthly' | 'yearly';
 type Tier = 'Basic' | 'Standard' | 'Enterprise';
@@ -204,6 +205,13 @@ export default function PackagesSection() {
   const [billing, setBilling] = useState<Billing>('onetime');
   const [packages, setPackages] = useState<Package[]>([]);
   const [loading, setLoading] = useState(true);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState<{ name: string; category: string; price: string } | null>(null);
+
+  const handleChoosePlan = (planName: string, price: string) => {
+    setSelectedPlan({ name: planName, category, price });
+    setModalOpen(true);
+  };
 
   useEffect(() => {
     fetchPackages();
@@ -426,13 +434,23 @@ export default function PackagesSection() {
                 ))}
               </ul>
 
-              <button className="cta" aria-label={`Choose ${plan.name} ${category} plan`}>
+              <button
+                className="cta"
+                aria-label={`Choose ${plan.name} ${category} plan`}
+                onClick={() => handleChoosePlan(plan.name, plan.prices[billing])}
+              >
                 Choose plan
               </button>
             </div>
           </article>
         ))}
       </div>
+
+      <PlanModal
+        isOpen={modalOpen}
+        onClose={() => setModalOpen(false)}
+        plan={selectedPlan}
+      />
 
       <style jsx>{`
         .pkg {

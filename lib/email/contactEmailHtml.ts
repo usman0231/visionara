@@ -157,7 +157,7 @@ export function contactEmailHtml(data: ContactPayload) {
                       <td>
                         <div style="font-size:12px;color:${brand.muted};text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">Message</div>
                         <div style="font-size:15px;line-height:1.6;color:${brand.text}">
-                          ${safe((data.message || '').replace(/\n/g, '<br/>')) || '—'}
+                          ${(safe(data.message || '') || '—').replace(/\n/g, '<br/>')}
                         </div>
                       </td>
                     </tr>

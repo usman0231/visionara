@@ -52,7 +52,8 @@
       "Bash(dir \"C:\\\\Usman\\\\visionara\\\\website\\\\app\\\\backoffice\" /b)",
       "Bash(dir \"C:\\\\Usman\\\\visionara\\\\website\\\\app\\\\backoffice\\\\\\(dashboard\\)\" /b)",
       "Bash(more:*)",
-      "Bash(powershell:*)"
+      "Bash(powershell:*)",
+      "mcp__ide__getDiagnostics"
     ],
     "deny": [],
     "ask": []

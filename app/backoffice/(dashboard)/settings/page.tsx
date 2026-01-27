@@ -27,6 +27,7 @@ interface Settings {
   twitter: string;
   github: string;
   threads: string;
+  linkedin: string;
 }
 
 const DEFAULT_SETTINGS: Settings = {
@@ -39,7 +40,8 @@ const DEFAULT_SETTINGS: Settings = {
   instagram: '',
   twitter: '',
   github: '',
-  threads: ''
+  threads: '',
+  linkedin: ''
 };
 
 const SETTINGS_KEY = 'site.settings';
@@ -293,6 +295,14 @@ export default function SettingsPage() {
                 editing={editing}
                 type="url"
                 placeholder="https://threads.net/..."
+              />
+              <SettingField
+                label="LinkedIn"
+                value={editing ? editValues.linkedin : settings.linkedin}
+                onChange={(v) => handleChange('linkedin', v)}
+                editing={editing}
+                type="url"
+                placeholder="https://linkedin.com/company/..."
               />
             </div>
           </div>
