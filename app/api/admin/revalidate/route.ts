@@ -4,7 +4,7 @@ import { revalidateTag, revalidatePath } from 'next/cache';
 export const runtime = 'nodejs';
 
 // Cache tags for different data types
-export const CACHE_TAGS = {
+const CACHE_TAGS = {
   projects: 'projects',
   services: 'services',
   reviews: 'reviews',
