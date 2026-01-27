@@ -51,25 +51,17 @@ const resolveDialectOptions = (): DialectOptions | undefined => {
     return undefined;
   }
 
-  // Allow self-signed certificates in development (required for Supabase pooler)
-  const allowSelfSigned = process.env.NODE_ENV === 'development';
-
+  // Allow self-signed certificates (required for Supabase pooler)
+  // Supabase uses connection pooling with self-signed certs
   return {
     ssl: {
       require: true,
-      rejectUnauthorized: !allowSelfSigned,
+      rejectUnauthorized: false,
     },
   };
 };
 
 const dialectOptions = resolveDialectOptions();
-
-// Log SSL configuration for debugging
-console.log('🔒 SSL Configuration:', {
-  dialectOptions,
-  isVercel: process.env.VERCEL === '1',
-  nodeEnv: process.env.NODE_ENV,
-});
 
 // Detect if running in serverless environment (Vercel)
 const isServerless = process.env.VERCEL === '1' || process.env.AWS_LAMBDA_FUNCTION_NAME !== undefined;

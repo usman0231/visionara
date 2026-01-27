@@ -91,7 +91,15 @@ export default function ReviewsSection() {
       }
       const data = await response.json();
       if (data.reviews && data.reviews.length > 0) {
-        setReviews(data.reviews);
+        // Map API fields to component fields
+        const mappedReviews = data.reviews.map((r: { id: string; name: string; role?: string; rating: number; text: string }) => ({
+          id: r.id,
+          clientName: r.name,
+          clientTitle: r.role,
+          rating: r.rating,
+          content: r.text,
+        }));
+        setReviews(mappedReviews);
       } else {
         setReviews(FALLBACK_REVIEWS);
       }
@@ -254,7 +262,7 @@ export default function ReviewsSection() {
               <div className="review-card__inner">
                 <div className="review-card__top">
                   <div className="avatar" aria-hidden>
-                    {r.clientName.split(' ').map(p => p[0]).slice(0,2).join('').toUpperCase()}
+                    {(r.clientName || 'U').split(' ').map(p => p[0]).slice(0,2).join('').toUpperCase()}
                   </div>
                   <div className="meta">
                     <div className="name">{r.clientName}</div>
