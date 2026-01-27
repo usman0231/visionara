@@ -4,6 +4,11 @@ import { env } from '@/lib/env';
 // Import pg explicitly for Turbopack compatibility
 import * as pg from 'pg';
 
+// Required for Supabase connection pooler (uses self-signed certificates)
+if (process.env.NODE_TLS_REJECT_UNAUTHORIZED !== '0') {
+  process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+}
+
 type DialectOptions = {
   ssl: {
     require: boolean;

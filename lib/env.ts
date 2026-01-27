@@ -3,11 +3,6 @@
  * READ-ONLY: Only reads from existing .env.local
  */
 
-// Handle SSL certificate issues in development
-if (process.env.NODE_ENV === 'development') {
-  process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
-}
-
 // Note: dotenv is automatically loaded by Next.js from .env.local
 // No need to manually load it here
 
