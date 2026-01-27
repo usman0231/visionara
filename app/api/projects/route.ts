@@ -43,7 +43,8 @@ export async function GET(request: NextRequest) {
     });
 
     const response = NextResponse.json({ projects });
-    response.headers.set('Cache-Control', 'public, s-maxage=3600, stale-while-revalidate=86400');
+    // Cache for 24 hours, can be manually revalidated via /api/admin/revalidate
+    response.headers.set('Cache-Control', 'public, s-maxage=86400, stale-while-revalidate=604800');
     return response;
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Unknown error';

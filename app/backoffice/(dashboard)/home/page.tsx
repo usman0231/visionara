@@ -20,7 +20,8 @@ import {
   CheckCircleIcon,
   ExclamationTriangleIcon,
   PlusIcon,
-  ArrowTopRightOnSquareIcon
+  ArrowTopRightOnSquareIcon,
+  ArrowPathIcon
 } from '@heroicons/react/24/outline';
 
 interface DashboardStats {
@@ -46,6 +47,7 @@ export default function DashboardPage() {
   const [recentActivity, setRecentActivity] = useState<RecentActivity[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [clearingCache, setClearingCache] = useState(false);
 
   useEffect(() => {
     fetchDashboardData();
@@ -195,6 +197,27 @@ export default function DashboardPage() {
     }
   };
 
+  const handleClearCache = async () => {
+    try {
+      setClearingCache(true);
+      const response = await fetch('/api/admin/revalidate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tags: ['all'] }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to clear cache');
+      }
+
+      showNotification('Cache cleared successfully! Changes will reflect on the website.', 'success');
+    } catch (err: any) {
+      showNotification('Failed to clear cache', 'error');
+    } finally {
+      setClearingCache(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="px-4 sm:px-6 lg:px-8">
@@ -292,6 +315,14 @@ export default function DashboardPage() {
               </div>
             </div>
             <div className="flex gap-2">
+              <button
+                onClick={handleClearCache}
+                disabled={clearingCache}
+                className="inline-flex items-center px-3 py-1.5 text-xs font-medium text-orange-700 bg-orange-100 rounded-md hover:bg-orange-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <ArrowPathIcon className={`h-3 w-3 mr-1 ${clearingCache ? 'animate-spin' : ''}`} />
+                {clearingCache ? 'Clearing...' : 'Clear Cache'}
+              </button>
               <Link
                 href="/backoffice/gallery"
                 className="inline-flex items-center px-3 py-1.5 text-xs font-medium text-blue-700 bg-blue-100 rounded-md hover:bg-blue-200 transition-colors"
