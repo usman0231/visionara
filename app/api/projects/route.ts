@@ -42,11 +42,13 @@ export async function GET(request: NextRequest) {
       ],
     });
 
-    return NextResponse.json({ projects });
-  } catch (error: any) {
-    console.error('Get projects error:', error);
+    const response = NextResponse.json({ projects });
+    response.headers.set('Cache-Control', 'public, s-maxage=3600, stale-while-revalidate=86400');
+    return response;
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json(
-      { error: 'Failed to fetch projects', details: error.message },
+      { error: 'Failed to fetch projects', details: message },
       { status: 500 }
     );
   }

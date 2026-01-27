@@ -67,7 +67,7 @@ export default function DashboardPage() {
         fetch('/api/admin/services').catch(() => null),
         fetch('/api/admin/packages').catch(() => null),
         fetch('/api/admin/reviews').catch(() => null),
-        fetch('/api/admin/gallery').catch(() => null),
+        fetch('/api/admin/projects').catch(() => null),
         fetch('/api/admin/contacts').catch(() => null),
         fetch('/api/admin/stats').catch(() => null)
       ]);

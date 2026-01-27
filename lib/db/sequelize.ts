@@ -51,12 +51,8 @@ const resolveDialectOptions = (): DialectOptions | undefined => {
     return undefined;
   }
 
-  // Always allow self-signed certificates (required for Supabase pooler)
-  const allowSelfSigned = true;
-
-  if (allowSelfSigned && process.env.NODE_TLS_REJECT_UNAUTHORIZED !== '0') {
-    process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
-  }
+  // Allow self-signed certificates in development (required for Supabase pooler)
+  const allowSelfSigned = process.env.NODE_ENV === 'development';
 
   return {
     ssl: {

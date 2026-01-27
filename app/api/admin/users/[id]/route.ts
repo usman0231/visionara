@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
+import { Op } from 'sequelize';
 import { supabaseServer } from '@/lib/supabase/server';
 import { User, Role, AuditLog, AuditAction } from '@/lib/db/models';
 import { updateUserSchema } from '@/lib/validations/user';
@@ -80,7 +81,7 @@ export async function PUT(
       const emailExists = await User.findOne({
         where: {
           email: validatedData.email,
-          id: { [require('sequelize').Op.ne]: id } // Exclude current user
+          id: { [Op.ne]: id } // Exclude current user
         }
       });
 

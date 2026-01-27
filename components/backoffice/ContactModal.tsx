@@ -88,7 +88,6 @@ export default function ContactModal({ isOpen, onClose, contact, onReplySuccess 
 
       // Check if email was actually sent
       const data = await response.json();
-      console.log('Reply response:', data);
 
       if (!data.emailSent && data.emailError) {
         console.warn('Email not sent:', data.emailError);

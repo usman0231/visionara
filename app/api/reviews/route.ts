@@ -9,29 +9,23 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const published = searchParams.get('published');
 
-    const whereCondition: any = { deletedAt: null };
+    const whereCondition: Record<string, unknown> = { deletedAt: null };
     if (published === 'true') {
-      whereCondition.isPublished = true;
+      whereCondition.active = true;
     }
 
     const reviews = await Review.findAll({
       where: whereCondition,
-      include: [
-        {
-          model: Service,
-          as: 'service',
-          attributes: ['id', 'name'],
-          required: false,
-        },
-      ],
-      order: [['displayOrder', 'ASC'], ['createdAt', 'DESC']],
+      order: [['sortOrder', 'ASC'], ['createdAt', 'DESC']],
     });
 
-    return NextResponse.json({ reviews });
-  } catch (error: any) {
-    console.error('Get reviews error:', error);
+    const response = NextResponse.json({ reviews });
+    response.headers.set('Cache-Control', 'public, s-maxage=3600, stale-while-revalidate=86400');
+    return response;
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json(
-      { error: 'Failed to fetch reviews', details: error.message },
+      { error: 'Failed to fetch reviews', details: message },
       { status: 500 }
     );
   }

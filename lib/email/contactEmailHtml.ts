@@ -39,7 +39,8 @@ export function contactEmailHtml(data: ContactPayload) {
       ? new Date(data.submittedAt)
       : new Date();
 
-  const logo = "/images/final_transparent.png";
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://visionara.ca';
+  const logo = `${baseUrl}/images/final_transparent.png`;
 
   const dateStr = dt.toLocaleString();
 

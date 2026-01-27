@@ -16,7 +16,7 @@ interface SEOData {
   twitterImage?: string | null;
   canonicalUrl?: string | null;
   robots?: string;
-  structuredData?: any;
+  structuredData?: Record<string, unknown>;
   isActive: boolean;
 }
 
@@ -138,14 +138,11 @@ export async function generateSEOMetadata(page: string = "global"): Promise<Meta
   // Twitter Card metadata
   if (seoData.twitterTitle || seoData.twitterDescription || seoData.twitterImage) {
     metadata.twitter = {
-      card: (seoData.twitterCard as any) || "summary_large_image",
+      card: (seoData.twitterCard as "summary" | "summary_large_image" | "app" | "player") || "summary_large_image",
       title: seoData.twitterTitle || seoData.title,
       description: seoData.twitterDescription || seoData.description,
+      ...(seoData.twitterImage && { images: [seoData.twitterImage] }),
     };
-
-    if (seoData.twitterImage) {
-      metadata.twitter.images = [seoData.twitterImage];
-    }
   }
 
   return metadata;

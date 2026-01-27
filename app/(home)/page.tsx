@@ -1,15 +1,18 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import Image from "next/image";
 import InteractiveBg from "@/app/scripts/bg";
-import Services from "@/components/services";
-import Package_detail from "@/components/package";
-import ReviewsSection from "@/components/reviews";
-import VisionQuoteBand from "@/components/quoate";
-import Gallery from "@/components/gallery";
-import Stats from "@/components/stats";
-import ProudlyCanadian from "@/components/proudly_candadian";
 import Footer from "@/components/footer";
+
+// Lazy load below-fold components for better initial page load
+const Services = dynamic(() => import("@/components/services"), { ssr: true });
+const Gallery = dynamic(() => import("@/components/gallery"), { ssr: true });
+const VisionQuoteBand = dynamic(() => import("@/components/quoate"), { ssr: true });
+const Package_detail = dynamic(() => import("@/components/package"), { ssr: true });
+const ReviewsSection = dynamic(() => import("@/components/reviews"), { ssr: true });
+const Stats = dynamic(() => import("@/components/stats"), { ssr: true });
+const ProudlyCanadian = dynamic(() => import("@/components/proudly_candadian"), { ssr: true });
 
 export default function Home() {
 
@@ -46,6 +49,8 @@ export default function Home() {
               src="/images/medium_res_logo.webp"
               alt="Visionara Logo"
               fill
+              priority
+              sizes="(max-width: 768px) 300px, 500px"
               className="object-contain"
             />
           </div>

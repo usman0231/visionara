@@ -11,11 +11,13 @@ export async function GET() {
       order: [['sortOrder', 'ASC'], ['createdAt', 'DESC']],
     });
 
-    return NextResponse.json({ services });
-  } catch (error: any) {
-    console.error('Get services error:', error);
+    const response = NextResponse.json({ services });
+    response.headers.set('Cache-Control', 'public, s-maxage=3600, stale-while-revalidate=86400');
+    return response;
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json(
-      { error: 'Failed to fetch services', details: error.message },
+      { error: 'Failed to fetch services', details: message },
       { status: 500 }
     );
   }

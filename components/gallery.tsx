@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useMemo, useCallback } from 'react';
 import Image from 'next/image';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -38,9 +38,12 @@ export default function AchievementsGallery() {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   // Filter projects based on active tab (max 8 per category)
-  const filteredProjects = activeTab === 'all'
-    ? projects.slice(0, 8)
-    : projects.filter(p => p.serviceId === activeTab).slice(0, 8);
+  const filteredProjects = useMemo(() =>
+    activeTab === 'all'
+      ? projects.slice(0, 8)
+      : projects.filter(p => p.serviceId === activeTab).slice(0, 8),
+    [activeTab, projects]
+  );
 
   useEffect(() => {
     const fetchData = async () => {
@@ -129,7 +132,7 @@ export default function AchievementsGallery() {
   }, [selectedProject]);
 
   // Get all images for selected project (cover + gallery images)
-  const getAllProjectImages = (project: Project): { url: string; alt: string }[] => {
+  const getAllProjectImages = useCallback((project: Project): { url: string; alt: string }[] => {
     const allImages: { url: string; alt: string }[] = [
       { url: project.coverImage, alt: project.title }
     ];
@@ -139,29 +142,29 @@ export default function AchievementsGallery() {
       });
     }
     return allImages;
-  };
+  }, []);
 
-  const openProject = (project: Project) => {
+  const openProject = useCallback((project: Project) => {
     setSelectedProject(project);
     setCurrentImageIndex(0);
-  };
+  }, []);
 
-  const closeProject = () => {
+  const closeProject = useCallback(() => {
     setSelectedProject(null);
     setCurrentImageIndex(0);
-  };
+  }, []);
 
-  const nextImage = () => {
+  const nextImage = useCallback(() => {
     if (!selectedProject) return;
     const images = getAllProjectImages(selectedProject);
     setCurrentImageIndex((prev) => (prev + 1) % images.length);
-  };
+  }, [selectedProject, getAllProjectImages]);
 
-  const prevImage = () => {
+  const prevImage = useCallback(() => {
     if (!selectedProject) return;
     const images = getAllProjectImages(selectedProject);
     setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
-  };
+  }, [selectedProject, getAllProjectImages]);
 
   if (loading) {
     return (

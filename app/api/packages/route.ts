@@ -15,11 +15,13 @@ export async function GET() {
       attributes: ['id', 'category', 'tier', 'priceOnetime', 'priceMonthly', 'priceYearly', 'features', 'sortOrder']
     });
 
-    return NextResponse.json(packages);
-  } catch (error: any) {
-    console.error('Get packages error:', error);
+    const response = NextResponse.json(packages);
+    response.headers.set('Cache-Control', 'public, s-maxage=3600, stale-while-revalidate=86400');
+    return response;
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json(
-      { error: 'Failed to fetch packages', details: error.message },
+      { error: 'Failed to fetch packages', details: message },
       { status: 500 }
     );
   }
