@@ -186,20 +186,6 @@ export default function ReviewModal({ isOpen, onClose, onSave, review }: ReviewM
                   </div>
 
                   <div>
-                    <label htmlFor="role" className="block text-sm font-medium text-gray-700">
-                      Role/Title
-                    </label>
-                    <input
-                      type="text"
-                      id="role"
-                      value={formData.role}
-                      onChange={(e) => handleInputChange('role', e.target.value)}
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                      placeholder="CEO at Company"
-                    />
-                  </div>
-
-                  <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Rating *
                     </label>

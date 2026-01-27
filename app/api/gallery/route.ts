@@ -1,14 +1,29 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { GalleryItem, AuditLog, AuditAction } from '@/lib/db/models';
+import { GalleryItem, AuditLog, AuditAction, Service } from '@/lib/db/models';
 import { createGalleryItemSchema } from '@/lib/validations/gallery';
 
 export const runtime = 'nodejs';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    const { searchParams } = new URL(request.url);
+    const serviceId = searchParams.get('serviceId');
+
+    const whereClause: Record<string, unknown> = { active: true };
+    if (serviceId) {
+      whereClause.serviceId = serviceId;
+    }
+
     const galleryItems = await GalleryItem.findAll({
-      where: { active: true },
+      where: whereClause,
       order: [['sortOrder', 'ASC'], ['createdAt', 'DESC']],
+      include: [
+        {
+          model: Service,
+          as: 'service',
+          attributes: ['id', 'title'],
+        },
+      ],
     });
 
     return NextResponse.json({ galleryItems });

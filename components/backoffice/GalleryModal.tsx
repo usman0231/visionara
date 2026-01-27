@@ -5,12 +5,19 @@ import { Dialog, Transition } from '@headlessui/react';
 import { XMarkIcon, PhotoIcon, CloudArrowUpIcon } from '@heroicons/react/24/outline';
 import Image from 'next/image';
 
+interface ServiceInfo {
+  id: string;
+  title: string;
+}
+
 interface GalleryItem {
   id: string;
   imageUrl: string;
   alt: string;
+  serviceId: string | null;
   active: boolean;
   sortOrder: number;
+  service?: ServiceInfo | null;
 }
 
 interface GalleryModalProps {
@@ -23,6 +30,7 @@ interface GalleryModalProps {
 interface GalleryFormData {
   imageUrl: string;
   alt: string;
+  serviceId: string | null;
   active: boolean;
   sortOrder: number;
 }
@@ -33,18 +41,37 @@ export default function GalleryModal({ isOpen, onClose, onSave, item }: GalleryM
   const [dragActive, setDragActive] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [services, setServices] = useState<ServiceInfo[]>([]);
   const [formData, setFormData] = useState<GalleryFormData>({
     imageUrl: '',
     alt: '',
+    serviceId: null,
     active: true,
     sortOrder: 0,
   });
+
+  // Fetch services for dropdown
+  useEffect(() => {
+    const fetchServices = async () => {
+      try {
+        const response = await fetch('/api/services');
+        if (response.ok) {
+          const data = await response.json();
+          setServices(data.services || []);
+        }
+      } catch (error) {
+        console.error('Failed to fetch services:', error);
+      }
+    };
+    fetchServices();
+  }, []);
 
   useEffect(() => {
     if (item) {
       setFormData({
         imageUrl: item.imageUrl,
         alt: item.alt,
+        serviceId: item.serviceId || null,
         active: item.active,
         sortOrder: item.sortOrder,
       });
@@ -52,6 +79,7 @@ export default function GalleryModal({ isOpen, onClose, onSave, item }: GalleryM
       setFormData({
         imageUrl: '',
         alt: '',
+        serviceId: null,
         active: true,
         sortOrder: 0,
       });
@@ -320,6 +348,28 @@ export default function GalleryModal({ isOpen, onClose, onSave, item }: GalleryM
                       className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                       placeholder="Describe the image for accessibility"
                     />
+                  </div>
+
+                  <div>
+                    <label htmlFor="serviceId" className="block text-sm font-medium text-gray-700">
+                      Service Category
+                    </label>
+                    <select
+                      id="serviceId"
+                      value={formData.serviceId || ''}
+                      onChange={(e) => handleInputChange('serviceId', e.target.value || null)}
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                    >
+                      <option value="">All Services (No specific category)</option>
+                      {services.map((service) => (
+                        <option key={service.id} value={service.id}>
+                          {service.title}
+                        </option>
+                      ))}
+                    </select>
+                    <p className="mt-1 text-xs text-gray-500">
+                      Select a service to categorize this image, or leave empty for general gallery.
+                    </p>
                   </div>
 
                   <div className="flex items-center justify-between">

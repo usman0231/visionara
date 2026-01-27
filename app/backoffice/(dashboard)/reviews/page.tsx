@@ -214,9 +214,6 @@ export default function ReviewsPage() {
                     <div className="flex items-center gap-3 mb-2">
                       <h3 className="text-lg font-medium text-gray-900">{review.name}</h3>
                     </div>
-                    {review.role && (
-                      <p className="text-sm text-gray-500 mb-2">{review.role}</p>
-                    )}
                     <div className="mb-3">
                       {renderStars(review.rating)}
                     </div>

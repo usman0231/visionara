@@ -1,10 +1,12 @@
 import { DataTypes, Model, Optional } from 'sequelize';
 import { sequelize } from '../sequelize';
+import { Service } from './service';
 
 interface GalleryItemAttributes {
   id: string;
   imageUrl: string;
   alt: string;
+  serviceId: string | null;
   sortOrder: number;
   active: boolean;
   createdAt: Date;
@@ -12,17 +14,24 @@ interface GalleryItemAttributes {
   deletedAt: Date | null;
 }
 
-interface GalleryItemCreationAttributes extends Optional<GalleryItemAttributes, 'id' | 'sortOrder' | 'active' | 'createdAt' | 'updatedAt' | 'deletedAt'> {}
+interface GalleryItemCreationAttributes extends Optional<GalleryItemAttributes, 'id' | 'serviceId' | 'sortOrder' | 'active' | 'createdAt' | 'updatedAt' | 'deletedAt'> {}
 
 export class GalleryItem extends Model<GalleryItemAttributes, GalleryItemCreationAttributes> implements GalleryItemAttributes {
-  public id!: string;
-  public imageUrl!: string;
-  public alt!: string;
-  public sortOrder!: number;
-  public active!: boolean;
-  public readonly createdAt!: Date;
-  public readonly updatedAt!: Date;
-  public readonly deletedAt!: Date | null;
+  declare id: string;
+  declare imageUrl: string;
+  declare alt: string;
+  declare serviceId: string | null;
+  declare sortOrder: number;
+  declare active: boolean;
+  declare readonly createdAt: Date;
+  declare readonly updatedAt: Date;
+  declare readonly deletedAt: Date | null;
+
+  // Association
+  public service?: {
+    id: string;
+    title: string;
+  };
 }
 
 GalleryItem.init(
@@ -39,6 +48,15 @@ GalleryItem.init(
     alt: {
       type: DataTypes.STRING,
       allowNull: false,
+    },
+    serviceId: {
+      type: DataTypes.UUID,
+      allowNull: true,
+      field: 'service_id',
+      references: {
+        model: 'services',
+        key: 'id',
+      },
     },
     sortOrder: {
       type: DataTypes.INTEGER,
@@ -69,5 +87,9 @@ GalleryItem.init(
     paranoid: true,
   }
 );
+
+// Associations
+GalleryItem.belongsTo(Service, { foreignKey: 'serviceId', as: 'service' });
+Service.hasMany(GalleryItem, { foreignKey: 'serviceId', as: 'galleryItems' });
 
 export default GalleryItem;

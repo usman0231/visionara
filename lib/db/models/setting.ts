@@ -12,11 +12,11 @@ interface SettingAttributes {
 interface SettingCreationAttributes extends Optional<SettingAttributes, 'id' | 'createdAt' | 'updatedAt'> {}
 
 export class Setting extends Model<SettingAttributes, SettingCreationAttributes> implements SettingAttributes {
-  public id!: string;
-  public key!: string;
-  public value!: Record<string, any>;
-  public readonly createdAt!: Date;
-  public readonly updatedAt!: Date;
+  declare id: string;
+  declare key: string;
+  declare value: Record<string, any>;
+  declare readonly createdAt: Date;
+  declare readonly updatedAt: Date;
 }
 
 Setting.init(

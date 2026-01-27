@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { GalleryItem } from '@/lib/db/models';
+import { GalleryItem, Service } from '@/lib/db/models';
 
 // Force Node.js runtime for database operations
 export const runtime = 'nodejs';
@@ -14,7 +14,15 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
-    const item = await GalleryItem.findByPk(id);
+    const item = await GalleryItem.findByPk(id, {
+      include: [
+        {
+          model: Service,
+          as: 'service',
+          attributes: ['id', 'title'],
+        },
+      ],
+    });
 
     if (!item) {
       return NextResponse.json(
@@ -45,10 +53,14 @@ export async function PUT(
     const { id } = await params;
     const body = await request.json();
 
+    // Handle serviceId - convert empty string to null
+    const serviceId = body.serviceId && body.serviceId.trim() !== '' ? body.serviceId : null;
+
     const [updatedRowsCount] = await GalleryItem.update(
       {
-        imageUrl: body.imageUrl,
-        alt: body.alt,
+        imageUrl: body.imageUrl?.trim(),
+        alt: body.alt?.trim(),
+        serviceId,
         active: body.active !== undefined ? body.active : true,
         sortOrder: body.sortOrder || 0
       },
@@ -64,7 +76,15 @@ export async function PUT(
       );
     }
 
-    const updatedItem = await GalleryItem.findByPk(id);
+    const updatedItem = await GalleryItem.findByPk(id, {
+      include: [
+        {
+          model: Service,
+          as: 'service',
+          attributes: ['id', 'title'],
+        },
+      ],
+    });
     return NextResponse.json(updatedItem);
   } catch (error: any) {
     console.error('Error updating gallery item:', error);

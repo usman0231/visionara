@@ -219,7 +219,7 @@ export default function ReviewsSection() {
       <header className="reviews__header">
         <p className="eyebrow reveal text-white">What people say</p>
         <h2 className="headline reveal">
-          <span className="headline-fill">Loved by teams</span>
+          <span className="headline-fill">what our client says</span>
           <span className="headline-sheen" aria-hidden />
         </h2>
         <p className="sub reveal text-white">
@@ -258,7 +258,6 @@ export default function ReviewsSection() {
                   </div>
                   <div className="meta">
                     <div className="name">{r.clientName}</div>
-                    {r.clientTitle && <div className="role">{r.clientTitle}</div>}
                   </div>
                   <Stars rating={r.rating} />
                 </div>
@@ -417,7 +416,6 @@ export default function ReviewsSection() {
           box-shadow: inset 0 0 0 1px rgba(255,255,255,.15);
         }
         .meta .name { font-weight: 600; }
-        .meta .role { font-size: .85rem; opacity: .8; }
 
         .text {
           margin-top: .85rem;
