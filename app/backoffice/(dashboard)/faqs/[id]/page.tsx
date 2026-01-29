@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
 import FAQForm from '@/components/backoffice/FAQForm';
+import { FAQ } from '@/lib/db/models';
 
 interface EditFAQPageProps {
   params: Promise<{
@@ -9,15 +10,25 @@ interface EditFAQPageProps {
 
 async function getFAQ(id: string) {
   try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/admin/faqs/${id}`, {
-      cache: 'no-store',
-    });
+    // Directly query database instead of API call to avoid URL issues on Vercel
+    const faq = await FAQ.findByPk(id);
 
-    if (!response.ok) {
+    if (!faq) {
       return null;
     }
 
-    return await response.json();
+    // Convert Sequelize model to plain object and serialize dates for client component
+    const plainFaq = faq.get({ plain: true });
+    return {
+      id: plainFaq.id,
+      question: plainFaq.question,
+      answer: plainFaq.answer,
+      category: plainFaq.category,
+      sortOrder: plainFaq.sortOrder,
+      active: plainFaq.active,
+      createdAt: plainFaq.createdAt instanceof Date ? plainFaq.createdAt.toISOString() : String(plainFaq.createdAt),
+      updatedAt: plainFaq.updatedAt instanceof Date ? plainFaq.updatedAt.toISOString() : String(plainFaq.updatedAt),
+    };
   } catch (error) {
     console.error('Error fetching FAQ:', error);
     return null;

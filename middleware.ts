@@ -29,12 +29,16 @@ export async function middleware(request: NextRequest) {
         return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
       }
 
-      // Add user info to headers for API routes
-      const response = NextResponse.next();
-      response.headers.set('x-user-id', user.id);
-      response.headers.set('x-user-email', user.email || '');
+      // Add user info to request headers for API routes
+      const requestHeaders = new Headers(request.headers);
+      requestHeaders.set('x-user-id', user.id);
+      requestHeaders.set('x-user-email', user.email || '');
 
-      return response;
+      return NextResponse.next({
+        request: {
+          headers: requestHeaders,
+        },
+      });
     } catch (error) {
       return NextResponse.json({ error: 'Authentication error' }, { status: 401 });
     }
@@ -99,12 +103,16 @@ export async function middleware(request: NextRequest) {
       // On error, allow through but log it
     }
 
-    // Valid session with existing user, add user info to headers for API routes
-    const response = NextResponse.next();
-    response.headers.set('x-user-id', user.id);
-    response.headers.set('x-user-email', user.email || '');
+    // Valid session with existing user, add user info to request headers for API routes
+    const requestHeaders = new Headers(request.headers);
+    requestHeaders.set('x-user-id', user.id);
+    requestHeaders.set('x-user-email', user.email || '');
 
-    return response;
+    return NextResponse.next({
+      request: {
+        headers: requestHeaders,
+      },
+    });
 
   } catch (error) {
     console.error('Middleware auth error:', error);

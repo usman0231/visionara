@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { put } from '@vercel/blob';
 import { writeFile, mkdir } from 'fs/promises';
 import { join } from 'path';
 import { randomUUID } from 'crypto';
@@ -9,6 +10,7 @@ export const runtime = 'nodejs';
 /**
  * POST /api/admin/upload
  * Upload an image file and return the URL
+ * Uses Vercel Blob in production, local filesystem in development
  */
 export async function POST(request: NextRequest) {
   try {
@@ -43,23 +45,41 @@ export async function POST(request: NextRequest) {
     const fileExtension = file.name.split('.').pop()?.toLowerCase() || 'jpg';
     const fileName = `${randomUUID()}.${fileExtension}`;
 
-    // Create uploads directory if it doesn't exist
-    const uploadsDir = join(process.cwd(), 'public', 'uploads');
-    try {
-      await mkdir(uploadsDir, { recursive: true });
-    } catch (error) {
-      // Directory already exists, continue
+    let url: string;
+
+    // Use Vercel Blob in production (when BLOB_READ_WRITE_TOKEN is available)
+    if (process.env.BLOB_READ_WRITE_TOKEN) {
+      try {
+        const blob = await put(`uploads/${fileName}`, file, {
+          access: 'public',
+          addRandomSuffix: false,
+        });
+        url = blob.url;
+      } catch (blobError: any) {
+        console.error('Vercel Blob upload error:', blobError);
+        return NextResponse.json(
+          { error: 'Failed to upload to cloud storage', details: blobError.message },
+          { status: 500 }
+        );
+      }
+    } else {
+      // Fallback to local filesystem for development
+      const uploadsDir = join(process.cwd(), 'public', 'uploads');
+      try {
+        await mkdir(uploadsDir, { recursive: true });
+      } catch (error) {
+        // Directory already exists, continue
+      }
+
+      // Convert file to buffer and save
+      const bytes = await file.arrayBuffer();
+      const buffer = Buffer.from(bytes);
+
+      const filePath = join(uploadsDir, fileName);
+      await writeFile(filePath, buffer);
+
+      url = `/uploads/${fileName}`;
     }
-
-    // Convert file to buffer and save
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
-
-    const filePath = join(uploadsDir, fileName);
-    await writeFile(filePath, buffer);
-
-    // Return the public URL
-    const url = `/uploads/${fileName}`;
 
     return NextResponse.json({ url }, { status: 201 });
   } catch (error: any) {
