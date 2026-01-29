@@ -9,6 +9,15 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: false,
   },
+  // Configure allowed image domains for Next.js Image component
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'gorfboholnzcxtwi.public.blob.vercel-storage.com',
+      },
+    ],
+  },
 };
 
 export default nextConfig;

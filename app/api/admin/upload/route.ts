@@ -62,10 +62,12 @@ export async function POST(request: NextRequest) {
     // Check if we're on Vercel (production)
     if (isVercel) {
       // Require BLOB_READ_WRITE_TOKEN on Vercel
-      if (!process.env.BLOB_READ_WRITE_TOKEN) {
-        console.error('BLOB_READ_WRITE_TOKEN not configured on Vercel');
+      const blobToken = process.env.BLOB_READ_WRITE_TOKEN;
+      if (!blobToken) {
+        console.error('BLOB_READ_WRITE_TOKEN not configured. Available env vars starting with BLOB:',
+          Object.keys(process.env).filter(k => k.includes('BLOB')));
         return NextResponse.json(
-          { error: 'Cloud storage not configured. Please contact administrator.' },
+          { error: 'Cloud storage not configured. Please add BLOB_READ_WRITE_TOKEN environment variable in Vercel.' },
           { status: 500 }
         );
       }
