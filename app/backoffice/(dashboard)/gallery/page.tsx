@@ -533,21 +533,48 @@ function ProductModal({
   }, [pendingImages]);
 
   const uploadFile = async (file: File): Promise<string | null> => {
+    // Client-side validation before upload (Vercel has 4.5MB limit)
+    const maxSize = 4 * 1024 * 1024; // 4MB
+    if (file.size > maxSize) {
+      throw new Error(`Image "${file.name}" is too large. Maximum size is 4MB.`);
+    }
+
     const uploadFormData = new FormData();
     uploadFormData.append('file', file);
 
-    const response = await fetch('/api/admin/upload', {
-      method: 'POST',
-      body: uploadFormData,
-    });
+    try {
+      const response = await fetch('/api/admin/upload', {
+        method: 'POST',
+        body: uploadFormData,
+      });
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || 'Failed to upload image');
+      // Handle Vercel's payload too large error
+      if (response.status === 413) {
+        throw new Error(`Image "${file.name}" is too large. Maximum size is 4MB.`);
+      }
+
+      if (!response.ok) {
+        // Try to get JSON error, but handle non-JSON responses
+        const contentType = response.headers.get('content-type');
+        if (contentType?.includes('application/json')) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Failed to upload image');
+        } else {
+          // Non-JSON response (like Vercel error page)
+          throw new Error('Failed to upload image. The file may be too large.');
+        }
+      }
+
+      const { url } = await response.json();
+      return url;
+    } catch (err: any) {
+      // Re-throw our custom errors
+      if (err.message) {
+        throw err;
+      }
+      // Handle network errors
+      throw new Error('Network error. Please check your connection and try again.');
     }
-
-    const { url } = await response.json();
-    return url;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -589,6 +616,7 @@ function ProductModal({
         const newProduct = await response.json();
 
         // Upload gallery images
+        const failedGalleryUploads: string[] = [];
         for (let i = 0; i < galleryImgs.length; i++) {
           const img = galleryImgs[i];
           setUploadProgress({ total: pendingImages.length, completed: i + 1, current: img.file.name });
@@ -606,12 +634,19 @@ function ProductModal({
                 }),
               });
             }
-          } catch (err) {
+          } catch (err: any) {
             console.error(`Failed to upload gallery image ${img.file.name}:`, err);
+            failedGalleryUploads.push(img.file.name);
           }
         }
 
         setUploadProgress(null);
+
+        // Show warning for failed gallery uploads but still close modal (product was created)
+        if (failedGalleryUploads.length > 0) {
+          alert(`Product created, but some images failed to upload: ${failedGalleryUploads.join(', ')}. You can add them later by editing the product.`);
+        }
+
         onSave();
         return;
       }
@@ -647,14 +682,29 @@ function ProductModal({
 
   // Handle adding multiple images for new products
   const handleAddPendingImages = useCallback((files: FileList | File[]) => {
+    const maxSize = 4 * 1024 * 1024; // 4MB (Vercel limit)
+    const tooLargeFiles: string[] = [];
+    const invalidTypeFiles: string[] = [];
+
     const validFiles = Array.from(files).filter(file => {
-      if (!file.type.startsWith('image/')) return false;
-      if (file.size > 10 * 1024 * 1024) return false;
+      if (!file.type.startsWith('image/')) {
+        invalidTypeFiles.push(file.name);
+        return false;
+      }
+      if (file.size > maxSize) {
+        tooLargeFiles.push(file.name);
+        return false;
+      }
       return true;
     });
 
-    if (validFiles.length === 0) {
-      setError('No valid image files selected. Max 10MB per image.');
+    // Show specific error messages
+    if (tooLargeFiles.length > 0) {
+      setError(`These images are too large (max 4MB): ${tooLargeFiles.join(', ')}`);
+      if (validFiles.length === 0) return;
+    }
+    if (invalidTypeFiles.length > 0 && validFiles.length === 0) {
+      setError('Selected files are not valid images.');
       return;
     }
 
@@ -694,14 +744,25 @@ function ProductModal({
       return;
     }
 
+    const maxSize = 4 * 1024 * 1024; // 4MB (Vercel limit)
+    const tooLargeFiles: string[] = [];
+
     const validFiles = Array.from(files).filter(file => {
       if (!file.type.startsWith('image/')) return false;
-      if (file.size > 10 * 1024 * 1024) return false;
+      if (file.size > maxSize) {
+        tooLargeFiles.push(file.name);
+        return false;
+      }
       return true;
     });
 
+    if (tooLargeFiles.length > 0) {
+      setError(`These images are too large (max 4MB): ${tooLargeFiles.join(', ')}`);
+      if (validFiles.length === 0) return;
+    }
+
     if (validFiles.length === 0) {
-      setError('No valid image files selected. Max 10MB per image.');
+      setError('No valid image files selected.');
       return;
     }
 
@@ -709,6 +770,7 @@ function ProductModal({
     setError(null);
 
     const newImages: ProductImage[] = [];
+    const failedUploads: string[] = [];
 
     for (let i = 0; i < validFiles.length; i++) {
       const file = validFiles[i];
@@ -732,13 +794,19 @@ function ProductModal({
             newImages.push(newImage);
           }
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error(`Failed to upload ${file.name}:`, error);
+        failedUploads.push(file.name);
       }
     }
 
     setImages(prev => [...prev, ...newImages]);
     setUploadProgress(null);
+
+    // Show error for failed uploads
+    if (failedUploads.length > 0) {
+      setError(`Failed to upload: ${failedUploads.join(', ')}`);
+    }
   }, [product, images.length, handleAddPendingImages]);
 
   const handleDeleteImage = async (imageId: string) => {

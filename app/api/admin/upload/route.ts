@@ -7,6 +7,9 @@ import { randomUUID } from 'crypto';
 // Force Node.js runtime for file operations
 export const runtime = 'nodejs';
 
+// Check if running on Vercel
+const isVercel = process.env.VERCEL === '1' || process.env.VERCEL_ENV !== undefined;
+
 /**
  * POST /api/admin/upload
  * Upload an image file and return the URL
@@ -14,6 +17,15 @@ export const runtime = 'nodejs';
  */
 export async function POST(request: NextRequest) {
   try {
+    // Check content length before processing to avoid payload errors
+    const contentLength = request.headers.get('content-length');
+    if (contentLength && parseInt(contentLength) > 4 * 1024 * 1024) {
+      return NextResponse.json(
+        { error: 'File too large. Maximum size is 4MB.' },
+        { status: 413 }
+      );
+    }
+
     const formData = await request.formData();
     const file = formData.get('file') as File;
 
@@ -32,11 +44,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validate file size (max 10MB)
-    const maxSize = 10 * 1024 * 1024; // 10MB
+    // Validate file size (max 4MB to stay under Vercel's 4.5MB serverless limit)
+    const maxSize = 4 * 1024 * 1024; // 4MB
     if (file.size > maxSize) {
       return NextResponse.json(
-        { error: 'File size must be less than 10MB' },
+        { error: 'File size must be less than 4MB' },
         { status: 400 }
       );
     }
@@ -47,8 +59,17 @@ export async function POST(request: NextRequest) {
 
     let url: string;
 
-    // Use Vercel Blob in production (when BLOB_READ_WRITE_TOKEN is available)
-    if (process.env.BLOB_READ_WRITE_TOKEN) {
+    // Check if we're on Vercel (production)
+    if (isVercel) {
+      // Require BLOB_READ_WRITE_TOKEN on Vercel
+      if (!process.env.BLOB_READ_WRITE_TOKEN) {
+        console.error('BLOB_READ_WRITE_TOKEN not configured on Vercel');
+        return NextResponse.json(
+          { error: 'Cloud storage not configured. Please contact administrator.' },
+          { status: 500 }
+        );
+      }
+
       try {
         const blob = await put(`uploads/${fileName}`, file, {
           access: 'public',
@@ -58,12 +79,12 @@ export async function POST(request: NextRequest) {
       } catch (blobError: any) {
         console.error('Vercel Blob upload error:', blobError);
         return NextResponse.json(
-          { error: 'Failed to upload to cloud storage', details: blobError.message },
+          { error: 'Failed to upload image. Please try again.' },
           { status: 500 }
         );
       }
     } else {
-      // Fallback to local filesystem for development
+      // Local development - use filesystem
       const uploadsDir = join(process.cwd(), 'public', 'uploads');
       try {
         await mkdir(uploadsDir, { recursive: true });
@@ -84,8 +105,17 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ url }, { status: 201 });
   } catch (error: any) {
     console.error('Error uploading file:', error);
+
+    // Handle specific errors with user-friendly messages
+    if (error.message?.includes('EROFS') || error.message?.includes('read-only')) {
+      return NextResponse.json(
+        { error: 'Cloud storage not configured. Please contact administrator.' },
+        { status: 500 }
+      );
+    }
+
     return NextResponse.json(
-      { error: 'Failed to upload file', details: error.message },
+      { error: 'Failed to upload image. Please try again.' },
       { status: 500 }
     );
   }
