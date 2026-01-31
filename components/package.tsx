@@ -559,25 +559,43 @@ export default function PackagesSection() {
         /* Category pills */
         .pills {
           display: flex;
-          flex-wrap: wrap;
-          gap: 0.5rem;
-          justify-content: center;
+          flex-wrap: nowrap;
+          gap: 0.4rem;
+          justify-content: flex-start;
           margin: 1rem 0 1.5rem;
+          overflow-x: auto;
+          -webkit-overflow-scrolling: touch;
+          scrollbar-width: none;
+          -ms-overflow-style: none;
+          padding: 0.25rem 1rem;
+          margin-left: -1rem;
+          margin-right: -1rem;
+        }
+        .pills::-webkit-scrollbar {
+          display: none;
         }
         @media (min-width: 640px) {
           .pills {
+            flex-wrap: wrap;
+            justify-content: center;
             gap: 0.75rem;
             margin: 1.2rem 0 1.8rem;
+            overflow-x: visible;
+            padding: 0;
+            margin-left: 0;
+            margin-right: 0;
           }
         }
         .pill {
           border: 1px solid rgba(118, 60, 172, 0.4);
           background: rgba(255, 255, 255, 0.03);
-          padding: 0.6rem 1rem;
+          padding: 0.5rem 0.9rem;
           border-radius: 999px;
           transition: background 0.25s ease, border-color 0.25s ease, transform 0.2s ease;
-          font-size: clamp(0.85rem, 2vw, 0.95rem);
+          font-size: 0.85rem;
           font-weight: 500;
+          white-space: nowrap;
+          flex-shrink: 0;
         }
         @media (min-width: 640px) {
           .pill {
@@ -591,8 +609,7 @@ export default function PackagesSection() {
           background: rgba(255, 255, 255, 0.06);
         }
         .pill.is-active {
-          background: rgba(118, 60, 172, 0.15),
-            rgba(255, 255, 255, 0.06);
+          background: linear-gradient(135deg, rgba(118, 60, 172, 0.15), rgba(255, 255, 255, 0.06));
           border-color: var(--foreground);
         }
 
@@ -602,15 +619,21 @@ export default function PackagesSection() {
           display: flex;
           align-items: stretch;
           gap: 0;
-          padding: 0.35rem;
+          padding: 0.25rem;
           border-radius: 999px;
           margin: 0.8rem auto 1.8rem;
           border: 1px solid rgba(118, 60, 172, 0.45);
           background: rgba(255, 255, 255, 0.03);
-          width: 100%;
-          max-width: 400px;
+          width: calc(100% - 1rem);
+          max-width: 340px;
         }
-        @media (min-width: 600px) {
+        @media (min-width: 480px) {
+          .seg {
+            max-width: 400px;
+            padding: 0.35rem;
+          }
+        }
+        @media (min-width: 640px) {
           .seg {
             max-width: 450px;
           }
@@ -618,32 +641,33 @@ export default function PackagesSection() {
         .seg__btn {
           position: relative;
           z-index: 1;
-          padding: 0.6rem 1rem;
+          padding: 0.45rem 0.5rem;
           border-radius: 999px;
           font-weight: 600;
           opacity: 0.9;
           display: flex;
           align-items: center;
           justify-content: center;
-          gap: 0.4rem;
+          gap: 0.25rem;
           flex: 1;
           min-width: 0;
           text-align: center;
-          min-height: 2.5rem;
+          min-height: 2.2rem;
+          font-size: 0.8rem;
         }
         .seg__btn.is-active {
           opacity: 1;
         }
         .yearly-btn {
           flex-direction: column;
-          gap: 0.2rem;
-          padding: 0.4rem 0.8rem;
+          gap: 0.15rem;
+          padding: 0.35rem 0.4rem;
         }
         .discount-badge {
-          font-size: 0.65rem;
+          font-size: 0.55rem;
           background: linear-gradient(90deg, #ff6b35, #f7931e);
           color: white;
-          padding: 0.1rem 0.3rem;
+          padding: 0.08rem 0.25rem;
           border-radius: 999px;
           font-weight: 700;
           letter-spacing: 0.02em;
@@ -655,10 +679,24 @@ export default function PackagesSection() {
           0%, 100% { transform: scale(1); }
           50% { transform: scale(1.05); }
         }
-        @media (min-width: 600px) {
+        @media (min-width: 480px) {
+          .seg__btn {
+            padding: 0.5rem 0.8rem;
+            min-height: 2.5rem;
+            font-size: 0.85rem;
+          }
+          .yearly-btn {
+            padding: 0.4rem 0.6rem;
+          }
+          .discount-badge {
+            font-size: 0.6rem;
+          }
+        }
+        @media (min-width: 640px) {
           .seg__btn {
             padding: 0.6rem 1.2rem;
             min-height: 3rem;
+            font-size: 0.95rem;
           }
           .yearly-btn {
             flex-direction: row;
@@ -673,24 +711,39 @@ export default function PackagesSection() {
         .seg__thumb {
           position: absolute;
           z-index: 0;
-          top: 4px;
-          bottom: 4px;
-          width: calc((100% - 0.7rem) / 3);
+          top: 3px;
+          bottom: 3px;
+          width: calc((100% - 0.5rem) / 3);
           border-radius: 999px;
-          background: rgba(118, 60, 172, 0.2),
-            rgba(255, 255, 255, 0.08);
+          background: linear-gradient(135deg, rgba(118, 60, 172, 0.2), rgba(255, 255, 255, 0.08));
           box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08),
             0 8px 22px rgba(118, 60, 172, 0.25);
           transition: left 0.28s cubic-bezier(0.22, 0.8, 0.36, 1);
         }
         .seg__thumb.onetime {
-          left: 4px;
+          left: 3px;
         }
         .seg__thumb.monthly {
-          left: calc(4px + (100% - 0.7rem) / 3 + 0.35rem);
+          left: calc(3px + (100% - 0.5rem) / 3 + 0.25rem);
         }
         .seg__thumb.yearly {
-          left: calc(4px + 2 * ((100% - 0.7rem) / 3 + 0.35rem));
+          left: calc(3px + 2 * ((100% - 0.5rem) / 3 + 0.25rem));
+        }
+        @media (min-width: 480px) {
+          .seg__thumb {
+            top: 4px;
+            bottom: 4px;
+            width: calc((100% - 0.7rem) / 3);
+          }
+          .seg__thumb.onetime {
+            left: 4px;
+          }
+          .seg__thumb.monthly {
+            left: calc(4px + (100% - 0.7rem) / 3 + 0.35rem);
+          }
+          .seg__thumb.yearly {
+            left: calc(4px + 2 * ((100% - 0.7rem) / 3 + 0.35rem));
+          }
         }
 
         /* ===== Responsive grid layout ===== */
@@ -752,8 +805,7 @@ export default function PackagesSection() {
         .pkg-card__inner {
           position: relative;
           border-radius: 17px;
-          background: rgba(118, 60, 172, 0.08),
-            rgba(255, 255, 255, 0.03);
+          background: linear-gradient(135deg, rgba(118, 60, 172, 0.08), rgba(255, 255, 255, 0.03));
           backdrop-filter: blur(8px);
           padding: 1.3rem;
           height: 100%;

@@ -14,7 +14,13 @@ async function getAboutContent(id: string) {
     if (!content) {
       return null;
     }
-    return content.toJSON();
+    const data = content.toJSON();
+    // Convert dates to ISO strings for serialization
+    return {
+      ...data,
+      createdAt: data.createdAt?.toISOString?.() || data.createdAt,
+      updatedAt: data.updatedAt?.toISOString?.() || data.updatedAt,
+    };
   } catch (error) {
     console.error('Error fetching about content:', error);
     return null;
