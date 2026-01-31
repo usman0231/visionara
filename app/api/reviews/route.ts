@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { Review, Service, AuditLog, AuditAction } from '@/lib/db/models';
+import { Review, AuditLog, AuditAction } from '@/lib/db/models';
 import { createReviewSchema } from '@/lib/validations/review';
 
 export const runtime = 'nodejs';
@@ -42,21 +42,6 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const validatedData = createReviewSchema.parse(body);
 
-    // Verify service exists if serviceId provided
-    if (validatedData.serviceId) {
-      const service = await Service.findOne({
-        where: { id: validatedData.serviceId, deletedAt: null },
-      });
-
-      if (!service) {
-        return NextResponse.json(
-          { error: 'Service not found' },
-          { status: 404 }
-        );
-      }
-    }
-
-    // @ts-expect-error - Temporary fix for model/validation schema mismatch
     const review = await Review.create({
       ...validatedData,
     });
@@ -72,7 +57,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ review }, { status: 201 });
   } catch (error: any) {
     console.error('Create review error:', error);
-    
+
     if (error.name === 'ZodError') {
       return NextResponse.json(
         { error: 'Validation failed', details: error.errors },

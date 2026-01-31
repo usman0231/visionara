@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { Package, Service, AuditLog, AuditAction } from '@/lib/db/models';
+import { Package, AuditLog, AuditAction, PackageCategory, PackageTier } from '@/lib/db/models';
 import { updatePackageSchema } from '@/lib/validations/package';
 
 export const runtime = 'nodejs';
@@ -13,15 +13,8 @@ export async function GET(
     const package_ = await Package.findOne({
       where: {
         id,
-        deletedAt: null 
+        deletedAt: null
       },
-      include: [
-        {
-          model: Service,
-          as: 'service',
-          attributes: ['id', 'name'],
-        },
-      ],
     });
 
     if (!package_) {
@@ -55,7 +48,7 @@ export async function PUT(
     const package_ = await Package.findOne({
       where: {
         id,
-        deletedAt: null 
+        deletedAt: null
       },
     });
 
@@ -70,23 +63,14 @@ export async function PUT(
     const validatedData = updatePackageSchema.parse(body);
     const oldValues = package_.toJSON();
 
-    // Verify service exists if serviceId is being updated
-    if (validatedData.serviceId) {
-      const service = await Service.findOne({
-        where: { id: validatedData.serviceId, deletedAt: null },
-      });
-
-      if (!service) {
-        return NextResponse.json(
-          { error: 'Service not found' },
-          { status: 404 }
-        );
-      }
+    const updateData: Record<string, unknown> = { ...validatedData };
+    if (validatedData.category) {
+      updateData.category = validatedData.category as PackageCategory;
     }
-
-    await package_.update({
-      ...validatedData,
-    });
+    if (validatedData.tier) {
+      updateData.tier = validatedData.tier as PackageTier;
+    }
+    await package_.update(updateData);
 
     await AuditLog.create({
       actorUserId: userId,
@@ -99,7 +83,7 @@ export async function PUT(
     return NextResponse.json({ package: package_ });
   } catch (error: any) {
     console.error('Update package error:', error);
-    
+
     if (error.name === 'ZodError') {
       return NextResponse.json(
         { error: 'Validation failed', details: error.errors },
@@ -128,7 +112,7 @@ export async function DELETE(
     const package_ = await Package.findOne({
       where: {
         id,
-        deletedAt: null 
+        deletedAt: null
       },
     });
 

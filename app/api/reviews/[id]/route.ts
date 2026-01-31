@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { Review, Service, AuditLog, AuditAction } from '@/lib/db/models';
+import { Review, AuditLog, AuditAction } from '@/lib/db/models';
 import { updateReviewSchema } from '@/lib/validations/review';
 
 export const runtime = 'nodejs';
@@ -13,16 +13,8 @@ export async function GET(
     const review = await Review.findOne({
       where: {
         id,
-        deletedAt: null 
+        deletedAt: null
       },
-      include: [
-        {
-          model: Service,
-          as: 'service',
-          attributes: ['id', 'name'],
-          required: false,
-        },
-      ],
     });
 
     if (!review) {
@@ -56,7 +48,7 @@ export async function PUT(
     const review = await Review.findOne({
       where: {
         id,
-        deletedAt: null 
+        deletedAt: null
       },
     });
 
@@ -70,20 +62,6 @@ export async function PUT(
     const body = await request.json();
     const validatedData = updateReviewSchema.parse(body);
     const oldValues = review.toJSON();
-
-    // Verify service exists if serviceId is being updated
-    if (validatedData.serviceId) {
-      const service = await Service.findOne({
-        where: { id: validatedData.serviceId, deletedAt: null },
-      });
-
-      if (!service) {
-        return NextResponse.json(
-          { error: 'Service not found' },
-          { status: 404 }
-        );
-      }
-    }
 
     await review.update({
       ...validatedData,
@@ -100,7 +78,7 @@ export async function PUT(
     return NextResponse.json({ review });
   } catch (error: any) {
     console.error('Update review error:', error);
-    
+
     if (error.name === 'ZodError') {
       return NextResponse.json(
         { error: 'Validation failed', details: error.errors },
@@ -129,7 +107,7 @@ export async function DELETE(
     const review = await Review.findOne({
       where: {
         id,
-        deletedAt: null 
+        deletedAt: null
       },
     });
 

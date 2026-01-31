@@ -31,7 +31,6 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const validatedData = createStatSchema.parse(body);
 
-    // @ts-expect-error - Temporary fix for model/validation schema mismatch
     const stat = await Stat.create({
       ...validatedData,
     });

@@ -53,7 +53,6 @@ export async function PUT(
     const validatedData = updateStatSchema.parse(body);
     const oldValues = stat.toJSON();
 
-    // @ts-expect-error - Temporary fix for model/validation schema mismatch
     await stat.update({
       ...validatedData,
     });

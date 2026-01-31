@@ -1,16 +1,14 @@
 import { z } from 'zod';
 
 export const createPackageSchema = z.object({
-  serviceId: z.string().uuid('Service ID must be valid UUID'),
-  name: z.string().min(1, 'Name is required').max(255),
-  description: z.string().min(1, 'Description is required'),
-  price: z.number().min(0, 'Price must be non-negative'),
-  currency: z.string().length(3, 'Currency must be 3 characters').default('USD'),
-  duration: z.string().max(100).optional(),
+  category: z.enum(['Web', 'Mobile', 'Graphic', 'Marketing']),
+  tier: z.enum(['Basic', 'Standard', 'Enterprise']),
+  priceOnetime: z.string().min(1, 'One-time price is required'),
+  priceMonthly: z.string().min(1, 'Monthly price is required'),
+  priceYearly: z.string().min(1, 'Yearly price is required'),
   features: z.array(z.string()).default([]),
-  isPopular: z.boolean().default(false),
-  isActive: z.boolean().default(true),
-  displayOrder: z.number().int().min(0).default(0),
+  sortOrder: z.number().int().min(0).default(0),
+  active: z.boolean().default(true),
 });
 
 export const updatePackageSchema = createPackageSchema.partial();

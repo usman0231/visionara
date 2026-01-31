@@ -8,19 +8,26 @@ interface EditAboutContentPageProps {
   }>;
 }
 
-async function getAboutContent(id: string) {
+interface AboutContentData {
+  id: string;
+  section: 'hero' | 'story' | 'values' | 'services' | 'tech' | 'testimonials' | 'cta' | 'stats';
+  title: string;
+  subtitle: string | null;
+  content: Record<string, any>;
+  active: boolean;
+  sortOrder: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+async function getAboutContent(id: string): Promise<AboutContentData | null> {
   try {
     const content = await AboutContent.findByPk(id);
     if (!content) {
       return null;
     }
-    const data = content.toJSON();
-    // Convert dates to ISO strings for serialization
-    return {
-      ...data,
-      createdAt: data.createdAt?.toISOString?.() || data.createdAt,
-      updatedAt: data.updatedAt?.toISOString?.() || data.updatedAt,
-    };
+    // Serialize to JSON string and parse back to ensure all dates become strings
+    return JSON.parse(JSON.stringify(content.toJSON()));
   } catch (error) {
     console.error('Error fetching about content:', error);
     return null;

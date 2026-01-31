@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { Package, Service, AuditLog, AuditAction } from '@/lib/db/models';
+import { Package, AuditLog, AuditAction, PackageCategory, PackageTier } from '@/lib/db/models';
 import { createPackageSchema } from '@/lib/validations/package';
 
 export const runtime = 'nodejs';
@@ -38,21 +38,10 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const validatedData = createPackageSchema.parse(body);
 
-    // Verify service exists
-    const service = await Service.findOne({
-      where: { id: validatedData.serviceId, deletedAt: null },
-    });
-
-    if (!service) {
-      return NextResponse.json(
-        { error: 'Service not found' },
-        { status: 404 }
-      );
-    }
-
-    // @ts-expect-error - Temporary fix for model/validation schema mismatch
     const package_ = await Package.create({
       ...validatedData,
+      category: validatedData.category as PackageCategory,
+      tier: validatedData.tier as PackageTier,
     });
 
     await AuditLog.create({
@@ -66,7 +55,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ package: package_ }, { status: 201 });
   } catch (error: any) {
     console.error('Create package error:', error);
-    
+
     if (error.name === 'ZodError') {
       return NextResponse.json(
         { error: 'Validation failed', details: error.errors },
