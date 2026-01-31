@@ -28,7 +28,7 @@ export default function ServicesTable() {
 
   const fetchServices = async () => {
     try {
-      const response = await fetch('/api/services');
+      const response = await fetch('/api/admin/services');
       if (!response.ok) {
         // If API fails, show empty state instead of error
         setServices([]);
@@ -50,7 +50,7 @@ export default function ServicesTable() {
     if (!confirm('Are you sure you want to delete this service?')) return;
 
     try {
-      const response = await fetch(`/api/services/${id}`, {
+      const response = await fetch(`/api/admin/services/${id}`, {
         method: 'DELETE',
       });
 
@@ -64,7 +64,7 @@ export default function ServicesTable() {
   };
 
   const handleToggleActive = async (id: string, currentActive: boolean) => {
-    const response = await fetch(`/api/services/${id}`, {
+    const response = await fetch(`/api/admin/services/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ active: !currentActive }),
