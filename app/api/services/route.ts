@@ -35,7 +35,6 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const validatedData = createServiceSchema.parse(body);
 
-    // @ts-expect-error - Temporary fix for model/validation schema mismatch
     const service = await Service.create({
       ...validatedData,
     });
