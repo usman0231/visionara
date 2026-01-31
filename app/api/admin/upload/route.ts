@@ -1,14 +1,29 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { put } from '@vercel/blob';
 import { writeFile, mkdir } from 'fs/promises';
 import { join } from 'path';
 import { randomUUID } from 'crypto';
 
 // Force Node.js runtime for file operations
 export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
 
 // Check if running on Vercel
 const isVercel = process.env.VERCEL === '1' || process.env.VERCEL_ENV !== undefined;
+
+/**
+ * OPTIONS /api/admin/upload
+ * Handle preflight requests
+ */
+export async function OPTIONS() {
+  return new NextResponse(null, {
+    status: 200,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type',
+    },
+  });
+}
 
 /**
  * POST /api/admin/upload
@@ -73,6 +88,8 @@ export async function POST(request: NextRequest) {
       }
 
       try {
+        // Dynamic import to avoid build errors when package is not installed
+        const { put } = await import('@vercel/blob');
         const blob = await put(`uploads/${fileName}`, file, {
           access: 'public',
           addRandomSuffix: false,
@@ -104,7 +121,10 @@ export async function POST(request: NextRequest) {
       url = `/uploads/${fileName}`;
     }
 
-    return NextResponse.json({ url }, { status: 201 });
+    return NextResponse.json({ url }, {
+      status: 201,
+      headers: { 'Content-Type': 'application/json' }
+    });
   } catch (error: any) {
     console.error('Error uploading file:', error);
 
@@ -112,13 +132,13 @@ export async function POST(request: NextRequest) {
     if (error.message?.includes('EROFS') || error.message?.includes('read-only')) {
       return NextResponse.json(
         { error: 'Cloud storage not configured. Please contact administrator.' },
-        { status: 500 }
+        { status: 500, headers: { 'Content-Type': 'application/json' } }
       );
     }
 
     return NextResponse.json(
       { error: 'Failed to upload image. Please try again.' },
-      { status: 500 }
+      { status: 500, headers: { 'Content-Type': 'application/json' } }
     );
   }
 }

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath, revalidateTag } from 'next/cache';
 import { Service, AuditLog, AuditAction } from '@/lib/db/models';
 import { updateServiceSchema } from '@/lib/validations/service';
 
@@ -75,6 +76,10 @@ export async function PUT(
       diff: { oldValues, newValues: validatedData },
     });
 
+    // Revalidate cache for services
+    revalidatePath('/');
+    revalidatePath('/services');
+
     return NextResponse.json({ service });
   } catch (error: any) {
     console.error('Update service error:', error);
@@ -131,6 +136,10 @@ export async function DELETE(
       entityId: service.id,
       diff: { oldValues },
     });
+
+    // Revalidate cache for services
+    revalidatePath('/');
+    revalidatePath('/services');
 
     return NextResponse.json({ message: 'Service deleted successfully' });
   } catch (error: any) {

@@ -300,11 +300,11 @@ export default function AboutContentForm({
             <div className="sm:col-span-6">
               <label
                 htmlFor="description"
-                className="block text-sm font-medium leading-6 text-gray-900"
+                className="block text-sm font-medium text-gray-700 mb-1.5"
               >
                 Description
               </label>
-              <div className="mt-2">
+              <div>
                 <textarea
                   id="description"
                   rows={4}
@@ -312,16 +312,16 @@ export default function AboutContentForm({
                   onChange={(e) =>
                     handleContentChange("description", e.target.value)
                   }
-                  className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                  className="block w-full rounded-lg border border-gray-300 px-4 py-2.5 text-gray-900 placeholder-gray-400 shadow-sm transition-all duration-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 focus:outline-none hover:border-gray-400 sm:text-sm"
                   placeholder="Visionara is a studio of builders..."
                 />
               </div>
             </div>
             <div className="sm:col-span-6">
-              <label className="block text-sm font-medium leading-6 text-gray-900">
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">
                 Call-to-Action Buttons
               </label>
-              <div className="mt-2 space-y-2">
+              <div className="space-y-3">
                 {(formData.content.buttons || []).map(
                   (button: any, index: number) => (
                     <div key={index} className="flex gap-2 items-center">
@@ -339,7 +339,7 @@ export default function AboutContentForm({
                           };
                           handleContentChange("buttons", newButtons);
                         }}
-                        className="flex-1 rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                        className="flex-1 rounded-lg border border-gray-300 px-4 py-2.5 text-gray-900 placeholder-gray-400 shadow-sm transition-all duration-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 focus:outline-none hover:border-gray-400 sm:text-sm"
                       />
                       <input
                         type="text"
@@ -355,7 +355,7 @@ export default function AboutContentForm({
                           };
                           handleContentChange("buttons", newButtons);
                         }}
-                        className="flex-1 rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                        className="flex-1 rounded-lg border border-gray-300 px-4 py-2.5 text-gray-900 placeholder-gray-400 shadow-sm transition-all duration-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 focus:outline-none hover:border-gray-400 sm:text-sm"
                       />
                       <label className="flex items-center gap-1">
                         <input
@@ -371,7 +371,7 @@ export default function AboutContentForm({
                             };
                             handleContentChange("buttons", newButtons);
                           }}
-                          className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600"
+                          className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-2 focus:ring-indigo-500/20 cursor-pointer"
                         />
                         <span className="text-sm">Primary</span>
                       </label>
@@ -383,7 +383,7 @@ export default function AboutContentForm({
                           ).filter((_: any, i: number) => i !== index);
                           handleContentChange("buttons", newButtons);
                         }}
-                        className="text-red-600 hover:text-red-900"
+                        className="p-1.5 text-red-500 bg-red-50 rounded-lg hover:bg-red-100 hover:text-red-600 transition-colors duration-200"
                       >
                         <XMarkIcon className="h-4 w-4" />
                       </button>
@@ -399,7 +399,7 @@ export default function AboutContentForm({
                     ];
                     handleContentChange("buttons", newButtons);
                   }}
-                  className="flex items-center gap-1 text-indigo-600 hover:text-indigo-900"
+                  className="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-indigo-600 bg-indigo-50 rounded-lg hover:bg-indigo-100 hover:text-indigo-700 transition-colors duration-200"
                 >
                   <PlusIcon className="h-4 w-4" />
                   Add Button
@@ -414,17 +414,17 @@ export default function AboutContentForm({
           <div className="sm:col-span-6">
             <label
               htmlFor="text"
-              className="block text-sm font-medium leading-6 text-gray-900"
+              className="block text-sm font-medium text-gray-700 mb-1.5"
             >
               Story Text
             </label>
-            <div className="mt-2">
+            <div>
               <textarea
                 id="text"
                 rows={6}
                 value={formData.content.text || ""}
                 onChange={(e) => handleContentChange("text", e.target.value)}
-                className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                className="block w-full rounded-lg border border-gray-300 px-4 py-2.5 text-gray-900 placeholder-gray-400 shadow-sm transition-all duration-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 focus:outline-none hover:border-gray-400 sm:text-sm"
                 placeholder="We started Visionara to give founders..."
               />
             </div>
@@ -434,13 +434,13 @@ export default function AboutContentForm({
       case "values":
         return (
           <div className="sm:col-span-6">
-            <label className="block text-sm font-medium leading-6 text-gray-900">
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">
               Values
             </label>
-            <div className="mt-2 space-y-3">
+            <div className="space-y-3">
               {(formData.content.items || []).map(
                 (item: any, index: number) => (
-                  <div key={index} className="border rounded-md p-3">
+                  <div key={index} className="rounded-xl border border-gray-200 bg-gray-50/50 p-4 hover:border-gray-300 transition-colors duration-200">
                     <div className="flex gap-2 items-start">
                       <div className="flex-1 space-y-2">
                         <input
@@ -457,7 +457,7 @@ export default function AboutContentForm({
                             };
                             handleContentChange("items", newItems);
                           }}
-                          className="w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                          className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-gray-900 placeholder-gray-400 shadow-sm transition-all duration-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 focus:outline-none hover:border-gray-400 sm:text-sm"
                         />
                         <textarea
                           placeholder="Value description"
@@ -473,7 +473,7 @@ export default function AboutContentForm({
                             };
                             handleContentChange("items", newItems);
                           }}
-                          className="w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                          className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-gray-900 placeholder-gray-400 shadow-sm transition-all duration-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 focus:outline-none hover:border-gray-400 sm:text-sm"
                         />
                       </div>
                       <button
@@ -484,7 +484,7 @@ export default function AboutContentForm({
                           ).filter((_: any, i: number) => i !== index);
                           handleContentChange("items", newItems);
                         }}
-                        className="text-red-600 hover:text-red-900"
+                        className="p-1.5 text-red-500 bg-red-50 rounded-lg hover:bg-red-100 hover:text-red-600 transition-colors duration-200"
                       >
                         <XMarkIcon className="h-4 w-4" />
                       </button>
@@ -501,7 +501,7 @@ export default function AboutContentForm({
                   ];
                   handleContentChange("items", newItems);
                 }}
-                className="flex items-center gap-1 text-indigo-600 hover:text-indigo-900"
+                className="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-indigo-600 bg-indigo-50 rounded-lg hover:bg-indigo-100 hover:text-indigo-700 transition-colors duration-200"
               >
                 <PlusIcon className="h-4 w-4" />
                 Add Value
@@ -544,14 +544,14 @@ export default function AboutContentForm({
           <div className="sm:col-span-6 space-y-6">
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
-                <label className="block text-sm font-medium leading-6 text-gray-900">
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">
                   Layout
                 </label>
-                <div className="mt-2">
+                <div>
                   <select
                     value={servicesContent.layout || "grid"}
                     onChange={(e) => handleContentChange("layout", e.target.value)}
-                    className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                    className="block w-full rounded-lg border border-gray-300 px-4 py-2.5 text-gray-900 placeholder-gray-400 shadow-sm transition-all duration-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 focus:outline-none hover:border-gray-400 sm:text-sm"
                   >
                     <option value="grid">Grid cards</option>
                     <option value="feature">Feature split</option>
@@ -560,10 +560,10 @@ export default function AboutContentForm({
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium leading-6 text-gray-900">
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">
                   Columns
                 </label>
-                <div className="mt-2">
+                <div>
                   <input
                     type="number"
                     min={1}
@@ -581,7 +581,7 @@ export default function AboutContentForm({
                       );
                       handleContentChange("columns", parsed);
                     }}
-                    className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                    className="block w-full rounded-lg border border-gray-300 px-4 py-2.5 text-gray-900 placeholder-gray-400 shadow-sm transition-all duration-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 focus:outline-none hover:border-gray-400 sm:text-sm"
                   />
                 </div>
                 <p className="mt-1 text-xs text-gray-500">
@@ -589,30 +589,30 @@ export default function AboutContentForm({
                 </p>
               </div>
               <div>
-                <label className="block text-sm font-medium leading-6 text-gray-900">
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">
                   Section Accent Color
                 </label>
-                <div className="mt-2">
+                <div>
                   <input
                     type="text"
                     placeholder="#6366F1 or var(--accent)"
                     value={servicesContent.accentColor || ""}
                     onChange={(e) => handleContentChange("accentColor", e.target.value)}
-                    className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                    className="block w-full rounded-lg border border-gray-300 px-4 py-2.5 text-gray-900 placeholder-gray-400 shadow-sm transition-all duration-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 focus:outline-none hover:border-gray-400 sm:text-sm"
                   />
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium leading-6 text-gray-900">
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">
                   Background Style
                 </label>
-                <div className="mt-2">
+                <div>
                   <textarea
                     rows={2}
                     placeholder="Optional CSS color or gradient"
                     value={servicesContent.background || ""}
                     onChange={(e) => handleContentChange("background", e.target.value)}
-                    className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                    className="block w-full rounded-lg border border-gray-300 px-4 py-2.5 text-gray-900 placeholder-gray-400 shadow-sm transition-all duration-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 focus:outline-none hover:border-gray-400 sm:text-sm"
                   />
                 </div>
                 <p className="mt-1 text-xs text-gray-500">
@@ -629,16 +629,16 @@ export default function AboutContentForm({
               return (
                 <div
                   key={index}
-                  className="rounded-lg border border-gray-200 bg-white/70 p-4 shadow-sm space-y-4"
+                  className="rounded-xl border border-gray-200 bg-gradient-to-br from-white to-gray-50/50 p-5 shadow-sm hover:shadow-md hover:border-gray-300 transition-all duration-200 space-y-5"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex-1 space-y-4">
                       <div className="grid gap-3 sm:grid-cols-2">
                         <div>
-                          <label className="block text-sm font-medium leading-6 text-gray-900">
+                          <label className="block text-sm font-medium text-gray-700 mb-1.5">
                             Title
                           </label>
-                          <div className="mt-2">
+                          <div>
                             <input
                               type="text"
                               placeholder="Service title"
@@ -649,15 +649,15 @@ export default function AboutContentForm({
                                   title: e.target.value,
                                 }))
                               }
-                              className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                              className="block w-full rounded-lg border border-gray-300 px-4 py-2.5 text-gray-900 placeholder-gray-400 shadow-sm transition-all duration-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 focus:outline-none hover:border-gray-400 sm:text-sm"
                             />
                           </div>
                         </div>
                         <div>
-                          <label className="block text-sm font-medium leading-6 text-gray-900">
+                          <label className="block text-sm font-medium text-gray-700 mb-1.5">
                             Tagline / Badge
                           </label>
-                          <div className="mt-2">
+                          <div>
                             <input
                               type="text"
                               placeholder="e.g., End-to-end delivery"
@@ -668,7 +668,7 @@ export default function AboutContentForm({
                                   tagline: e.target.value,
                                 }))
                               }
-                              className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                              className="block w-full rounded-lg border border-gray-300 px-4 py-2.5 text-gray-900 placeholder-gray-400 shadow-sm transition-all duration-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 focus:outline-none hover:border-gray-400 sm:text-sm"
                             />
                           </div>
                         </div>
@@ -676,10 +676,10 @@ export default function AboutContentForm({
 
                       <div className="grid gap-3 sm:grid-cols-2">
                         <div>
-                          <label className="block text-sm font-medium leading-6 text-gray-900">
+                          <label className="block text-sm font-medium text-gray-700 mb-1.5">
                             Icon / Image
                           </label>
-                          <div className="mt-2">
+                          <div>
                             <input
                               type="text"
                               placeholder="Emoji, icon name, or image URL"
@@ -690,7 +690,7 @@ export default function AboutContentForm({
                                   icon: e.target.value,
                                 }))
                               }
-                              className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                              className="block w-full rounded-lg border border-gray-300 px-4 py-2.5 text-gray-900 placeholder-gray-400 shadow-sm transition-all duration-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 focus:outline-none hover:border-gray-400 sm:text-sm"
                             />
                           </div>
                           <p className="mt-1 text-xs text-gray-500">
@@ -698,10 +698,10 @@ export default function AboutContentForm({
                           </p>
                         </div>
                         <div>
-                          <label className="block text-sm font-medium leading-6 text-gray-900">
+                          <label className="block text-sm font-medium text-gray-700 mb-1.5">
                             Card Accent
                           </label>
-                          <div className="mt-2">
+                          <div>
                             <input
                               type="text"
                               placeholder="#F97316"
@@ -712,17 +712,17 @@ export default function AboutContentForm({
                                   accentColor: e.target.value,
                                 }))
                               }
-                              className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                              className="block w-full rounded-lg border border-gray-300 px-4 py-2.5 text-gray-900 placeholder-gray-400 shadow-sm transition-all duration-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 focus:outline-none hover:border-gray-400 sm:text-sm"
                             />
                           </div>
                         </div>
                       </div>
 
                       <div>
-                        <label className="block text-sm font-medium leading-6 text-gray-900">
+                        <label className="block text-sm font-medium text-gray-700 mb-1.5">
                           Description
                         </label>
-                        <div className="mt-2">
+                        <div>
                           <textarea
                             rows={3}
                             placeholder="Short blurb or differentiator"
@@ -733,16 +733,16 @@ export default function AboutContentForm({
                                 description: e.target.value,
                               }))
                             }
-                            className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                            className="block w-full rounded-lg border border-gray-300 px-4 py-2.5 text-gray-900 placeholder-gray-400 shadow-sm transition-all duration-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 focus:outline-none hover:border-gray-400 sm:text-sm"
                           />
                         </div>
                       </div>
 
                       <div>
-                        <label className="block text-sm font-medium leading-6 text-gray-900">
+                        <label className="block text-sm font-medium text-gray-700 mb-1.5">
                           Highlights
                         </label>
-                        <div className="mt-2 space-y-2">
+                        <div className="space-y-3">
                           {details.map((detail, detailIndex) => (
                             <div key={detailIndex} className="flex items-start gap-2">
                               <input
@@ -755,7 +755,7 @@ export default function AboutContentForm({
                                     return { ...card, items: nextDetails };
                                   })
                                 }
-                                className="flex-1 rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                                className="flex-1 rounded-lg border border-gray-300 px-4 py-2.5 text-gray-900 placeholder-gray-400 shadow-sm transition-all duration-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 focus:outline-none hover:border-gray-400 sm:text-sm"
                               />
                               {details.length > 1 && (
                                 <button
@@ -771,7 +771,7 @@ export default function AboutContentForm({
                                       };
                                     })
                                   }
-                                  className="text-red-600 hover:text-red-900"
+                                  className="p-1.5 text-red-500 bg-red-50 rounded-lg hover:bg-red-100 hover:text-red-600 transition-colors duration-200"
                                 >
                                   <XMarkIcon className="h-4 w-4" />
                                 </button>
@@ -787,7 +787,7 @@ export default function AboutContentForm({
                               items: [...(card.items || []), ""],
                             }))
                           }
-                          className="mt-2 flex items-center gap-1 text-indigo-600 hover:text-indigo-900"
+                          className="mt-2 inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-indigo-600 bg-indigo-50 rounded-lg hover:bg-indigo-100 hover:text-indigo-700 transition-colors duration-200"
                         >
                           <PlusIcon className="h-4 w-4" />
                           Add Detail
@@ -808,7 +808,7 @@ export default function AboutContentForm({
                                   cta: undefined,
                                 }))
                               }
-                              className="text-red-600 hover:text-red-900 text-sm"
+                              className="p-1.5 text-red-500 bg-red-50 rounded-lg hover:bg-red-100 hover:text-red-600 transition-colors duration-200 text-sm"
                             >
                               Remove CTA
                             </button>
@@ -839,7 +839,7 @@ export default function AboutContentForm({
                                   cta: { ...(card.cta || { href: "" }), text: e.target.value },
                                 }))
                               }
-                              className="rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                              className="rounded-lg border border-gray-300 px-4 py-2.5 text-gray-900 placeholder-gray-400 shadow-sm transition-all duration-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 focus:outline-none hover:border-gray-400 sm:text-sm"
                             />
                             <input
                               type="text"
@@ -851,7 +851,7 @@ export default function AboutContentForm({
                                   cta: { ...(card.cta || { text: "" }), href: e.target.value },
                                 }))
                               }
-                              className="rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                              className="rounded-lg border border-gray-300 px-4 py-2.5 text-gray-900 placeholder-gray-400 shadow-sm transition-all duration-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 focus:outline-none hover:border-gray-400 sm:text-sm"
                             />
                           </div>
                         )}
@@ -862,7 +862,7 @@ export default function AboutContentForm({
                       <button
                         type="button"
                         onClick={() => removeCard(index)}
-                        className="text-red-600 hover:text-red-900"
+                        className="p-1.5 text-red-500 bg-red-50 rounded-lg hover:bg-red-100 hover:text-red-600 transition-colors duration-200"
                       >
                         <XMarkIcon className="h-5 w-5" />
                       </button>
@@ -875,7 +875,7 @@ export default function AboutContentForm({
             <button
               type="button"
               onClick={addCard}
-              className="flex items-center gap-1 text-indigo-600 hover:text-indigo-900"
+              className="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-indigo-600 bg-indigo-50 rounded-lg hover:bg-indigo-100 hover:text-indigo-700 transition-colors duration-200"
             >
               <PlusIcon className="h-4 w-4" />
               Add Service
@@ -887,10 +887,10 @@ export default function AboutContentForm({
       case "tech":
         return (
           <div className="sm:col-span-6">
-            <label className="block text-sm font-medium leading-6 text-gray-900">
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">
               Technologies
             </label>
-            <div className="mt-2">
+            <div>
               <textarea
                 placeholder="Enter technologies separated by commas (e.g., Next.js, React, TypeScript)"
                 rows={3}
@@ -903,7 +903,7 @@ export default function AboutContentForm({
                     .filter(Boolean);
                   handleContentChange("technologies", technologies);
                 }}
-                className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                className="block w-full rounded-lg border border-gray-300 px-4 py-2.5 text-gray-900 placeholder-gray-400 shadow-sm transition-all duration-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 focus:outline-none hover:border-gray-400 sm:text-sm"
               />
             </div>
           </div>
@@ -912,13 +912,13 @@ export default function AboutContentForm({
       case "testimonials":
         return (
           <div className="sm:col-span-6">
-            <label className="block text-sm font-medium leading-6 text-gray-900">
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">
               Testimonials
             </label>
-            <div className="mt-2 space-y-3">
+            <div className="space-y-3">
               {(formData.content.testimonials || []).map(
                 (testimonial: any, index: number) => (
-                  <div key={index} className="border rounded-md p-3">
+                  <div key={index} className="rounded-xl border border-gray-200 bg-gray-50/50 p-4 hover:border-gray-300 transition-colors duration-200">
                     <div className="flex gap-2 items-start">
                       <div className="flex-1 space-y-2">
                         <textarea
@@ -935,7 +935,7 @@ export default function AboutContentForm({
                             };
                             handleContentChange("testimonials", newTestimonials);
                           }}
-                          className="w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                          className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-gray-900 placeholder-gray-400 shadow-sm transition-all duration-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 focus:outline-none hover:border-gray-400 sm:text-sm"
                         />
                         <input
                           type="text"
@@ -951,7 +951,7 @@ export default function AboutContentForm({
                             };
                             handleContentChange("testimonials", newTestimonials);
                           }}
-                          className="w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                          className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-gray-900 placeholder-gray-400 shadow-sm transition-all duration-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 focus:outline-none hover:border-gray-400 sm:text-sm"
                         />
                       </div>
                       <button
@@ -962,7 +962,7 @@ export default function AboutContentForm({
                           ).filter((_: any, i: number) => i !== index);
                           handleContentChange("testimonials", newTestimonials);
                         }}
-                        className="text-red-600 hover:text-red-900"
+                        className="p-1.5 text-red-500 bg-red-50 rounded-lg hover:bg-red-100 hover:text-red-600 transition-colors duration-200"
                       >
                         <XMarkIcon className="h-4 w-4" />
                       </button>
@@ -979,7 +979,7 @@ export default function AboutContentForm({
                   ];
                   handleContentChange("testimonials", newTestimonials);
                 }}
-                className="flex items-center gap-1 text-indigo-600 hover:text-indigo-900"
+                className="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-indigo-600 bg-indigo-50 rounded-lg hover:bg-indigo-100 hover:text-indigo-700 transition-colors duration-200"
               >
                 <PlusIcon className="h-4 w-4" />
                 Add Testimonial
@@ -994,11 +994,11 @@ export default function AboutContentForm({
             <div className="sm:col-span-6">
               <label
                 htmlFor="description"
-                className="block text-sm font-medium leading-6 text-gray-900"
+                className="block text-sm font-medium text-gray-700 mb-1.5"
               >
                 Description
               </label>
-              <div className="mt-2">
+              <div>
                 <textarea
                   id="description"
                   rows={3}
@@ -1006,16 +1006,16 @@ export default function AboutContentForm({
                   onChange={(e) =>
                     handleContentChange("description", e.target.value)
                   }
-                  className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                  className="block w-full rounded-lg border border-gray-300 px-4 py-2.5 text-gray-900 placeholder-gray-400 shadow-sm transition-all duration-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 focus:outline-none hover:border-gray-400 sm:text-sm"
                   placeholder="Tell us where you're headed..."
                 />
               </div>
             </div>
             <div className="sm:col-span-6">
-              <label className="block text-sm font-medium leading-6 text-gray-900">
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">
                 Call-to-Action Button
               </label>
-              <div className="mt-2 space-y-2">
+              <div className="space-y-3">
                 <input
                   type="text"
                   placeholder="Button text"
@@ -1027,7 +1027,7 @@ export default function AboutContentForm({
                     };
                     handleContentChange("button", newButton);
                   }}
-                  className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                  className="block w-full rounded-lg border border-gray-300 px-4 py-2.5 text-gray-900 placeholder-gray-400 shadow-sm transition-all duration-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 focus:outline-none hover:border-gray-400 sm:text-sm"
                 />
                 <input
                   type="text"
@@ -1040,7 +1040,7 @@ export default function AboutContentForm({
                     };
                     handleContentChange("button", newButton);
                   }}
-                  className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                  className="block w-full rounded-lg border border-gray-300 px-4 py-2.5 text-gray-900 placeholder-gray-400 shadow-sm transition-all duration-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 focus:outline-none hover:border-gray-400 sm:text-sm"
                 />
               </div>
             </div>
@@ -1050,13 +1050,13 @@ export default function AboutContentForm({
       case "stats":
         return (
           <div className="sm:col-span-6">
-            <label className="block text-sm font-medium leading-6 text-gray-900">
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">
               Statistics
             </label>
-            <div className="mt-2 space-y-3">
+            <div className="space-y-3">
               {(formData.content.stats || []).map(
                 (stat: any, index: number) => (
-                  <div key={index} className="border rounded-md p-3">
+                  <div key={index} className="rounded-xl border border-gray-200 bg-gray-50/50 p-4 hover:border-gray-300 transition-colors duration-200">
                     <div className="flex gap-2 items-start">
                       <div className="flex-1 grid grid-cols-2 gap-2">
                         <input
@@ -1075,7 +1075,7 @@ export default function AboutContentForm({
                             };
                             handleContentChange("stats", newStats);
                           }}
-                          className="w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                          className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-gray-900 placeholder-gray-400 shadow-sm transition-all duration-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 focus:outline-none hover:border-gray-400 sm:text-sm"
                         />
                         <input
                           type="text"
@@ -1091,7 +1091,7 @@ export default function AboutContentForm({
                             };
                             handleContentChange("stats", newStats);
                           }}
-                          className="w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                          className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-gray-900 placeholder-gray-400 shadow-sm transition-all duration-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 focus:outline-none hover:border-gray-400 sm:text-sm"
                         />
                         <input
                           type="text"
@@ -1107,7 +1107,7 @@ export default function AboutContentForm({
                             };
                             handleContentChange("stats", newStats);
                           }}
-                          className="w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                          className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-gray-900 placeholder-gray-400 shadow-sm transition-all duration-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 focus:outline-none hover:border-gray-400 sm:text-sm"
                         />
                         <input
                           type="text"
@@ -1123,7 +1123,7 @@ export default function AboutContentForm({
                             };
                             handleContentChange("stats", newStats);
                           }}
-                          className="w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                          className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-gray-900 placeholder-gray-400 shadow-sm transition-all duration-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 focus:outline-none hover:border-gray-400 sm:text-sm"
                         />
                       </div>
                       <button
@@ -1134,7 +1134,7 @@ export default function AboutContentForm({
                           ).filter((_: any, i: number) => i !== index);
                           handleContentChange("stats", newStats);
                         }}
-                        className="text-red-600 hover:text-red-900"
+                        className="p-1.5 text-red-500 bg-red-50 rounded-lg hover:bg-red-100 hover:text-red-600 transition-colors duration-200"
                       >
                         <XMarkIcon className="h-4 w-4" />
                       </button>
@@ -1151,7 +1151,7 @@ export default function AboutContentForm({
                   ];
                   handleContentChange("stats", newStats);
                 }}
-                className="flex items-center gap-1 text-indigo-600 hover:text-indigo-900"
+                className="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-indigo-600 bg-indigo-50 rounded-lg hover:bg-indigo-100 hover:text-indigo-700 transition-colors duration-200"
               >
                 <PlusIcon className="h-4 w-4" />
                 Add Statistic
@@ -1165,11 +1165,11 @@ export default function AboutContentForm({
           <div className="sm:col-span-6">
             <label
               htmlFor="content-json"
-              className="block text-sm font-medium leading-6 text-gray-900"
+              className="block text-sm font-medium text-gray-700 mb-1.5"
             >
               Content (JSON)
             </label>
-            <div className="mt-2">
+            <div>
               <textarea
                 id="content-json"
                 rows={6}
@@ -1182,7 +1182,7 @@ export default function AboutContentForm({
                     // Invalid JSON, don't update
                   }
                 }}
-                className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 font-mono text-xs"
+                className="block w-full rounded-lg border border-gray-300 px-4 py-2.5 text-gray-900 placeholder-gray-400 shadow-sm transition-all duration-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 focus:outline-none hover:border-gray-400 sm:text-sm font-mono text-xs"
               />
             </div>
           </div>
@@ -1221,7 +1221,8 @@ export default function AboutContentForm({
             <p className="text-sm text-gray-600 mt-1">Set the fundamental details for this content block</p>
           </div>
           <div className="px-6 py-6">
-            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {/* Section Type */}
               <div>
                 <label htmlFor="section" className="block text-sm font-medium text-gray-900 mb-2">
                   Section Type
@@ -1230,7 +1231,7 @@ export default function AboutContentForm({
                   id="section"
                   value={formData.section}
                   onChange={(e) => handleInputChange("section", e.target.value)}
-                  className="block w-full rounded-lg border-0 py-2.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm"
+                  className="block w-full rounded-lg border border-gray-300 py-2.5 px-3 text-gray-900 shadow-sm transition-all duration-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 focus:outline-none hover:border-gray-400 sm:text-sm"
                 >
                   {sections.map((section) => (
                     <option key={section} value={section}>
@@ -1238,53 +1239,50 @@ export default function AboutContentForm({
                     </option>
                   ))}
                 </select>
-                <p className="text-xs text-gray-500 mt-1">Choose the type of content section</p>
+                <p className="text-xs text-gray-500 mt-1.5">Choose the type of content section</p>
               </div>
 
-              <div className="flex items-center justify-between">
-                {initialData && (
-                  <div className="flex-1 mr-4">
-                    <label className="block text-sm font-medium text-gray-900 mb-2">
-                      Display Order
-                    </label>
-                    <div className="block w-full rounded-lg border-0 py-2.5 px-3 text-gray-500 bg-gray-100 shadow-sm ring-1 ring-inset ring-gray-200 sm:text-sm">
-                      {initialData.sortOrder}
-                    </div>
-                    <p className="text-xs text-gray-500 mt-1">Order is automatically managed</p>
-                  </div>
-                )}
-                <div className={`${initialData ? 'mt-8' : ''}`}>
-                  <label className="block text-sm font-medium text-gray-900 mb-3">
-                    Status
+              {/* Display Order - only shown when editing */}
+              {initialData && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-900 mb-2">
+                    Display Order
                   </label>
-                  <div className="flex items-center justify-between p-6 bg-gradient-to-br from-white/40 to-gray-50/60 backdrop-blur-sm rounded-xl border border-white/20 shadow-lg">
-                    <div>
-                      <span className="text-sm font-semibold text-gray-900">
-                        {formData.active ? 'Published' : 'Draft'}
-                      </span>
-                      <p className="text-xs text-gray-600 mt-1">
-                        {formData.active
-                          ? 'This content is visible on your website'
-                          : 'This content is hidden from your website'
-                        }
-                      </p>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => handleInputChange("active", !formData.active)}
-                      className={`relative inline-flex h-8 w-14 items-center rounded-full transition-all duration-300 ease-in-out focus:outline-none focus:ring-4 focus:ring-opacity-30 transform hover:scale-105 shadow-lg backdrop-blur-sm border border-white/30 ${
-                        formData.active
-                          ? 'bg-gradient-to-r from-emerald-400 to-cyan-500 focus:ring-emerald-300'
-                          : 'bg-gradient-to-r from-gray-300 to-gray-400 focus:ring-gray-300'
+                  <div className="block w-full rounded-lg border border-gray-200 py-2.5 px-3 text-gray-500 bg-gray-50 sm:text-sm">
+                    #{initialData.sortOrder}
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1.5">Order is automatically managed</p>
+                </div>
+              )}
+
+              {/* Status Toggle */}
+              <div className={initialData ? '' : 'sm:col-span-1'}>
+                <label className="block text-sm font-medium text-gray-900 mb-2">
+                  Status
+                </label>
+                <div className="flex items-center gap-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                  <button
+                    type="button"
+                    onClick={() => handleInputChange("active", !formData.active)}
+                    className={`relative inline-flex h-7 w-12 items-center rounded-full transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+                      formData.active
+                        ? 'bg-gradient-to-r from-emerald-400 to-cyan-500 focus:ring-emerald-300'
+                        : 'bg-gray-300 focus:ring-gray-400'
+                    }`}
+                  >
+                    <span
+                      className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform duration-300 ${
+                        formData.active ? 'translate-x-6' : 'translate-x-1'
                       }`}
-                    >
-                      <span
-                        className={`inline-block h-6 w-6 transform rounded-full bg-white shadow-lg transition-all duration-300 ease-in-out border-2 border-white/50 backdrop-blur-sm ${
-                          formData.active ? 'translate-x-7' : 'translate-x-1'
-                        }`}
-                      />
-                      <span className="sr-only">Toggle status</span>
-                    </button>
+                    />
+                  </button>
+                  <div>
+                    <span className={`text-sm font-medium ${formData.active ? 'text-emerald-700' : 'text-gray-600'}`}>
+                      {formData.active ? 'Published' : 'Draft'}
+                    </span>
+                    <p className="text-xs text-gray-500">
+                      {formData.active ? 'Visible on website' : 'Hidden from website'}
+                    </p>
                   </div>
                 </div>
               </div>

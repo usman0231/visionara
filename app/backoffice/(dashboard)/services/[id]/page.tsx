@@ -24,7 +24,7 @@ export default function EditServicePage() {
       if (!params.id) return;
 
       try {
-        const response = await fetch(`/api/admin/services/${params.id}`);
+        const response = await fetch(`/api/services/${params.id}`);
 
         if (!response.ok) {
           setError('Service not found');
@@ -32,7 +32,7 @@ export default function EditServicePage() {
         }
 
         const data = await response.json();
-        setService(data);
+        setService(data.service);
       } catch (err) {
         setError('Failed to load service');
       } finally {

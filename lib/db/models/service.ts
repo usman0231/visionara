@@ -4,7 +4,7 @@ import { sequelize } from '../sequelize';
 interface ServiceAttributes {
   id: string;
   title: string;
-  iconUrl: string;
+  iconUrl: string | null;
   text: string;
   sortOrder: number;
   active: boolean;
@@ -13,12 +13,12 @@ interface ServiceAttributes {
   deletedAt: Date | null;
 }
 
-interface ServiceCreationAttributes extends Optional<ServiceAttributes, 'id' | 'sortOrder' | 'active' | 'createdAt' | 'updatedAt' | 'deletedAt'> {}
+interface ServiceCreationAttributes extends Optional<ServiceAttributes, 'id' | 'iconUrl' | 'sortOrder' | 'active' | 'createdAt' | 'updatedAt' | 'deletedAt'> {}
 
 export class Service extends Model<ServiceAttributes, ServiceCreationAttributes> implements ServiceAttributes {
   public id!: string;
   public title!: string;
-  public iconUrl!: string;
+  public iconUrl!: string | null;
   public text!: string;
   public sortOrder!: number;
   public active!: boolean;
@@ -40,7 +40,7 @@ Service.init(
     },
     iconUrl: {
       type: DataTypes.TEXT,
-      allowNull: false,
+      allowNull: true,
     },
     text: {
       type: DataTypes.TEXT,

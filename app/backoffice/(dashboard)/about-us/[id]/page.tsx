@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
 import AboutContentForm from '@/components/backoffice/AboutContentForm';
+import { AboutContent } from '@/lib/db/models';
 
 interface EditAboutContentPageProps {
   params: Promise<{
@@ -9,15 +10,11 @@ interface EditAboutContentPageProps {
 
 async function getAboutContent(id: string) {
   try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/admin/about-content/${id}`, {
-      cache: 'no-store',
-    });
-
-    if (!response.ok) {
+    const content = await AboutContent.findByPk(id);
+    if (!content) {
       return null;
     }
-
-    return await response.json();
+    return content.toJSON();
   } catch (error) {
     console.error('Error fetching about content:', error);
     return null;
@@ -33,12 +30,18 @@ export default async function EditAboutContentPage({ params }: EditAboutContentP
   }
 
   return (
-    <div className="px-4 sm:px-6 lg:px-8">
-      <div className="mb-8">
-        <h1 className="text-xl font-semibold text-gray-900">Edit Content Block</h1>
-        <p className="mt-2 text-sm text-gray-700">
-          Update the content block: {content.title}
-        </p>
+    <div className="px-4 sm:px-6 lg:px-8 py-6">
+      {/* Back Navigation */}
+      <div className="mb-6">
+        <a
+          href="/backoffice/about-us"
+          className="inline-flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-gray-700 transition-colors"
+        >
+          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+          Back to About Us
+        </a>
       </div>
 
       <AboutContentForm initialData={content} />

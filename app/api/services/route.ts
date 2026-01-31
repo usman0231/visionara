@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { Service, AuditLog, AuditAction } from '@/lib/db/models';
 import { createServiceSchema, updateServiceSchema } from '@/lib/validations/service';
 
@@ -46,6 +47,10 @@ export async function POST(request: NextRequest) {
       entityId: service.id,
       diff: { newValues: validatedData },
     });
+
+    // Revalidate cache for services
+    revalidatePath('/');
+    revalidatePath('/services');
 
     return NextResponse.json({ service }, { status: 201 });
   } catch (error: any) {

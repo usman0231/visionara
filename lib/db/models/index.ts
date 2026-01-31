@@ -12,6 +12,7 @@ export { default as ContactSubmission } from "./contactSubmission";
 export { default as AboutContent, AboutSection } from "./aboutContent";
 export { default as FAQ } from "./faq";
 export { default as PasswordResetCode } from "./passwordResetCode";
+export { default as SEO } from "./seo";
 
 // Re-export sequelize instance
 export { sequelize } from "../sequelize";

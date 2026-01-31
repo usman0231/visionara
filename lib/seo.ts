@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import SEO from "@/lib/db/models/seo";
+import { SEO } from "@/lib/db/models";
 
 interface SEOData {
   page: string;
