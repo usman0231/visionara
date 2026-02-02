@@ -104,8 +104,12 @@ export default function GalleryPage() {
     try {
       const response = await fetch(`/api/admin/projects/${id}`, {
         method: 'DELETE',
+        credentials: 'include',
       });
-      if (!response.ok) throw new Error('Failed to delete product');
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Failed to delete product');
+      }
       await fetchProducts();
       showNotification('Product deleted successfully', 'success');
     } catch (error: any) {
@@ -183,10 +187,10 @@ export default function GalleryPage() {
     return (
       <div className="px-4 sm:px-6 lg:px-8">
         <div className="animate-pulse">
-          <div className="h-8 bg-gray-200 rounded mb-4 w-48"></div>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {[...Array(8)].map((_, i) => (
-              <div key={i} className="h-72 bg-gray-200 rounded-lg"></div>
+          <div className="h-8 bg-gray-200 rounded mb-4"></div>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="h-64 bg-gray-200 rounded-lg"></div>
             ))}
           </div>
         </div>
@@ -220,58 +224,71 @@ export default function GalleryPage() {
           <div className="ml-3">
             <h3 className="text-sm font-medium text-blue-800">Product Gallery Management</h3>
             <div className="mt-1 text-sm text-blue-700">
-              Create products with cover image and multiple gallery images. Star icon marks featured products. Max 8 products shown per category on frontend.
+              Create products with a cover image and multiple gallery images. Star icon marks featured products (priority 0). Max 8 products shown per category on frontend.
             </div>
           </div>
         </div>
       </div>
 
-      {/* Filter & Stats Row */}
-      <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-        <div className="flex items-center gap-4">
-          <label htmlFor="serviceFilter" className="text-sm font-medium text-gray-700">
-            Filter:
-          </label>
-          <select
-            id="serviceFilter"
-            value={filterServiceId}
-            onChange={(e) => setFilterServiceId(e.target.value)}
-            className="rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"
-          >
-            <option value="">All Categories</option>
-            {services.map((service) => (
-              <option key={service.id} value={service.id}>
-                {service.title}
-              </option>
-            ))}
-          </select>
-        </div>
+      {/* Filter by Service */}
+      <div className="mb-6 flex items-center gap-4">
+        <label htmlFor="serviceFilter" className="text-sm font-medium text-gray-700">
+          Filter by Category:
+        </label>
+        <select
+          id="serviceFilter"
+          value={filterServiceId}
+          onChange={(e) => setFilterServiceId(e.target.value)}
+          className="rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"
+        >
+          <option value="">All Categories</option>
+          {services.map((service) => (
+            <option key={service.id} value={service.id}>
+              {service.title}
+            </option>
+          ))}
+        </select>
+      </div>
 
-        <div className="flex items-center gap-6 text-sm text-gray-600">
-          <span>Total: <strong>{products.length}</strong></span>
-          <span>Active: <strong>{products.filter(p => p.active).length}</strong></span>
-          <span>Featured: <strong>{products.filter(p => p.priority === 0).length}</strong></span>
+      {/* Stats */}
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-3 mb-8">
+        <div className="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6">
+          <dt className="truncate text-sm font-medium text-gray-500">Total Products</dt>
+          <dd className="mt-1 text-3xl font-semibold tracking-tight text-gray-900">{products.length}</dd>
+        </div>
+        <div className="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6">
+          <dt className="truncate text-sm font-medium text-gray-500">Active Products</dt>
+          <dd className="mt-1 text-3xl font-semibold tracking-tight text-gray-900">
+            {products.filter(p => p.active).length}
+          </dd>
+        </div>
+        <div className="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6">
+          <dt className="truncate text-sm font-medium text-gray-500">Total Images</dt>
+          <dd className="mt-1 text-3xl font-semibold tracking-tight text-gray-900">
+            {products.reduce((acc, p) => acc + (p.images?.length || 0) + 1, 0)}
+          </dd>
         </div>
       </div>
 
       {/* Products Grid */}
-      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {filteredProducts.map((product) => (
           <div
             key={product.id}
-            className="group relative bg-white rounded-xl shadow-sm ring-1 ring-gray-200 overflow-hidden hover:shadow-md transition-shadow"
+            className="group relative overflow-hidden rounded-lg bg-white shadow-sm ring-1 ring-gray-900/10"
           >
             {/* Cover Image */}
-            <div className="aspect-[4/3] relative bg-gray-100">
-              <Image
+            <div className="aspect-video relative bg-gray-100">
+              <img
                 src={product.coverImage}
                 alt={product.title}
-                fill
-                className="object-cover"
-                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                className="absolute inset-0 w-full h-full object-cover"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDIwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjIwMCIgaGVpZ2h0PSIyMDAiIGZpbGw9IiNGM0Y0RjYiLz48L3N2Zz4=';
+                }}
               />
-
-              {/* Hover Overlay */}
+              {/* Hover overlay */}
               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors duration-200">
                 <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                   <div className="flex gap-2">
@@ -299,29 +316,14 @@ export default function GalleryPage() {
                   </div>
                 </div>
               </div>
-
-              {/* Badges */}
-              <div className="absolute top-2 left-2 flex flex-col gap-1">
-                {!product.active && (
+              {/* Status badges */}
+              {!product.active && (
+                <div className="absolute top-2 left-2">
                   <span className="inline-flex items-center rounded-md bg-gray-100/90 px-2 py-1 text-xs font-medium text-gray-600">
                     Inactive
                   </span>
-                )}
-                {product.service && (
-                  <span className="inline-flex items-center rounded-md bg-indigo-500/90 px-2 py-1 text-xs font-medium text-white">
-                    {product.service.title}
-                  </span>
-                )}
-              </div>
-
-              {/* Image Count */}
-              <div className="absolute bottom-2 right-2 flex items-center gap-1 bg-black/60 px-2 py-1 rounded-md">
-                <PhotoIcon className="h-3.5 w-3.5 text-white" />
-                <span className="text-xs font-medium text-white">
-                  {(product.images?.length || 0) + 1}
-                </span>
-              </div>
-
+                </div>
+              )}
               {/* Priority Star */}
               <button
                 onClick={() => handleTogglePriority(product.id, product.priority)}
@@ -334,17 +336,24 @@ export default function GalleryPage() {
                   <StarIcon className="h-4 w-4 text-gray-400" />
                 )}
               </button>
+              {/* Image count */}
+              <div className="absolute bottom-2 right-2 flex items-center gap-1 bg-black/50 px-2 py-1 rounded-md">
+                <PhotoIcon className="h-4 w-4 text-white" />
+                <span className="text-xs font-medium text-white">{(product.images?.length || 0) + 1}</span>
+              </div>
             </div>
 
             {/* Content */}
             <div className="p-4">
-              <div className="flex items-start justify-between gap-2">
+              <div className="flex items-start justify-between">
                 <div className="flex-1 min-w-0">
-                  <h3 className="text-sm font-semibold text-gray-900 truncate" title={product.title}>
+                  <h3 className="text-sm font-medium text-gray-900 truncate" title={product.title}>
                     {product.title}
                   </h3>
-                  {product.description && (
-                    <p className="mt-1 text-xs text-gray-500 line-clamp-2">{product.description}</p>
+                  {product.service && (
+                    <span className="inline-flex items-center rounded-md bg-indigo-50 px-2 py-0.5 text-xs font-medium text-indigo-700 mt-1">
+                      {product.service.title}
+                    </span>
                   )}
                 </div>
                 <ToggleSwitch
@@ -356,20 +365,22 @@ export default function GalleryPage() {
                   size="sm"
                 />
               </div>
+              {product.description && (
+                <p className="mt-2 text-xs text-gray-500 line-clamp-2">{product.description}</p>
+              )}
             </div>
           </div>
         ))}
       </div>
 
-      {/* Empty State */}
       {filteredProducts.length === 0 && (
         <div className="text-center py-12">
           <PhotoIcon className="mx-auto h-12 w-12 text-gray-400" />
           <h3 className="mt-2 text-sm font-semibold text-gray-900">
-            {filterServiceId ? 'No products in this category' : 'No products yet'}
+            {filterServiceId ? 'No products in this category' : 'No products'}
           </h3>
           <p className="mt-1 text-sm text-gray-500">
-            Get started by creating your first product.
+            {filterServiceId ? 'Try selecting a different category or create a new product.' : 'Get started by creating your first product.'}
           </p>
           <div className="mt-6">
             <button

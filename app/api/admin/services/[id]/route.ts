@@ -115,8 +115,13 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params;
+    console.log('DELETE service request for id:', id);
+
     const userId = request.headers.get('x-user-id');
+    console.log('User ID from header:', userId);
+
     if (!userId) {
+      console.log('No user ID found in headers');
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
@@ -136,9 +141,8 @@ export async function DELETE(
 
     const oldValues = service.toJSON();
 
-    await service.update({
-      deletedAt: new Date(),
-    });
+    // Use destroy() for paranoid models - this sets deletedAt automatically
+    await service.destroy();
 
     await AuditLog.create({
       actorUserId: userId,
@@ -151,6 +155,7 @@ export async function DELETE(
     revalidatePath('/');
     revalidatePath('/services');
 
+    console.log('Service deleted successfully:', id);
     return NextResponse.json({ message: 'Service deleted successfully' });
   } catch (error: any) {
     console.error('Delete service error:', error);

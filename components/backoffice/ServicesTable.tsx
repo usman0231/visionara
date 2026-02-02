@@ -52,9 +52,14 @@ export default function ServicesTable() {
     try {
       const response = await fetch(`/api/admin/services/${id}`, {
         method: 'DELETE',
+        credentials: 'include',
       });
 
-      if (!response.ok) throw new Error('Failed to delete service');
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        console.error('Delete failed:', response.status, errorData);
+        throw new Error(errorData.error || `Failed to delete service (${response.status})`);
+      }
 
       await fetchServices();
       showNotification('Service deleted successfully', 'success');

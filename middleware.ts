@@ -20,8 +20,10 @@ export async function middleware(request: NextRequest) {
     }
 
     const token = request.cookies.get('sb-access-token')?.value;
+    console.log('Middleware: Admin API request to', pathname, 'method:', request.method, 'has token:', !!token);
 
     if (!token) {
+      console.log('Middleware: No token found for admin API');
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
@@ -29,8 +31,11 @@ export async function middleware(request: NextRequest) {
       const { data: { user }, error } = await supabase.auth.getUser(token);
 
       if (error || !user) {
+        console.log('Middleware: Token verification failed:', error?.message);
         return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
       }
+
+      console.log('Middleware: User verified:', user.id);
 
       // Add user info to request headers for API routes
       const requestHeaders = new Headers(request.headers);
@@ -42,7 +47,8 @@ export async function middleware(request: NextRequest) {
           headers: requestHeaders,
         },
       });
-    } catch (error) {
+    } catch (error: any) {
+      console.log('Middleware: Auth error:', error?.message);
       return NextResponse.json({ error: 'Authentication error' }, { status: 401 });
     }
   }
